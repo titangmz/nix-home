@@ -1,10 +1,19 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, username ? builtins.getEnv "USER", homeDir ? (
+  let
+    user = builtins.getEnv "USER";
+    isDarwin = pkgs.stdenv.isDarwin;
+  in
+  if isDarwin then "/Users/${user}" else "/home/${user}"
+), ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = "xray";
-  home.homeDirectory = "/home/xray";
+  # Automatically detect username and construct home directory
+  # Works on both Mac and Linux
+  # Username and homeDir are passed from flake.nix or fallback to environment
+  home.username = username;
+  home.homeDirectory = homeDir;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -38,6 +47,7 @@
 	pkgs.procs
 	pkgs.gping
 	pkgs.btop
+	pkgs.sshuttle
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
@@ -147,6 +157,8 @@
 	# Install the Catppuccin plugin
 	plugins = with pkgs.vimPlugins; [
 	catppuccin-nvim
+	nvim-tree-lua
+	nvim-web-devicons
 	];
 
   # Lua config after plugin is loaded

@@ -19,6 +19,7 @@ alias top="btop"
 
 # Git
 alias gc="git commit -m"
+alias gp="git push"
 alias gst="git status"
 alias gdiff="git diff"
 alias gco="git checkout"
