@@ -102,32 +102,51 @@
     # EDITOR = "emacs";
   };
   
+
   programs.tmux = {
-  enable = true;
-  clock24 = true;
+    enable = true;
+    clock24 = true;
+    terminal = "tmux-256color";
 
-  plugins = with pkgs.tmuxPlugins; [
-    sensible
-    yank
-    pain-control
-    catppuccin
-    resurrect
-    continuum
-  ];
+    plugins = with pkgs.tmuxPlugins; [
+      sensible
+      yank
+      pain-control
+      catppuccin
+      resurrect
+      continuum
+      cpu
+      battery
+    ];
 
-  extraConfig = ''
-    set -g mouse on
-    set -g history-limit 10000
+    extraConfig = ''
+      # Options to make tmux more pleasant
+      set -g mouse on
+      set -g history-limit 10000
+      set -g default-shell "${pkgs.zsh}/bin/zsh"
+      set -g renumber-windows on
+      set -g base-index 1
+      set -g status-position top
 
-    # Use zsh as default shell
-    set -g default-command "${pkgs.zsh}/bin/zsh"
-    set -g default-shell "${pkgs.zsh}/bin/zsh"
+      # Configure the catppuccin plugin
+      set -g @catppuccin_flavor "mocha"
+      set -g @catppuccin_window_status_style "rounded"
 
-    # Continuum autosave every 15 minutes
-    set -g @continuum-save-interval '15'
-    set -g @catppuccin_flavor "frappe"
-  '';
-};
+      # Continuum settings
+      set -g @continuum-save-interval '15'
+
+      # Make the status line pretty and add some modules
+      set -g status-right-length 100
+      set -g status-left-length 100
+      set -g status-left ""
+      set -g status-right "#{E:@catppuccin_status_application}"
+      set -agF status-right "#{E:@catppuccin_status_cpu}"
+      set -ag status-right "#{E:@catppuccin_status_session}"
+      set -ag status-right "#{E:@catppuccin_status_uptime}"
+      set -agF status-right "#{E:@catppuccin_status_battery}"
+    '';
+  };
+
 
   programs.zsh = {
 	enable = true;

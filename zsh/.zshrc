@@ -10,7 +10,7 @@ alias v="nvim"
 alias c="bat"
 alias la="tree"
 
-alias lg="lazygit"
+alias lgt="lazygit"
 
 alias df="duf"
 
