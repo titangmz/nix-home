@@ -1,3 +1,6 @@
+autoload -Uz compinit && compinit
+
+
 # Eza
 alias l="eza -l --icons --git -a"
 alias lt="eza --tree --level=2 --long --icons --git"

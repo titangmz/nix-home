@@ -115,6 +115,20 @@
 
   programs.zsh = {
 	enable = true;
+	
+
+	oh-my-zsh = {
+		enable = true;
+		plugins = [ "z" ];
+	};
+	autosuggestion.enable = true;
+    	
+	syntaxHighlighting.enable = true;
+    	history = {
+      	size = 10000;
+    	};
+	
+
 	initContent = builtins.readFile ./zshrc;
   };
 
