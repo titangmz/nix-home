@@ -118,6 +118,10 @@
     set -g mouse on
     set -g history-limit 10000
 
+    # Use zsh as default shell
+    set -g default-command "${pkgs.zsh}/bin/zsh"
+    set -g default-shell "${pkgs.zsh}/bin/zsh"
+
     # Continuum autosave every 15 minutes
     set -g @continuum-save-interval '15'
     set -g @catppuccin_flavor "frappe"
