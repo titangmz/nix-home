@@ -48,6 +48,7 @@
 	pkgs.gping
 	pkgs.btop
 	pkgs.sshuttle
+  pkgs.dysk
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
@@ -66,9 +67,9 @@
   # plain files is through 'home.file'.
   home.file = {
 
-    ".config/eza/theme.yml".source = ./eza.theme.yml;
-    ".config/starship.toml".source = ./starship.toml;
-    ".config/lazygit/config.yml".source = ./lazygit.yml;
+    ".config/eza/theme.yml".source = ./eza/theme.yml;
+    ".config/starship.toml".source = ./starship/starship.toml;
+    ".config/lazygit/config.yml".source = ./lazygit/config.yml;
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
@@ -139,7 +140,7 @@
     	};
 	
 
-	initContent = builtins.readFile ./zshrc;
+	initContent = builtins.readFile ./zsh/.zshrc;
   };
 
   programs.bash = {

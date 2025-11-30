@@ -8,6 +8,7 @@ alias ltree="eza --tree --level=2  --icons --git"
 
 alias v="nvim"
 alias cat="bat"
+alias bat="cat"
 alias la="tree"
 
 alias lg="lazygit"
@@ -19,7 +20,7 @@ alias top="btop"
 
 # Git
 alias gc="git commit -m"
-alias gp="git push"
+alias gp="git push -u origin"
 alias gst="git status"
 alias gdiff="git diff"
 alias gco="git checkout"
