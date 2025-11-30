@@ -7,8 +7,7 @@ alias lt="eza --tree --level=2 --long --icons --git"
 alias ltree="eza --tree --level=2  --icons --git"
 
 alias v="nvim"
-alias cat="bat"
-alias c="cat"
+alias c="bat"
 alias la="tree"
 
 alias lg="lazygit"
