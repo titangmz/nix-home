@@ -71,7 +71,6 @@
 
     ".config/eza/theme.yml".source = ./eza/theme.yml;
     ".config/starship.toml".source = ./starship/starship.toml;
-    ".config/lazygit/config.yml".source = ./lazygit/config.yml;
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
@@ -155,7 +154,29 @@
   };
 
   programs.starship = {
-	enable = true;
+    enable = true;
+  };
+
+  programs.lazygit = {
+    enable = true;
+    settings = {
+      gui = {
+        theme = {
+          activeBorderColor = [ "#cba6f7" "bold" ];
+          inactiveBorderColor = [ "#a6adc8" ];
+          optionsTextColor = [ "#89b4fa" ];
+          selectedLineBgColor = [ "#313244" ];
+          cherryPickedCommitBgColor = [ "#45475a" ];
+          cherryPickedCommitFgColor = [ "#cba6f7" ];
+          unstagedChangesColor = [ "#f38ba8" ];
+          defaultFgColor = [ "#cdd6f4" ];
+          searchingActiveBorderColor = [ "#f9e2af" ];
+        };
+        authorColors = {
+          "*" = "#b4befe";
+        };
+      };
+    };
   };
 
   programs.neovim = {
