@@ -48,7 +48,9 @@
 	pkgs.gping
 	pkgs.btop
 	pkgs.sshuttle
-  pkgs.dysk
+	pkgs.rustscan
+	pkgs.dysk
+	pkgs.netcat
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
