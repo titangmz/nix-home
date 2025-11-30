@@ -124,6 +124,7 @@
       set -g mouse on
       set -g history-limit 10000
       set -g default-shell "${pkgs.zsh}/bin/zsh"
+      set -g default-command "${pkgs.zsh}/bin/zsh"
       set -g renumber-windows on
       set -g base-index 1
       set -g status-position top
