@@ -9,6 +9,7 @@ require("catppuccin").setup({
   transparent_background = true,
   integrations = {
     nvimtree = true,
+    telescope = { enabled = true },
   },
 })
 vim.cmd.colorscheme("catppuccin")
@@ -59,20 +60,47 @@ require("nvim-tree").setup({
   },
 })
 
--- Keybindings for nvim-tree
-vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>', { noremap = true, silent = true, desc = "Toggle file tree" })
+-- Toggle focus between nvim-tree and editor
+local function toggle_tree_focus()
+  local nvim_tree_api = require('nvim-tree.api')
+  local current_buf = vim.api.nvim_get_current_buf()
+  local current_buf_name = vim.api.nvim_buf_get_name(current_buf)
+  if current_buf_name:match("NvimTree_") then
+    vim.cmd('wincmd p')  -- Go to previous window
+  else
+    nvim_tree_api.tree.focus()
+  end
+end
+
+-- Keybindings
 vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true, desc = "Toggle file tree" })
-vim.keymap.set('n', '<leader>f', ':NvimTreeFocus<CR>', { noremap = true, silent = true, desc = "Focus file tree" })
+vim.keymap.set('n', '<leader>w', toggle_tree_focus, { noremap = true, silent = true, desc = "Toggle focus tree/editor" })
+vim.keymap.set('n', '<leader>g', ':LazyGit<CR>', { noremap = true, silent = true, desc = "Open LazyGit" })
 
--- Window navigation (easier than Ctrl+w)
-vim.keymap.set('n', '<C-h>', '<C-w>h', { noremap = true, silent = true, desc = "Move to left window" })
-vim.keymap.set('n', '<C-j>', '<C-w>j', { noremap = true, silent = true, desc = "Move to window below" })
-vim.keymap.set('n', '<C-k>', '<C-w>k', { noremap = true, silent = true, desc = "Move to window above" })
-vim.keymap.set('n', '<C-l>', '<C-w>l', { noremap = true, silent = true, desc = "Move to right window" })
-vim.keymap.set('n', '<leader>w', '<C-w>w', { noremap = true, silent = true, desc = "Toggle between windows" })
+-- Telescope fuzzy finder
+local telescope = require('telescope')
+local builtin = require('telescope.builtin')
 
--- Lazygit integration
-vim.keymap.set('n', '<leader>gg', ':LazyGit<CR>', { noremap = true, silent = true, desc = "Open LazyGit" })
-vim.keymap.set('n', '<leader>gc', ':LazyGitCurrentFile<CR>', { noremap = true, silent = true, desc = "LazyGit current file history" })
-vim.keymap.set('n', '<leader>gf', ':LazyGitFilter<CR>', { noremap = true, silent = true, desc = "LazyGit filter" })
+telescope.setup({
+  defaults = {
+    file_ignore_patterns = { "node_modules", ".git/" },
+    layout_strategy = "horizontal",
+    layout_config = {
+      horizontal = { preview_width = 0.5 },
+    },
+  },
+  extensions = {
+    fzf = {
+      fuzzy = true,
+      override_generic_sorter = true,
+      override_file_sorter = true,
+    },
+  },
+})
+
+-- Load fzf extension for better performance
+pcall(telescope.load_extension, 'fzf')
+
+vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = "Find files" })
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = "Live grep" })
 

@@ -189,7 +189,9 @@
       nvim-tree-lua
       nvim-web-devicons
       lazygit-nvim
-      plenary-nvim  # required dependency for lazygit-nvim
+      plenary-nvim  # required dependency
+      telescope-nvim
+      telescope-fzf-native-nvim  # faster fuzzy matching
     ];
     extraLuaConfig = builtins.readFile ./neovim/init.lua;
   };
