@@ -67,10 +67,20 @@
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
-  home.file = {
-
+  home.file = let
+    # Fetch catppuccin tmux plugin (v2.1.3)
+    catppuccinTmux = pkgs.fetchFromGitHub {
+      owner = "catppuccin";
+      repo = "tmux";
+      rev = "v2.1.3";
+      sha256 = "sha256-Is0CQ1ZJMXIwpDjrI5MDNHJtq+R3jlNcd9NXQESUe2w=";
+    };
+  in {
     ".config/eza/theme.yml".source = ./eza/theme.yml;
     ".config/starship.toml".source = ./starship/starship.toml;
+    
+    # Install catppuccin tmux plugin manually (recommended method per docs)
+    ".config/tmux/plugins/catppuccin/tmux".source = catppuccinTmux;
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
@@ -108,43 +118,16 @@
     clock24 = true;
     terminal = "tmux-256color";
 
-    plugins = with pkgs.tmuxPlugins; [
-      sensible
-      yank
-      pain-control
-      catppuccin
-      resurrect
-      continuum
-      cpu
-      battery
-    ];
+    # TPM plugins are managed via tmux.conf, not Nix plugins
+    # plugins = with pkgs.tmuxPlugins; [ ... ];
 
     extraConfig = ''
-      # Options to make tmux more pleasant
-      set -g mouse on
-      set -g history-limit 10000
+      # Set default shell to zsh (must be set before loading other config)
       set -g default-shell "${pkgs.zsh}/bin/zsh"
       set -g default-command "${pkgs.zsh}/bin/zsh"
-      set -g renumber-windows on
-      set -g base-index 1
-      set -g status-position top
 
-      # Configure the catppuccin plugin
-      set -g @catppuccin_flavor "mocha"
-      set -g @catppuccin_window_status_style "rounded"
-
-      # Continuum settings
-      set -g @continuum-save-interval '15'
-
-      # Make the status line pretty and add some modules
-      set -g status-right-length 100
-      set -g status-left-length 100
-      set -g status-left ""
-      set -g status-right "#{E:@catppuccin_status_application}"
-      set -agF status-right "#{E:@catppuccin_status_cpu}"
-      set -ag status-right "#{E:@catppuccin_status_session}"
-      set -ag status-right "#{E:@catppuccin_status_uptime}"
-      set -agF status-right "#{E:@catppuccin_status_battery}"
+      # Load configuration from tmux.conf file
+      ${builtins.readFile ./tmux/tmux.conf}
     '';
   };
 
