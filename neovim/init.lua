@@ -27,6 +27,10 @@ vim.g.loaded_netrwPlugin = 1
 -- Enable 24-bit color
 vim.opt.termguicolors = true
 
+-- Fast mode switching (no delay on Esc)
+vim.opt.timeoutlen = 300   -- Time to wait for mapped sequences
+vim.opt.ttimeoutlen = 10   -- Time to wait for key codes (makes Esc instant)
+
 require("nvim-tree").setup({
   sort = {
     sorter = "case_sensitive",
@@ -77,6 +81,7 @@ end
 vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true, desc = "Toggle file tree" })
 vim.keymap.set('n', '<leader>w', toggle_tree_focus, { noremap = true, silent = true, desc = "Toggle focus tree/editor" })
 vim.keymap.set('n', '<leader>g', ':LazyGit<CR>', { noremap = true, silent = true, desc = "Open LazyGit" })
+vim.keymap.set('n', '<leader>q', ':q!<CR>', { noremap = true, silent = true, desc = "Force quit" })
 
 -- Telescope fuzzy finder
 local telescope = require('telescope')
