@@ -183,30 +183,15 @@
   };
 
   programs.neovim = {
-	enable = true;
-
-	# Install the Catppuccin plugin
-	plugins = with pkgs.vimPlugins; [
-	catppuccin-nvim
-	nvim-tree-lua
-	nvim-web-devicons
-	];
-
-  # Lua config after plugin is loaded
-  extraConfig = ''
-    lua << EOF
-    require("catppuccin").setup({
-      flavour = "mocha",
-      background = { light = "latte", dark = "mocha" },
-      transparent_background = true,
-    })
-    vim.cmd.colorscheme("catppuccin")
-    
-    -- Ensure Normal highlight group has transparent background
-    vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
-    EOF
-  '';
+    enable = true;
+    plugins = with pkgs.vimPlugins; [
+      catppuccin-nvim
+      nvim-tree-lua
+      nvim-web-devicons
+      lazygit-nvim
+      plenary-nvim  # required dependency for lazygit-nvim
+    ];
+    extraLuaConfig = builtins.readFile ./neovim/init.lua;
   };
 
   # Let Home Manager install and manage itself.
