@@ -33,6 +33,10 @@ vim.g.loaded_netrwPlugin = 1
 -- Enable 24-bit color
 vim.opt.termguicolors = true
 
+-- Line numbers
+vim.opt.number = true          -- Show line numbers
+vim.opt.relativenumber = true  -- Relative line numbers (helps with jumping)
+
 -- Fast mode switching (no delay on Esc)
 vim.opt.timeoutlen = 300   -- Time to wait for mapped sequences
 vim.opt.ttimeoutlen = 10   -- Time to wait for key codes (makes Esc instant)
