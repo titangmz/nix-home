@@ -198,8 +198,13 @@
     require("catppuccin").setup({
       flavour = "mocha",
       background = { light = "latte", dark = "mocha" },
+      transparent_background = true,
     })
     vim.cmd.colorscheme("catppuccin")
+    
+    -- Ensure Normal highlight group has transparent background
+    vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
     EOF
   '';
   };
