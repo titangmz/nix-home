@@ -35,7 +35,6 @@
 	pkgs.lolcat
 	pkgs.bat
 	pkgs.tree
-	pkgs.git
 	pkgs.eza
 	pkgs.duf
 	pkgs.dust
@@ -160,6 +159,16 @@
     enable = true;
   };
 
+  programs.git = {
+    enable = true;
+    settings = {
+      user = {
+        name = "Pedram Parsa";
+        email = "titangmz@gmail.com";
+      };
+    };
+  };
+
   programs.lazygit = {
     enable = true;
     settings = {
@@ -189,10 +198,25 @@
       nvim-tree-lua
       nvim-web-devicons
       lazygit-nvim
-      plenary-nvim  # required dependency
+      plenary-nvim
       telescope-nvim
-      telescope-fzf-native-nvim  # faster fuzzy matching
+      telescope-fzf-native-nvim
       lualine-nvim
+      # LSP & Completion
+      nvim-lspconfig
+      nvim-cmp
+      cmp-nvim-lsp
+      cmp-buffer
+      cmp-path
+      luasnip
+      cmp_luasnip
+      # Treesitter
+      nvim-treesitter.withAllGrammars
+      # UI
+      indent-blankline-nvim
+      noice-nvim
+      nui-nvim
+      nvim-notify
     ];
     extraLuaConfig = builtins.readFile ./neovim/init.lua;
   };

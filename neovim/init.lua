@@ -11,6 +11,12 @@ require("catppuccin").setup({
     nvimtree = true,
     telescope = { enabled = true },
     lualine = true,
+    treesitter = true,
+    indent_blankline = { enabled = true },
+    noice = true,
+    notify = true,
+    cmp = true,
+    native_lsp = { enabled = true },
   },
 })
 vim.cmd.colorscheme("catppuccin")
@@ -161,6 +167,84 @@ require('lualine').setup({
     lualine_x = { 'filetype' },
     lualine_y = { 'progress' },
     lualine_z = { 'location' },
+  },
+})
+
+-- Treesitter (better syntax highlighting)
+require('nvim-treesitter.configs').setup({
+  highlight = { enable = true },
+  indent = { enable = true },
+})
+
+-- Indent blankline (indentation guides)
+require('ibl').setup({
+  indent = { char = '│' },
+  scope = { enabled = true },
+})
+
+-- LSP Setup
+local lspconfig = require('lspconfig')
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+-- Add language servers here as needed:
+-- lspconfig.lua_ls.setup({ capabilities = capabilities })
+-- lspconfig.pyright.setup({ capabilities = capabilities })
+-- lspconfig.ts_ls.setup({ capabilities = capabilities })
+-- lspconfig.nil_ls.setup({ capabilities = capabilities })  -- Nix
+
+-- Completion (nvim-cmp)
+local cmp = require('cmp')
+local luasnip = require('luasnip')
+
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+  }),
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+    { name = 'buffer' },
+    { name = 'path' },
+  }),
+})
+
+-- Noice (better command line & notifications UI)
+require('noice').setup({
+  lsp = {
+    override = {
+      ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+      ['vim.lsp.util.stylize_markdown'] = true,
+      ['cmp.entry.get_documentation'] = true,
+    },
+  },
+  presets = {
+    bottom_search = true,
+    command_palette = true,
+    long_message_to_split = true,
+    lsp_doc_border = true,
   },
 })
 
