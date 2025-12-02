@@ -1,5 +1,8 @@
 autoload -Uz compinit && compinit
 
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    export TERM=xterm-256color
+fi
 
 # Eza
 alias l="eza -l --icons --git -a"
