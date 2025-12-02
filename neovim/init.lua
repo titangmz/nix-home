@@ -10,6 +10,7 @@ require("catppuccin").setup({
   integrations = {
     nvimtree = true,
     telescope = { enabled = true },
+    lualine = true,
   },
 })
 vim.cmd.colorscheme("catppuccin")
@@ -103,4 +104,58 @@ pcall(telescope.load_extension, 'fzf')
 
 vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = "Find files" })
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = "Live grep" })
+
+-- Lualine statusline with transparent background
+local colors = require("catppuccin.palettes").get_palette("mocha")
+
+-- Custom theme with transparent backgrounds
+local custom_catppuccin = {
+  normal = {
+    a = { bg = colors.blue, fg = colors.mantle, gui = "bold" },
+    b = { bg = "NONE", fg = colors.blue },
+    c = { bg = "NONE", fg = colors.text },
+  },
+  insert = {
+    a = { bg = colors.green, fg = colors.mantle, gui = "bold" },
+    b = { bg = "NONE", fg = colors.green },
+    c = { bg = "NONE", fg = colors.text },
+  },
+  visual = {
+    a = { bg = colors.mauve, fg = colors.mantle, gui = "bold" },
+    b = { bg = "NONE", fg = colors.mauve },
+    c = { bg = "NONE", fg = colors.text },
+  },
+  replace = {
+    a = { bg = colors.red, fg = colors.mantle, gui = "bold" },
+    b = { bg = "NONE", fg = colors.red },
+    c = { bg = "NONE", fg = colors.text },
+  },
+  command = {
+    a = { bg = colors.peach, fg = colors.mantle, gui = "bold" },
+    b = { bg = "NONE", fg = colors.peach },
+    c = { bg = "NONE", fg = colors.text },
+  },
+  inactive = {
+    a = { bg = "NONE", fg = colors.surface1 },
+    b = { bg = "NONE", fg = colors.surface1 },
+    c = { bg = "NONE", fg = colors.surface1 },
+  },
+}
+
+require('lualine').setup({
+  options = {
+    theme = custom_catppuccin,
+    component_separators = { left = '│', right = '│' },
+    section_separators = { left = '', right = '' },
+    globalstatus = true,
+  },
+  sections = {
+    lualine_a = { 'mode' },
+    lualine_b = { 'branch', 'diff' },
+    lualine_c = { 'filename' },
+    lualine_x = { 'filetype' },
+    lualine_y = { 'progress' },
+    lualine_z = { 'location' },
+  },
+})
 

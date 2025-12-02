@@ -192,6 +192,7 @@
       plenary-nvim  # required dependency
       telescope-nvim
       telescope-fzf-native-nvim  # faster fuzzy matching
+      lualine-nvim
     ];
     extraLuaConfig = builtins.readFile ./neovim/init.lua;
   };
