@@ -35,6 +35,7 @@
 	pkgs.rustscan
 	pkgs.dysk
 	pkgs.netcat
+	pkgs.tgpt
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 

@@ -16,7 +16,7 @@ alias la="tree"
 alias lgt="lazygit"
 
 alias df="duf"
-
+alias gpt="tgpt"
 alias top="btop"
 
 
@@ -31,6 +31,7 @@ alias gba='git branch -a'
 alias gadd='git add'
 alias gr='git remote'
 alias gre='git reset'
+alias gs='git status'
 
 # Docker
 alias dco="docker compose"
