@@ -38,10 +38,20 @@
           desc = "Go to references";
         };
       }
+      # git blame toggle
+      {
+        action = ":GitBlameToggle<CR>";
+        key = "<leader>gb";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Toggle git blame";
+        };
+      }
       # git blame open URL
       {
         action = ":GitBlameOpenCommitURL<CR>";
-        key = "<leader>gb";
+        key = "<leader>gbu";
         options = {
           silent = true;
           noremap = true;
