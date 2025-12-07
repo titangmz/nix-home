@@ -18,6 +18,16 @@
           desc = "Toggle file tree";
         };
       }
+      # Toggle terminal
+      {
+        action = "<cmd>ToggleTerm<CR>";
+        key = "<leader>tt";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Toggle terminal";
+        };
+      }
       # Go to definition
       {
         action = ":lua vim.lsp.buf.definition()<CR>";
@@ -78,20 +88,10 @@
           desc = "Open markdown preview in browser";
         };
       }
-      # Telescope search (live grep)
-      {
-        action = ":Telescope live_grep<CR>";
-        key = "<leader>sg";
-        options = {
-          silent = true;
-          noremap = true;
-          desc = "Search grep";
-        };
-      }
       # Telescope live grep (Ctrl+F)
       {
         action = ":Telescope live_grep<CR>";
-        key = "<C-f>";
+        key = "<leader>fg";
         options = {
           silent = true;
           noremap = true;
@@ -118,20 +118,10 @@
           desc = "Search commands";
         };
       }
-      # Telescope search files
-      {
-        action = ":Telescope find_files<CR>";
-        key = "<leader>sf";
-        options = {
-          silent = true;
-          noremap = true;
-          desc = "Search files";
-        };
-      }
       # Telescope find files (Ctrl+P)
       {
         action = ":Telescope find_files<CR>";
-        key = "<C-p>";
+        key = "<leader>fp";
         options = {
           silent = true;
           noremap = true;
@@ -211,7 +201,7 @@
       }
       {
         action = ":vsplit<CR>";
-        key = "<leader>s";
+        key = "<leader>ss";
         options = {
           silent = true;
           noremap = true;
@@ -247,7 +237,7 @@
       }
       {
         action = ":Trouble<CR>";
-        key = "<leader>t";
+        key = "<leader>tr";
         options = {
           silent = true;
           noremap = true;
