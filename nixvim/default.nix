@@ -11,6 +11,8 @@
     ./comment.nix
     ./gitblame.nix
     ./nvim-tree.nix
+    ./mini-icons.nix
+    ./snacks.nix
   ];
 
   programs.nixvim = {

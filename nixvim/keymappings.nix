@@ -11,7 +11,7 @@
       # nvim-tree toggle
       {
         action = ":NvimTreeToggle<CR>";
-        key = "<leader>o";
+        key = "<leader>q";
         options = {
           silent = true;
           noremap = true;
@@ -128,16 +128,6 @@
           desc = "Search commands";
         };
       }
-      # Telescope quickfixlist
-      {
-        action = ":Telescope quickfix<CR>";
-        key = "<leader>ql";
-        options = {
-          silent = true;
-          noremap = true;
-          desc = "Quickfix list";
-        };
-      }
       # Telescope undo tree
       {
         action = ":Telescope undo<CR>";
@@ -166,15 +156,6 @@
           silent = true;
           noremap = true;
           desc = "Diffview close";
-        };
-      }
-      # Mapping q for recording macros
-      {
-        action = "q";
-        key = "q";
-        options = {
-          silent = true;
-          noremap = true;
         };
       }
 
@@ -377,15 +358,6 @@
           silent = true;
           noremap = true;
           desc = "Export run output";
-        };
-      }
-      {
-        key = "<leader>qa";
-        action = "<cmd>QuartoActivate<CR>";
-        options = {
-          silent = true;
-          noremap = true;
-          desc = "Quarto Activate";
         };
       }
       {
