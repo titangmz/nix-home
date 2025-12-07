@@ -18,7 +18,6 @@
     ./toggleterm.nix
     ./trouble.nix
     ./line-numbers.nix
-    ./claude-code.nix
   ];
 
   programs.nixvim = {
