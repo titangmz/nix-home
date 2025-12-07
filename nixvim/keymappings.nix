@@ -88,6 +88,16 @@
           desc = "Search grep";
         };
       }
+      # Telescope live grep (Ctrl+F)
+      {
+        action = ":Telescope live_grep<CR>";
+        key = "<C-f>";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Search in files";
+        };
+      }
       # Telescope search buffers
       {
         action = ":Telescope buffers<CR>";
@@ -116,6 +126,16 @@
           silent = true;
           noremap = true;
           desc = "Search files";
+        };
+      }
+      # Telescope find files (Ctrl+P)
+      {
+        action = ":Telescope find_files<CR>";
+        key = "<C-p>";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Find files";
         };
       }
       # Telescope search commands
