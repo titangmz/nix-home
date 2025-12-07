@@ -5,9 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nixvim.url = "github:nix-community/nixvim/nixos-25.11";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, home-manager, nixvim, ... }:
   let
     lib = nixpkgs.lib;
     # Support both Mac and Linux
@@ -29,7 +30,10 @@
         extraSpecialArgs = {
           inherit username homeDir;
         };
-        modules = [ ./home.nix ];
+        modules = [
+          ./home.nix
+          nixvim.homeModules.nixvim
+        ];
       };
   in
   {

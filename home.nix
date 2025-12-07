@@ -7,6 +7,9 @@
 ), ... }:
 
 {
+  imports = [
+    ./nixvim
+  ];
   # Username and homeDir are passed from flake.nix or fallback to environment
   home.username = username;
   home.homeDirectory = homeDir;
@@ -143,34 +146,9 @@
     };
   };
 
-  programs.neovim = {
+  # Nixvim configuration
+  programs.nixvim = {
     enable = true;
-    plugins = with pkgs.vimPlugins; [
-      catppuccin-nvim
-      nvim-tree-lua
-      nvim-web-devicons
-      lazygit-nvim
-      plenary-nvim
-      telescope-nvim
-      telescope-fzf-native-nvim
-      lualine-nvim
-      # LSP & Completion
-      nvim-lspconfig
-      nvim-cmp
-      cmp-nvim-lsp
-      cmp-buffer
-      cmp-path
-      luasnip
-      cmp_luasnip
-      # Treesitter
-      nvim-treesitter.withAllGrammars
-      # UI
-      indent-blankline-nvim
-      noice-nvim
-      nui-nvim
-      nvim-notify
-    ];
-    extraLuaConfig = builtins.readFile ./neovim/init.lua;
   };
 
   # Let Home Manager install and manage itself.
