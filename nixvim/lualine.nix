@@ -5,6 +5,22 @@
     settings = {
       extensions = [ "fzf" ];
       globalstatus = true;
+      options = {
+        theme = "auto";
+        component_separators = "";
+        section_separators = "";
+        disabled_filetypes.statusline = [];
+        always_divide_middle = true;
+        globalstatus = true;
+      };
+      inactive_sections = {
+        lualine_a = [];
+        lualine_b = [];
+        lualine_c = [ "filename" ];
+        lualine_x = [ "location" ];
+        lualine_y = [];
+        lualine_z = [];
+      };
 
       # +-------------------------------------------------+
       # | A | B | C                             X | Y | Z |

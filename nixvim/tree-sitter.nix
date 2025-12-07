@@ -30,8 +30,16 @@
     };
     
     # Don't fold by default - set foldlevelstart to a high value
+    # Make everything transparent
     extraConfigLua = ''
       vim.opt.foldlevelstart = 99
+      -- Make background transparent
+      vim.opt.termguicolors = true
+      vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+      vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+      vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
+      vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
+      vim.api.nvim_set_hl(0, "WinSeparator", { bg = "none" })
     '';
   };
 }

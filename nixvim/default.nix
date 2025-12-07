@@ -13,6 +13,8 @@
     ./nvim-tree.nix
     ./mini-icons.nix
     ./snacks.nix
+    ./blink-cmp.nix
+    ./indent-o-matic.nix
   ];
 
   programs.nixvim = {
@@ -21,6 +23,7 @@
         enable = true;
         settings = {
           flavour = "mocha";
+          transparent_background = true;
           integrations = {
             cmp = true;
             gitsigns = true;

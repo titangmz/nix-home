@@ -12,6 +12,7 @@
           "^data/"
         ];
         set_env.COLORTERM = "truecolor";
+        borderchars = [ "─" "│" "─" "│" "╭" "╮" "╯" "╰" ];
       };
     };
   };

@@ -4,6 +4,27 @@
     settings =
   {
     enable = true;
+    views = {
+      cmdline_popup = {
+        border = {
+          style = "rounded";
+          padding = [ 0 1 ];
+        };
+        position = {
+          row = 5;
+          col = "50%";
+        };
+        size = {
+          min_width = 60;
+          width = "auto";
+          height = "auto";
+          max_height = 20;
+        };
+        win_options = {
+          winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder";
+        };
+      };
+    };
     notify = {
       enabled = true;
     };
