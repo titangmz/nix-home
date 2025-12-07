@@ -39,6 +39,8 @@
 	pkgs.dysk
 	pkgs.netcat
 	pkgs.tgpt
+  pkgs.pass
+  pkgs.gnupg
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
