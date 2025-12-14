@@ -43,6 +43,7 @@
   pkgs.gnupg
   pkgs.rustc
   pkgs.cargo
+  pkgs.clippy
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
@@ -71,6 +72,7 @@
   # Session Variables
   home.sessionVariables = {
     # EDITOR = "emacs";
+    PATH = "$HOME/.cargo/bin:$PATH";
   };
   
 
