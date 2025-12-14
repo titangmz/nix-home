@@ -41,6 +41,8 @@
 	pkgs.tgpt
   pkgs.pass
   pkgs.gnupg
+  pkgs.rustc
+  pkgs.cargo
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
