@@ -45,6 +45,7 @@
   pkgs.cargo
   pkgs.rust-analyzer
   pkgs.rustPlatform.rustLibSrc
+  pkgs.clippy
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
@@ -73,6 +74,7 @@
   # Session Variables
   home.sessionVariables = {
     # EDITOR = "emacs";
+    PATH = "$HOME/.cargo/bin:$PATH";
   };
 
 
