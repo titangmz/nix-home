@@ -43,6 +43,8 @@
   pkgs.gnupg
   pkgs.rustc
   pkgs.cargo
+  pkgs.rust-analyzer
+  pkgs.rustPlatform.rustLibSrc
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
@@ -72,7 +74,7 @@
   home.sessionVariables = {
     # EDITOR = "emacs";
   };
-  
+
 
   # Programs
   programs.tmux = {
@@ -100,12 +102,12 @@
 	};
 
 	autosuggestion.enable = true;
-    	
+
 	syntaxHighlighting.enable = true;
     	history = {
       	size = 10000;
     	};
-	
+
 	initContent = builtins.readFile ./zsh/.zshrc;
   };
 
