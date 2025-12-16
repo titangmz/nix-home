@@ -10,10 +10,8 @@
   imports = [
     ./nixvim
   ];
-  
-  # Allow unfree packages (required for vscode)
-  nixpkgs.config.allowUnfree = true;
-  
+
+
   # Username and homeDir are passed from flake.nix or fallback to environment
   home.username = username;
   home.homeDirectory = homeDir;
@@ -163,10 +161,6 @@
 
   # Nixvim configuration
   programs.nixvim = {
-    enable = true;
-  };
-
-  programs.vscode = {
     enable = true;
   };
 
