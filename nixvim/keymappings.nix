@@ -48,6 +48,74 @@
           desc = "Go to references";
         };
       }
+      # Hover documentation
+      {
+        action = ":lua vim.lsp.buf.hover()<CR>";
+        key = "K";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Show hover documentation";
+        };
+      }
+      # Code actions
+      {
+        action = ":lua vim.lsp.buf.code_action()<CR>";
+        key = "<leader>ca";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Code actions";
+        };
+      }
+      # Rename symbol
+      {
+        action = ":lua vim.lsp.buf.rename()<CR>";
+        key = "<leader>rn";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Rename symbol";
+        };
+      }
+      # Format document
+      {
+        action = ":lua vim.lsp.buf.format()<CR>";
+        key = "<leader>f";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Format document";
+        };
+      }
+      # Run Rust code
+      {
+        action = "<cmd>TermExec cmd='cargo run'<CR>";
+        key = "<leader>rr";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Run Rust project";
+        };
+      }
+      {
+        action = "<cmd>TermExec cmd='cargo check'<CR>";
+        key = "<leader>rc";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Check Rust code";
+        };
+      }
+      {
+        action = "<cmd>TermExec cmd='cargo test'<CR>";
+        key = "<leader>rt";
+        options = {
+          silent = true;
+          noremap = true;
+          desc = "Run Rust tests";
+        };
+      }
       # git blame toggle
       {
         action = ":GitBlameToggle<CR>";

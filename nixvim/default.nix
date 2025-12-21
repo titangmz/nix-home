@@ -18,6 +18,7 @@
     ./toggleterm.nix
     ./trouble.nix
     ./line-numbers.nix
+    ./rust.nix
   ];
 
   programs.nixvim = {
