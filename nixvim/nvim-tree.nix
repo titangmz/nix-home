@@ -4,17 +4,6 @@
       enable = true;
       settings = {
         view = {
-          float = {
-            enable = true;
-            open_win_config = {
-              relative = "editor";
-              border = "rounded";
-              width = 40;
-              height = 30;
-              row = 1;
-              col = 1;
-            };
-          };
           width = 30;
         };
         renderer = {
