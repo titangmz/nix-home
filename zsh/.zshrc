@@ -43,3 +43,6 @@ alias dx="docker exec -it"
 # Dirs
 alias ..="cd .."
 alias ...="cd ../.."
+
+
+eval "$(fnm env --use-on-cd --shell zsh)"

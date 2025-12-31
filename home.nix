@@ -48,6 +48,7 @@
   pkgs.rust-analyzer
   pkgs.rustPlatform.rustLibSrc
   pkgs.clippy
+  pkgs.fnm
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
