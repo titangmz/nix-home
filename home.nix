@@ -49,6 +49,9 @@
   pkgs.rustPlatform.rustLibSrc
   pkgs.clippy
   pkgs.fnm
+  pkgs.profanity
+  pkgs.tor
+  pkgs.torsocks
 
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
@@ -71,6 +74,8 @@
     ".config/eza/theme.yml".source = ./eza/theme.yml;
     ".config/starship.toml".source = ./starship/starship.toml;
     ".config/tmux/plugins/catppuccin/tmux".source = catppuccinTmux;
+    ".config/profanity/profrc".source = ./profanity/profrc;
+
   };
 
 
