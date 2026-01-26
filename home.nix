@@ -21,6 +21,7 @@
   # Packages
   home.packages = [
 	pkgs.zsh
+        pkgs.unar
 	pkgs.cowsay
 	pkgs.lolcat
 	pkgs.bat
