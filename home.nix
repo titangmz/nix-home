@@ -20,47 +20,40 @@
 
   # Packages
   home.packages = [
-	pkgs.zsh
-        pkgs.unar
-	pkgs.cowsay
-	pkgs.lolcat
-	pkgs.bat
-	pkgs.tree
-	pkgs.eza
-	pkgs.duf
-	pkgs.dust
-	pkgs.fd
-	pkgs.ripgrep
-	pkgs.fzf
-	pkgs.tldr
-	pkgs.lazygit
-	pkgs.procs
-	pkgs.gping
-	pkgs.btop
-	pkgs.sshuttle
-	pkgs.rustscan
-	pkgs.dysk
-	pkgs.netcat
-	pkgs.tgpt
-  pkgs.pass
-  pkgs.gnupg
-  pkgs.rustc
-  pkgs.cargo
-  pkgs.rust-analyzer
-  pkgs.rustPlatform.rustLibSrc
-  pkgs.clippy
-  pkgs.fnm
-  pkgs.profanity
-  pkgs.tor
-  pkgs.torsocks
-
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
+      pkgs.zsh
+      pkgs.unar
+      pkgs.cowsay
+      pkgs.lolcat
+      pkgs.bat
+      pkgs.tree
+      pkgs.eza
+      pkgs.duf
+      pkgs.dust
+      pkgs.fd
+      pkgs.ripgrep
+      pkgs.fzf
+      pkgs.tldr
+      pkgs.lazygit
+      pkgs.procs
+      pkgs.gping
+      pkgs.btop
+      pkgs.ctop
+      pkgs.sshuttle
+      pkgs.rustscan
+      pkgs.dysk
+      pkgs.netcat
+      pkgs.pass
+      pkgs.gnupg
+      pkgs.rustc
+      pkgs.cargo
+      pkgs.rust-analyzer
+      pkgs.rustPlatform.rustLibSrc
+      pkgs.clippy
+      pkgs.fnm
+      pkgs.profanity
+      pkgs.tor
+      pkgs.torsocks
   ];
-
 
   # Dotfiles
   home.file = let
