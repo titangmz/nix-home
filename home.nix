@@ -26,6 +26,7 @@
       pkgs.lolcat
       pkgs.bat
       pkgs.tree
+      pkgs.caddy
       pkgs.eza
       pkgs.duf
       pkgs.dust
