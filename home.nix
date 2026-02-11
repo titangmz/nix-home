@@ -29,6 +29,7 @@
 	pkgs.eza
 	pkgs.duf
 	pkgs.dust
+        pkgs.caddy
 	pkgs.fd
 	pkgs.ripgrep
 	pkgs.fzf
