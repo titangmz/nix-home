@@ -45,12 +45,6 @@
       pkgs.netcat
       pkgs.pass
       pkgs.gnupg
-      pkgs.rustc
-      pkgs.cargo
-      pkgs.rust-analyzer
-      pkgs.rustPlatform.rustLibSrc
-      pkgs.clippy
-      pkgs.fnm
       pkgs.profanity
       pkgs.tor
       pkgs.torsocks
