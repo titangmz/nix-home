@@ -1,0 +1,13 @@
+diff --git a/lua/sidekick/cli/terminal.lua b/lua/sidekick/cli/terminal.lua
+--- a/lua/sidekick/cli/terminal.lua
++++ b/lua/sidekick/cli/terminal.lua
+@@ -246,6 +246,9 @@ function M:start()
+       if elapsed > READY_MAX_WAIT then
+         return on_ready() -- timeout
+       end
++      if not self:win_valid() then
++        return
++      end
+       local lines = vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)
+       while #lines > 0 and lines[#lines] == "" do
+         table.remove(lines)
