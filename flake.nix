@@ -29,19 +29,23 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       pkgsFor = system: import nixpkgs { inherit system; };
-    in
-    {
-      homeConfigurations = forAllSystems (
-        system:
+      mkHome =
+        system: profile:
         home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsFor system;
           extraSpecialArgs.codexPackage = nixpkgs-codex.legacyPackages.${system}.codex;
           modules = [
-            ./home.nix
+            profile
             nixvim.homeModules.nixvim
           ];
-        }
-      );
+        };
+    in
+    {
+      nixosModules.desktop = import ./modules/nixos/system;
+
+      homeConfigurations = (forAllSystems (system: mkHome system ./home.nix)) // {
+        nixos-hyprland = mkHome "x86_64-linux" ./profiles/nixos-hyprland.nix;
+      };
 
       apps = forAllSystems (system: {
         home-manager = {
@@ -60,7 +64,18 @@
           mappingKeys = map (mapping: "${mapping.mode}:${mapping.key}") editor.keymaps;
         in
         {
-          home = home.activationPackage;
+          home =
+            assert !home.config.gtk.enable;
+            assert home.config.xfconf.settings == { };
+            assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
+              "hypr/hyprland.lua"
+              "waybar/config.jsonc"
+              "waybar/style.css"
+              "mako/config"
+            ];
+            assert !(builtins.hasAttr "xfconfd" home.config.systemd.user.services);
+            assert !(builtins.hasAttr "desktop-wallpaper" home.config.systemd.user.services);
+            home.activationPackage;
           switch =
             pkgs.runCommand "switch-script-check"
               {
@@ -71,6 +86,7 @@
               }
               ''
                 SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
+                REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
                 touch "$out"
               '';
           neovim =
@@ -84,6 +100,10 @@
               ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${./tests/neovim.lua}"
               touch "$out"
             '';
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          nixos-hyprland = self.homeConfigurations.nixos-hyprland.activationPackage;
+
         }
       );
 

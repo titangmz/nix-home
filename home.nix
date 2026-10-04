@@ -6,6 +6,7 @@
     ./modules/git
     ./modules/tmux
     ./modules/wezterm
+    ./modules/kitty
     ./modules/development
     ./modules/chat
     ./modules/neovim

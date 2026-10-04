@@ -1,0 +1,61 @@
+@define-color base #@base@;
+@define-color surface #@surface@;
+@define-color text #@text@;
+@define-color muted #@muted@;
+@define-color accent #@accent@;
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 12px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: @base;
+    color: @text;
+    border: 1px solid @surface;
+    border-radius: 14px;
+}
+
+#custom-launcher {
+    color: @accent;
+    font-weight: bold;
+    padding: 0 16px;
+}
+
+#workspaces { margin: 4px 0; }
+#workspaces button {
+    padding: 0 10px;
+    margin: 0 2px;
+    border-radius: 9px;
+    background: transparent;
+    color: @muted;
+    box-shadow: none;
+    text-shadow: none;
+}
+#workspaces button.active { background: @accent; color: @base; }
+#workspaces button.urgent { background: #@red@; color: @base; }
+#workspaces button:hover { background: @surface; color: @text; }
+
+#clock { color: @text; font-weight: bold; padding: 0 12px; }
+#pulseaudio, #network, #battery, #tray {
+    background: @surface;
+    border-radius: 9px;
+    margin: 4px 2px;
+    padding: 0 11px;
+}
+#tray { margin-right: 8px; }
+#network { color: #@blue@; }
+#battery.charging, #battery.plugged { color: #@green@; }
+#battery.warning { color: #@yellow@; }
+#battery.critical { color: #@red@; }
+#pulseaudio.muted, #network.disconnected { color: @muted; }
+
+tooltip {
+    background: @base;
+    border: 1px solid @surface;
+    border-radius: 10px;
+}
+tooltip label { color: @text; padding: 6px; }

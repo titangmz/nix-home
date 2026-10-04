@@ -21,6 +21,23 @@ encode_path() {
 }
 FLAKE="path:$(encode_path "$REPO_DIR")"
 
+# Opt in explicitly; platform detection alone must not enable a desktop.
+PROFILE=""
+HM_ARGS=()
+while (($#)); do
+  case "$1" in
+    --profile)
+      if (($# < 2)) || [[ "$2" != "nixos-hyprland" ]]; then
+        printf 'Usage: switch.sh [--profile nixos-hyprland] [Home Manager options]\n' >&2
+        exit 1
+      fi
+      PROFILE="$2"
+      shift 2
+      ;;
+    *) HM_ARGS+=("$1"); shift ;;
+  esac
+done
+
 if ! command -v nix >/dev/null 2>&1; then
   printf 'Nix is required. See README.md for setup instructions.\n' >&2
   exit 1
@@ -36,4 +53,9 @@ case "$SYSTEM" in
     ;;
 esac
 
-exec nix run "${FLAKE}#home-manager" -- switch --flake "${FLAKE}#${SYSTEM}" "$@"
+if [[ -n "$PROFILE" && "$SYSTEM" != "x86_64-linux" ]]; then
+  printf 'Profile %s requires x86_64-linux; detected %s.\n' "$PROFILE" "$SYSTEM" >&2
+  exit 1
+fi
+
+exec nix run "${FLAKE}#home-manager" -- switch --flake "${FLAKE}#${PROFILE:-$SYSTEM}" "${HM_ARGS[@]}"

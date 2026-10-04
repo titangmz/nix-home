@@ -8,6 +8,22 @@ default:
 switch *args:
     ./switch.sh "$@"
 
+# Opt in to the NixOS Hyprland home configuration.
+switch-nixos *args:
+    ./switch.sh --profile nixos-hyprland "$@"
+
+# Restart the wallpaper service after changing the local override.
+wallpaper:
+    systemctl --user restart desktop-wallpaper.service
+
+# Build the NixOS system without activating it.
+build-system *args:
+    ./rebuild.sh build "$@"
+
+# Apply the NixOS system; Home Manager is switched separately.
+switch-system *args:
+    sudo ./rebuild.sh switch "$@"
+
 # Time one real switch, including build and activation output.
 benchmark-switch:
     hyperfine --runs 10 --show-output 'just switch'

@@ -4,6 +4,14 @@ Personal Home Manager configuration for `xray`, with pinned Nixpkgs, Home Manage
 and Nixvim. A separate locked Nixpkgs 26.05 input supplies Codex only. Supports x86_64
 Linux, Apple Silicon macOS, and Intel macOS.
 
+The existing platform outputs contain the shared Home Manager setup. The NixOS
+Hyprland desktop is an explicit, separate `nixos-hyprland` profile; default
+switches on Linux and macOS do not include it.
+Reusable NixOS additions live in `modules/nixos/system`. Each machine keeps its
+base configuration, hardware settings, and NixOS package source outside this repo.
+Kitty's configuration is managed by Home Manager in `modules/kitty`; the Kitty
+package itself remains system-managed on NixOS.
+
 ## Setup and use
 
 Install Nix using the daemon installer (run in Bash or Zsh):
@@ -38,8 +46,8 @@ just switch             # Apply
 just benchmark-switch   # Time one real switch with Hyperfine
 ```
 
-The benchmark runs `hyperfine --runs 1 --show-output 'just switch'`, applies the
-configuration once, and prints the elapsed time. Cached builds make later
+The benchmark runs `hyperfine --runs 10 --show-output 'just switch'`, applies the
+configuration ten times, and prints the elapsed time. Cached builds make later
 switches faster. Run `just` to list recipes.
 
 ## Essential details
@@ -53,6 +61,140 @@ switches faster. Run `just` to list recipes.
 
 See [STRUCTURE.md](STRUCTURE.md) for the layout and [AGENTS.md](AGENTS.md) for
 contributor rules.
+
+## NixOS Hyprland desktop (opt in)
+
+This profile is for selected x86_64 NixOS machines. Apply it explicitly:
+
+```bash
+./switch.sh --profile nixos-hyprland --dry-run
+./switch.sh --profile nixos-hyprland
+# Equivalent wrapper:
+just switch-nixos
+```
+
+`profiles/nixos-hyprland.nix` extends the portable `home.nix` with
+`modules/nixos/desktop`. Other machines continue using `./switch.sh` or
+`just switch`, with their original platform output. Platform detection never
+selects the desktop automatically. A default switch on a machine previously
+using the desktop profile removes its Home Manager-managed desktop files and
+services, so continue using the explicit profile on those machines.
+The shared NixOS additions are described below; hardware settings stay local.
+
+`modules/nixos/desktop` manages the Catppuccin Mocha GTK theme with mauve accents,
+matching Papirus-Dark folder icons, and Noto Sans. It also sets Thunar's icon
+view, shortcuts sidebar, breadcrumbs, and folders-first sorting. Apply the
+desktop profile, then close and reopen Thunar to load the GTK theme. These
+settings also theme other GTK applications on opted-in machines.
+
+Hyprland's Lua config lives in `modules/nixos/desktop/hyprland`, Waybar's config and CSS
+in `modules/nixos/desktop/waybar`, and Mako's notification theme in `modules/nixos/desktop/mako`.
+Edit `modules/nixos/desktop/palette.nix` to change shared colors, GTK flavor, or GTK
+accent. The Lua/CSS/Mako sources use `@color@` placeholders rendered by Nix.
+Focused windows use an opaque mauve/blue gradient, with subdued inactive borders.
+Home Manager installs the files under `~/.config` and manages Waybar/Mako
+packages; NixOS still supplies Hyprland and its portals. Apply the desktop profile,
+then run `hyprctl reload config-only` and `makoctl reload`; restart Waybar if its
+styling changed. Hyprland's startup commands launch Waybar and Mako, with no
+duplicate Home Manager services. When first adopting existing local files,
+`./switch.sh --profile nixos-hyprland -b desktop-migration` preserves backups
+before creating managed links.
+
+The default wallpaper is `modules/nixos/desktop/wallpaper/wallpaper.png`.
+Hyprland starts the `desktop-wallpaper` user service at login. For a local
+replacement, put a PNG (or a symlink to one) at
+`~/.local/share/wallpapers/override.png`, then run:
+
+```sh
+systemctl --user restart desktop-wallpaper.service
+```
+
+The equivalent Just command is `just wallpaper`.
+
+Remove the override and restart the service to return to the bundled wallpaper.
+Override selection happens at runtime, without a Nix rebuild. The default is
+also available at `~/.local/share/wallpapers/wallpaper.png`.
+
+## NixOS system configuration
+
+### Clean NixOS installation
+
+After installing NixOS, let NixOS keep its generated machine files locally:
+
+```bash
+sudo nixos-generate-config
+```
+
+Clone this repository somewhere stable, for example `/home/xray/nix-home`:
+
+```bash
+git clone <repository-url> /home/xray/nix-home
+```
+
+Edit `/etc/nixos/configuration.nix` and add the shared module alongside the
+generated hardware file:
+
+```nix
+imports = [
+  ./hardware-configuration.nix
+  /home/xray/nix-home/modules/nixos/system
+];
+```
+
+Keep the hardware file and machine-specific settings in `/etc/nixos`. Do not
+copy them into this repository. Keep the checkout at the imported path, or
+change the absolute path in the import.
+
+Apply the operating-system configuration first:
+
+```bash
+sudo nixos-rebuild switch
+```
+
+Then apply the shared Home Manager configuration and the Hyprland desktop:
+
+```bash
+/home/xray/nix-home/switch.sh --profile nixos-hyprland
+```
+
+After that, use `just switch-system` for NixOS changes, `just switch-nixos` for
+Hyprland and other Linux desktop changes, and `just switch` for portable
+Home Manager changes.
+
+Only our shared additions live in `modules/nixos/system/default.nix`: Hyprland,
+audio, portals, Nerd Fonts, desktop applications, and the CLI tools (`git`,
+`curl`, `vim`, and `wget`). The flake also exports this
+module as `nixosModules.desktop`. There are no machine registrations or hardware
+files in this repo. Adding or removing a machine requires no repository change.
+
+On each opted-in NixOS machine, add the module to its local
+`/etc/nixos/configuration.nix` (adjust the checkout path):
+
+```nix
+imports = [
+  ./hardware-configuration.nix
+  /home/xray/nix-home/modules/nixos/system
+];
+```
+
+Move any duplicate desktop settings or packages into the shared module. Keep the
+machine's bootloader, filesystems, hostname, users, locale, networking, and
+`system.stateVersion` in its local configuration. The checkout must remain
+available at the imported path. System rebuilds use each machine's own NixOS
+package source/channel; ensure its Hyprland supports our Lua configuration.
+The shared Home Manager dependency pins remain unchanged.
+
+```bash
+just build-system       # Build the local OS without applying it
+just switch-system      # Apply the local OS with sudo
+just switch-nixos       # Apply shared Home Manager settings plus the desktop
+```
+
+The system recipes wrap `rebuild.sh`, which selects
+`/etc/nixos/configuration.nix`; there is no host argument or repo system flake.
+Home Manager remains standalone and uses `switch.sh`. System rebuilds do not
+switch the home configuration. Flake checks cover the Home Manager profiles
+and scripts; `just build-system` validates the complete local NixOS system.
 
 ## WezTerm
 
