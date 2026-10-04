@@ -21,15 +21,17 @@ modules/
       palette.nix      Shared Catppuccin colors, GTK flavor/accent, template renderer
       hyprland/        Lua configuration; NixOS owns compositor and portals
       waybar/          Bar configuration, CSS, packages, and button dependencies
+      rofi/            Styled application launcher configuration
       mako/            Notification styling, daemon package, and notify-send
       wallpaper/       Bundled wallpaper.png, runtime override, Hyprpaper service
   neovim/              Editing/formatting, languages/LSP, navigation, UI, Git, keymaps
     workspace/         Layout controller, single shell with two views, Cargo tasks
     ai/                CLI-only Sidekick/Codex integration and context actions
 switch.sh              Portable default; explicit --profile for the NixOS desktop
+switch-nixos.sh        Combined NixOS build, system activation, and desktop home switch
 rebuild.sh             Local /etc/nixos build/switch wrapper; build is the default
 bootstrap-nixos.sh     Idempotent fresh-machine system and desktop setup
-justfile               Bootstrap, home/system wrappers, wallpaper restart, and benchmark
+justfile               Bootstrap, switch/logout wrappers, wallpaper restart, and benchmark
 tests/                 Home/system script tests and Neovim behavioral checks
 docs/                  Focused NixOS, desktop, shell, terminal, editor, and development guides
 ```
@@ -43,21 +45,23 @@ portable home configuration. `nixos-hyprland` is a separate x86_64 Linux output,
 composed by `profiles/nixos-hyprland.nix`. Desktop modules are never imported by
 the portable outputs, including on Linux. Use `./switch.sh --profile nixos-hyprland`
 or `just switch-nixos` only on machines that should receive this desktop.
-`modules/nixos/system` owns shared NixOS additions, including desktop and CLI
-packages, and is exported as
+`modules/nixos/system` owns shared NixOS additions, including the `nix-command`
+and flakes opt-in, DConf user D-Bus activation, plus desktop and CLI packages,
+and is exported as
 `nixosModules.desktop`. Each machine's `/etc/nixos/configuration.nix` imports
 it alongside its local hardware file. Boot settings, filesystem UUIDs, users,
 hostname, locale, networking, `system.stateVersion`, and the NixOS package
 source remain local. There are no host directories or `nixosConfigurations`
 outputs in this repo. The portable Home Manager and Codex pins are unchanged.
-System and home activation stay separate: `just build-system` builds the local
-OS, `just switch-system` applies it with sudo, and `just switch-nixos` applies
-the complete shared home plus desktop. On a fresh installation,
-`just bootstrap-nixos` preserves the generated configuration as
-`/etc/nixos/machine.nix`, installs a small local import wrapper, builds it, and
-then performs both activations. Adding/removing machines needs no Git change.
-Flake checks cover home profiles/scripts; full system validation uses `just
-build-system` on the target machine.
+`just switch-nixos` builds the local OS, activates it with sudo, and then applies
+the complete shared home plus desktop profile. On a fresh installation,
+`./bootstrap-nixos.sh` (also wrapped by `just bootstrap-nixos`) preserves the
+generated configuration as `/etc/nixos/machine.nix`, installs a small local
+import wrapper, builds it, and then performs both activations. Its system
+activation enables `nix-command` and flakes before the flake-based Home Manager
+activation. Adding/removing machines needs no Git change.
+Flake checks cover home profiles and scripts; `just switch-nixos --dry-run`
+builds the target machine without activating it.
 `modules/neovim/editing.nix` owns Blink completion and its Insert-mode mappings:
 `Ctrl-e` accepts suggestions and `Ctrl-q` dismisses them.
 
@@ -66,14 +70,15 @@ mauve accents, Papirus-Dark icons with matching folders, and Noto Sans. Thunar
 uses an icon view, shortcuts sidebar, breadcrumbs, and folders-first sorting.
 The module provides user-session D-Bus activation for Xfconf on Hyprland;
 only the explicit desktop profile enables it.
-Its `hyprland`, `waybar`, and `mako` submodules own the compositor, bar, and
-notification configuration files. Home Manager installs them at `~/.config/hypr`,
-`~/.config/waybar`, and `~/.config/mako`. NixOS owns the Lua-compatible Hyprland
+Its `hyprland`, `waybar`, `rofi`, and `mako` submodules own the compositor, bar,
+application launcher, and notification configuration files. Home Manager installs
+them under `~/.config`. NixOS owns the Lua-compatible Hyprland
 package and portals; Home Manager owns Waybar/Mako packages. Hyprland startup
 commands launch both, without duplicate systemd services. `palette.nix` provides
 shared hex colors and GTK flavor/accent. Lua, CSS, and Mako sources use `@color@`
-placeholders rendered during evaluation; Mako also replaces `@HOME@` with the
-profile's home directory. Focused windows use an opaque mauve/blue border gradient.
+placeholders rendered during evaluation; the Rofi theme uses the same rendering,
+and Mako also replaces `@HOME@` with the profile's home directory. Focused windows
+use an opaque mauve/blue border gradient.
 
 `modules/nixos/desktop/wallpaper` owns `wallpaper.png` and the
 `desktop-wallpaper` user service. Its launcher selects a readable

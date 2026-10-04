@@ -71,6 +71,7 @@
               "hypr/hyprland.lua"
               "waybar/config.jsonc"
               "waybar/style.css"
+              "rofi/config.rasi"
               "mako/config"
             ];
             assert !(builtins.hasAttr "xfconfd" home.config.systemd.user.services);
@@ -86,6 +87,7 @@
               }
               ''
                 SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
+                NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
                 REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
                 BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
                 touch "$out"
@@ -103,7 +105,27 @@
             '';
         }
         // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-          nixos-hyprland = self.homeConfigurations.nixos-hyprland.activationPackage;
+          nixos-hyprland =
+            let
+              desktop = self.homeConfigurations.nixos-hyprland;
+            in
+            assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
+            desktop.activationPackage;
+
+          nixos-module =
+            let
+              moduleConfig = self.nixosModules.desktop {
+                inherit pkgs;
+                lib = nixpkgs.lib;
+              };
+              features = moduleConfig.nix.settings.experimental-features.content;
+            in
+            assert builtins.elem "nix-command" features;
+            assert builtins.elem "flakes" features;
+            assert moduleConfig.programs.dconf.enable;
+            pkgs.runCommand "nixos-module-check" { } ''
+              touch "$out"
+            '';
 
         }
       );

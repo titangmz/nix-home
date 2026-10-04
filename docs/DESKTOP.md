@@ -7,20 +7,26 @@ with `modules/nixos/desktop`. Apply desktop changes with:
 just switch-nixos
 ```
 
-Do not substitute `just switch` on this machine: the portable profile excludes
-desktop files and services.
+This single command handles both the NixOS system and desktop Home Manager
+configuration. Do not substitute `just switch` on this machine: that command is
+the portable, non-NixOS workflow and excludes desktop files and services.
 
 ## Components
 
 Hyprland's Lua configuration lives in `modules/nixos/desktop/hyprland`, Waybar
-configuration and CSS in `modules/nixos/desktop/waybar`, and Mako styling in
+configuration and CSS in `modules/nixos/desktop/waybar`, the application launcher
+theme in `modules/nixos/desktop/rofi`, and Mako styling in
 `modules/nixos/desktop/mako`. NixOS owns the Lua-compatible compositor package
-and portals; Home Manager owns Waybar and Mako. Hyprland startup commands manage
-Waybar and Mako lifecycle without duplicate Home Manager services.
+and portals; it also registers DConf on the user D-Bus so Home Manager can apply
+GTK preferences before linking the desktop files. Home Manager owns Waybar,
+Rofi, and Mako. Hyprland startup commands manage Waybar and Mako lifecycle without
+duplicate Home Manager services.
 
-Shared colors live in `modules/nixos/desktop/palette.nix`. Lua, CSS, and Mako
-sources use placeholders rendered from that palette. Focused windows use an
-opaque mauve/blue gradient with subdued inactive borders.
+Shared colors live in `modules/nixos/desktop/palette.nix`. Lua, CSS, Rofi, and
+Mako sources use placeholders rendered from that palette. Focused windows use
+an opaque mauve/blue gradient with subdued inactive borders. Rofi automatically
+loads its managed `~/.config/rofi/config.rasi` for the Super-D application
+launcher.
 
 After applying live style changes, reload the relevant process:
 
@@ -30,6 +36,12 @@ makoctl reload
 ```
 
 Restart Waybar when its configuration or CSS changes.
+
+Exit the current Hyprland session with:
+
+```bash
+just logout
+```
 
 ## GTK and Thunar
 

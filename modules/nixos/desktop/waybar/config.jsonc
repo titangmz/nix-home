@@ -6,14 +6,9 @@
   "margin-left": 16,
   "margin-right": 16,
   "spacing": 8,
-  "modules-left": ["custom/launcher", "hyprland/workspaces"],
+  "modules-left": ["hyprland/workspaces"],
   "modules-center": ["clock"],
   "modules-right": ["pulseaudio", "network", "battery", "tray"],
-  "custom/launcher": {
-    "format": "󰣇",
-    "tooltip": false,
-    "on-click": "rofi -show drun"
-  },
   "hyprland/workspaces": {
     "format": "{icon}",
     "format-icons": {

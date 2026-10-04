@@ -1,8 +1,20 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
+  # The bootstrap starts with nixos-rebuild, then uses the flake-based Home
+  # Manager switch after this system configuration has been activated.
+  nix.settings.experimental-features = lib.mkAfter [
+    "nix-command"
+    "flakes"
+  ];
+
   # Hyprland
   programs.hyprland.enable = true;
+
+  # Home Manager applies the desktop's GTK preferences through DConf before it
+  # links the Hyprland configuration. Register DConf on the user D-Bus so that
+  # activation cannot stop before linkGeneration.
+  programs.dconf.enable = true;
 
   # Audio
   security.rtkit.enable = true;

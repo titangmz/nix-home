@@ -8,9 +8,9 @@ default:
 switch *args:
     ./switch.sh "$@"
 
-# Opt in to the NixOS Hyprland home configuration.
+# Build and activate NixOS, then apply the Hyprland home configuration.
 switch-nixos *args:
-    ./switch.sh --profile nixos-hyprland "$@"
+    ./switch-nixos.sh "$@"
 
 # Bootstrap a fresh NixOS machine, then apply the system and desktop home profiles.
 bootstrap-nixos:
@@ -20,13 +20,9 @@ bootstrap-nixos:
 wallpaper:
     systemctl --user restart desktop-wallpaper.service
 
-# Build the NixOS system without activating it.
-build-system *args:
-    ./rebuild.sh build "$@"
-
-# Apply the NixOS system; Home Manager is switched separately.
-switch-system *args:
-    sudo ./rebuild.sh switch "$@"
+# Exit the current Hyprland session.
+logout:
+    hyprctl dispatch 'hl.dsp.exit()'
 
 # Time one real switch, including build and activation output.
 benchmark-switch:

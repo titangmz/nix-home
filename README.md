@@ -13,20 +13,20 @@ directory, and Git identity.
 
 ## NixOS machine
 
-Install NixOS normally and keep its generated configuration in `/etc/nixos`.
-Enable flakes, then clone this repository at a stable path:
+Install NixOS normally and keep its generated configuration in `/etc/nixos`,
+then clone this repository at a stable path:
 
 ```bash
 git clone <repository-url> /home/xray/nix-home
 cd /home/xray/nix-home
-./switch.sh
-just bootstrap-nixos
+./bootstrap-nixos.sh
 ```
 
-The initial portable switch installs `just`. `just bootstrap-nixos` is a
-one-time, idempotent setup command: it preserves the generated machine settings,
-builds and activates the shared NixOS configuration, and then applies the
-`nixos-hyprland` Home Manager profile.
+The bootstrap is a one-time, idempotent setup command: it preserves the
+generated machine settings, enables `nix-command` and flakes through the NixOS
+configuration, builds and activates that configuration, and then applies the
+`nixos-hyprland` Home Manager profile. That Home Manager activation installs
+`just` for later use; no manual `/etc/nix/nix.conf` edit is needed.
 
 Keep the checkout at the same absolute path after bootstrapping. See
 [docs/NIXOS.md](docs/NIXOS.md) for the generated `/etc/nixos` layout, safety
@@ -66,22 +66,24 @@ Run commands from the repository checkout.
 
 | Change | Command |
 | --- | --- |
-| First-time NixOS desktop setup | `just bootstrap-nixos` |
+| First-time NixOS desktop setup | `./bootstrap-nixos.sh` |
 | Portable Home Manager configuration on Linux or macOS | `just switch` |
-| Hyprland, Waybar, Mako, GTK, Kitty, shell, CLI, or Neovim configuration on the NixOS desktop | `just switch-nixos` |
-| NixOS packages, Hyprland package, portals, audio, fonts, or other `modules/nixos/system` changes | `just build-system`, then `just switch-system` |
-| Both NixOS system and desktop Home Manager changes | `just build-system`, `just switch-system`, then `just switch-nixos` |
+| Any system or home configuration on the NixOS desktop | `just switch-nixos` |
 | Local wallpaper override only | `just wallpaper` |
+| Exit the current Hyprland session | `just logout` |
 | Preview portable Home Manager changes | `just switch --dry-run` |
 | Preview NixOS desktop Home Manager changes | `just switch-nixos --dry-run` |
 | List all recipes | `just` |
 
-On a NixOS desktop, always use `just switch-nixos` for Home Manager changes.
-Running plain `just switch` selects the portable profile and removes the
-Home Manager-managed desktop files and services.
+On a NixOS desktop, always use `just switch-nixos`. It builds before activation,
+switches the system, and then applies the complete desktop Home Manager profile.
+That profile includes the managed Rofi `drun` theme used by Super-D and Waybar.
+Running plain `just switch` selects the portable profile and removes the desktop
+files and services.
 
-`just bootstrap-nixos` is only for initial machine setup. Normal system updates
-use `just build-system` and `just switch-system`.
+`./bootstrap-nixos.sh` (or `just bootstrap-nixos` when `just` is already
+available) is only for initial machine setup. All later NixOS updates use one
+`just switch-nixos` command.
 
 ## Validate repository changes
 

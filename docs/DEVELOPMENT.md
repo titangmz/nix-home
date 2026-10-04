@@ -16,7 +16,7 @@ prove native runtime support.
 Full NixOS validation uses the target machine's local configuration:
 
 ```bash
-just build-system
+just switch-nixos --dry-run
 ```
 
 Unlike `nix flake check`, `nix fmt` passes positional arguments to the

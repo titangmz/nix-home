@@ -5,6 +5,7 @@ in
 {
   imports = [
     ./waybar
+    ./rofi
     ./mako
     ./hyprland
     ./wallpaper

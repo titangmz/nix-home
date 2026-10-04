@@ -17,16 +17,6 @@ window#waybar {
     color: @text;
 }
 
-#custom-launcher {
-    background: linear-gradient(135deg, #@accent@, #@blue@);
-    color: @base;
-    font-weight: bold;
-    font-size: 17px;
-    padding: 0 15px;
-    margin: 2px 0;
-    border-radius: 12px;
-}
-
 #workspaces {
     background: alpha(@surface, 0.9);
     padding: 3px;

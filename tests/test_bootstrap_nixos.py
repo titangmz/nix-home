@@ -29,14 +29,13 @@ class BootstrapNixosTests(unittest.TestCase):
         self.original = "{ ... }: { imports = [ ./hardware-configuration.nix ]; system.stateVersion = \"26.05\"; }\n"
         (self.config_dir / "configuration.nix").write_text(self.original)
         self.log = self.root / "calls"
-        for name in ["rebuild.sh", "switch.sh"]:
-            script = self.repo / name
-            script.write_text(
-                f"#!{BASH}\n"
-                f"printf '%s\\n' \"{name} $*\" >> \"$BOOTSTRAP_TEST_LOG\"\n"
-                f"exit \"${{BOOTSTRAP_TEST_{name.split('.')[0].upper()}_EXIT:-0}}\"\n"
-            )
-            script.chmod(0o755)
+        script = self.repo / "switch-nixos.sh"
+        script.write_text(
+            f"#!{BASH}\n"
+            "printf '%s\\n' \"switch-nixos.sh $*\" >> \"$BOOTSTRAP_TEST_LOG\"\n"
+            "exit \"${BOOTSTRAP_TEST_SWITCH_NIXOS_EXIT:-0}\"\n"
+        )
+        script.chmod(0o755)
         self.env = dict(
             os.environ,
             NIX_HOME_BOOTSTRAP_CONFIG_DIR=str(self.config_dir),
@@ -62,11 +61,7 @@ class BootstrapNixosTests(unittest.TestCase):
         self.assertIn("# Managed by nix-home bootstrap.", wrapper)
         self.assertIn("./machine.nix", wrapper)
         self.assertIn(str(self.repo / "modules/nixos/system"), wrapper)
-        self.assertEqual(self.calls(), [
-            "rebuild.sh build",
-            "rebuild.sh switch",
-            "switch.sh --profile nixos-hyprland",
-        ])
+        self.assertEqual(self.calls(), ["switch-nixos.sh "])
 
     def test_second_run_is_idempotent(self):
         first = self.invoke()
@@ -77,17 +72,13 @@ class BootstrapNixosTests(unittest.TestCase):
         second = self.invoke()
         self.assertEqual(second.returncode, 0, second.stderr)
         self.assertEqual(machine.read_text(), "machine settings changed after bootstrap\n")
-        self.assertEqual(self.calls(), [
-            "rebuild.sh build",
-            "rebuild.sh switch",
-            "switch.sh --profile nixos-hyprland",
-        ])
+        self.assertEqual(self.calls(), ["switch-nixos.sh "])
 
     def test_build_failure_prevents_activation(self):
-        self.env["BOOTSTRAP_TEST_REBUILD_EXIT"] = "23"
+        self.env["BOOTSTRAP_TEST_SWITCH_NIXOS_EXIT"] = "23"
         result = self.invoke()
         self.assertEqual(result.returncode, 23)
-        self.assertEqual(self.calls(), ["rebuild.sh build"])
+        self.assertEqual(self.calls(), ["switch-nixos.sh "])
 
     def test_existing_machine_file_is_not_overwritten(self):
         machine = self.config_dir / "machine.nix"

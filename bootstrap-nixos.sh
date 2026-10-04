@@ -82,13 +82,11 @@ if [[ "$already_bootstrapped" == false ]]; then
 fi
 "${SUDO[@]}" install "${INSTALL_OWNER[@]}" -m 0644 -- "$wrapper" "$SYSTEM_CONFIG"
 
-printf 'Building the combined machine and shared NixOS configuration...\n'
-"$REPO_DIR/rebuild.sh" build
-
-printf 'Activating the NixOS configuration...\n'
-"${SUDO[@]}" "$REPO_DIR/rebuild.sh" switch
-
-printf 'Activating the nixos-hyprland Home Manager profile...\n'
-"$REPO_DIR/switch.sh" --profile nixos-hyprland
+if ((${#SUDO[@]} == 0)); then
+  NIX_HOME_NIXOS_NO_SUDO=1 NIX_HOME_NIXOS_TEST="${NIX_HOME_BOOTSTRAP_TEST:-}" \
+    "$REPO_DIR/switch-nixos.sh"
+else
+  "$REPO_DIR/switch-nixos.sh"
+fi
 
 printf 'NixOS bootstrap complete.\n'
