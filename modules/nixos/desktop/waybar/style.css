@@ -6,47 +6,69 @@
 
 * {
     font-family: "JetBrainsMono Nerd Font";
-    font-size: 12px;
+    font-size: 13px;
     border: none;
     border-radius: 0;
     min-height: 0;
 }
 
 window#waybar {
-    background: @base;
+    background: transparent;
     color: @text;
-    border: 1px solid @surface;
-    border-radius: 14px;
 }
 
 #custom-launcher {
-    color: @accent;
+    background: linear-gradient(135deg, #@accent@, #@blue@);
+    color: @base;
     font-weight: bold;
-    padding: 0 16px;
+    font-size: 17px;
+    padding: 0 15px;
+    margin: 2px 0;
+    border-radius: 12px;
 }
 
-#workspaces { margin: 4px 0; }
+#workspaces {
+    background: alpha(@surface, 0.9);
+    padding: 3px;
+    margin: 2px 0;
+    border-radius: 12px;
+}
 #workspaces button {
-    padding: 0 10px;
-    margin: 0 2px;
+    min-width: 24px;
+    padding: 0 7px;
+    margin: 0 1px;
     border-radius: 9px;
     background: transparent;
     color: @muted;
     box-shadow: none;
     text-shadow: none;
+    transition: 150ms ease;
 }
-#workspaces button.active { background: @accent; color: @base; }
+#workspaces button.active {
+    background: linear-gradient(135deg, #@accent@, #@blue@);
+    color: @base;
+    font-weight: bold;
+}
 #workspaces button.urgent { background: #@red@; color: @base; }
 #workspaces button:hover { background: @surface; color: @text; }
 
-#clock { color: @text; font-weight: bold; padding: 0 12px; }
-#pulseaudio, #network, #battery, #tray {
-    background: @surface;
-    border-radius: 9px;
-    margin: 4px 2px;
-    padding: 0 11px;
+#clock {
+    background: @base;
+    border: 1px solid @border;
+    border-radius: 12px;
+    color: @text;
+    font-weight: bold;
+    padding: 0 15px;
+    margin: 2px 0;
 }
-#tray { margin-right: 8px; }
+#pulseaudio, #network, #battery, #tray {
+    background: alpha(@surface, 0.9);
+    border: 1px solid alpha(@border, 0.75);
+    border-radius: 11px;
+    margin: 2px 0;
+    padding: 0 12px;
+}
+#tray { padding: 0 10px; }
 #network { color: #@blue@; }
 #battery.charging, #battery.plugged { color: #@green@; }
 #battery.warning { color: #@yellow@; }
@@ -54,8 +76,8 @@ window#waybar {
 #pulseaudio.muted, #network.disconnected { color: @muted; }
 
 tooltip {
-    background: @base;
-    border: 1px solid @surface;
+    background: @crust;
+    border: 1px solid @border;
     border-radius: 10px;
 }
-tooltip label { color: @text; padding: 6px; }
+tooltip label { color: @text; padding: 7px 9px; }

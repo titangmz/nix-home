@@ -1,46 +1,52 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 36,
-  "margin-top": 10,
-  "margin-left": 14,
-  "margin-right": 14,
-  "spacing": 4,
+  "height": 40,
+  "margin-top": 12,
+  "margin-left": 16,
+  "margin-right": 16,
+  "spacing": 8,
   "modules-left": ["custom/launcher", "hyprland/workspaces"],
   "modules-center": ["clock"],
   "modules-right": ["pulseaudio", "network", "battery", "tray"],
   "custom/launcher": {
-    "format": "Apps",
+    "format": "󰣇",
     "tooltip": false,
     "on-click": "rofi -show drun"
   },
   "hyprland/workspaces": {
-    "format": "{name}",
+    "format": "{icon}",
+    "format-icons": {
+      "active": "●",
+      "default": "○"
+    },
     "all-outputs": false,
     "persistent-workspaces": {"*": [1, 2, 3, 4, 5]}
   },
   "clock": {
-    "format": "{:%a %d %b  ·  %H:%M}",
+    "format": "󰥔  {:%a %d %b  ·  %H:%M}",
     "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
   },
   "pulseaudio": {
-    "format": "Vol {volume}%",
-    "format-muted": "Muted",
+    "format": "{icon}  {volume}%",
+    "format-muted": "󰝟  Muted",
+    "format-icons": ["󰕿", "󰖀", "󰕾"],
     "scroll-step": 5,
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
   },
   "network": {
-    "format-wifi": "Wi-Fi {signalStrength}%",
-    "format-ethernet": "Ethernet",
-    "format-disconnected": "Offline",
+    "format-wifi": "󰤨  {signalStrength}%",
+    "format-ethernet": "󰈀  Ethernet",
+    "format-disconnected": "󰤭  Offline",
     "tooltip-format": "{ifname} · {ipaddr}",
     "tooltip-format-wifi": "{essid} · {ipaddr}"
   },
   "battery": {
     "states": {"warning": 25, "critical": 10},
-    "format": "Bat {capacity}%",
-    "format-charging": "Charging {capacity}%",
-    "format-plugged": "AC {capacity}%",
+    "format": "{icon}  {capacity}%",
+    "format-charging": "󰂄  {capacity}%",
+    "format-plugged": "󰚥  {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "tooltip-format": "{timeTo}"
   },
   "tray": {"icon-size": 16, "spacing": 10}
