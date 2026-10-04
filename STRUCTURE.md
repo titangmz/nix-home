@@ -28,8 +28,10 @@ modules/
     ai/                CLI-only Sidekick/Codex integration and context actions
 switch.sh              Portable default; explicit --profile for the NixOS desktop
 rebuild.sh             Local /etc/nixos build/switch wrapper; build is the default
-justfile               Home/system wrappers, wallpaper restart, and Hyperfine benchmark
+bootstrap-nixos.sh     Idempotent fresh-machine system and desktop setup
+justfile               Bootstrap, home/system wrappers, wallpaper restart, and benchmark
 tests/                 Home/system script tests and Neovim behavioral checks
+docs/                  Focused NixOS, desktop, shell, terminal, editor, and development guides
 ```
 
 Each module owns its packages, settings, and raw configuration files. Keep
@@ -50,9 +52,12 @@ source remain local. There are no host directories or `nixosConfigurations`
 outputs in this repo. The portable Home Manager and Codex pins are unchanged.
 System and home activation stay separate: `just build-system` builds the local
 OS, `just switch-system` applies it with sudo, and `just switch-nixos` applies
-the complete shared home plus desktop. Adding/removing machines needs no Git
-change. Flake checks cover home profiles/scripts; full system validation uses
-`just build-system` on the target machine.
+the complete shared home plus desktop. On a fresh installation,
+`just bootstrap-nixos` preserves the generated configuration as
+`/etc/nixos/machine.nix`, installs a small local import wrapper, builds it, and
+then performs both activations. Adding/removing machines needs no Git change.
+Flake checks cover home profiles/scripts; full system validation uses `just
+build-system` on the target machine.
 `modules/neovim/editing.nix` owns Blink completion and its Insert-mode mappings:
 `Ctrl-e` accepts suggestions and `Ctrl-q` dismisses them.
 

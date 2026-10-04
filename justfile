@@ -12,6 +12,10 @@ switch *args:
 switch-nixos *args:
     ./switch.sh --profile nixos-hyprland "$@"
 
+# Bootstrap a fresh NixOS machine, then apply the system and desktop home profiles.
+bootstrap-nixos:
+    ./bootstrap-nixos.sh
+
 # Restart the wallpaper service after changing the local override.
 wallpaper:
     systemctl --user restart desktop-wallpaper.service

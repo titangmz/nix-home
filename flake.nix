@@ -87,6 +87,7 @@
               ''
                 SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
                 REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
+                BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
                 touch "$out"
               '';
           neovim =
