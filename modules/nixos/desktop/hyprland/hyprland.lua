@@ -72,8 +72,8 @@ local menu        = "hyprlauncher"
 
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
 
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
 hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
 
 
 -----------------------
@@ -101,6 +101,13 @@ hl.env("HYPRCURSOR_SIZE", "24")
 
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
+    cursor = {
+        -- NVIDIA's hardware cursor plane flickers on this dual-monitor setup.
+        -- Bibata is an XCursor theme, so use Hyprland's XCursor fallback too.
+        enable_hyprcursor   = false,
+        no_hardware_cursors = true,
+    },
+
     general = {
         gaps_in  = 5,
         gaps_out = 20,

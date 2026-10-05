@@ -28,6 +28,12 @@ an opaque mauve/blue gradient with subdued inactive borders. Rofi automatically
 loads its managed `~/.config/rofi/config.rasi` for the Super-D application
 launcher.
 
+The desktop uses the Nix-managed Bibata Modern Classic cursor at 24 pixels.
+Home Manager applies the XCursor theme to GTK and XWayland, while Hyprland uses
+the same XCursor fallback instead of Hyprcursor. Hardware cursors are disabled
+because their NVIDIA cursor plane flickers on the dual-monitor setup; Hyprland
+composites the pointer with the desktop instead.
+
 After applying live style changes, reload the relevant process:
 
 ```bash

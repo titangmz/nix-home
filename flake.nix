@@ -112,6 +112,10 @@
               desktop = self.homeConfigurations.nixos-hyprland;
             in
             assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
+            assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
+            assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
+            assert nixpkgs.lib.hasInfix "no_hardware_cursors = true"
+              desktop.config.xdg.configFile."hypr/hyprland.lua".text;
             desktop.activationPackage;
 
           nixos-module =
