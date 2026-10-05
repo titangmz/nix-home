@@ -45,6 +45,19 @@ in
       };
     };
 
+    xdg.mimeApps = {
+      enable = true;
+      defaultApplications = {
+        "image/bmp" = [ "imv.desktop" ];
+        "image/gif" = [ "imv.desktop" ];
+        "image/jpeg" = [ "imv.desktop" ];
+        "image/png" = [ "imv.desktop" ];
+        "image/svg+xml" = [ "imv.desktop" ];
+        "image/tiff" = [ "imv.desktop" ];
+        "image/webp" = [ "imv.desktop" ];
+      };
+    };
+
     # Provide Xfconf activation in this Hyprland session without an Xfce desktop.
     home.packages = [ pkgs.xfce.xfconf ];
     xdg.dataFile."dbus-1/services/org.xfce.Xfconf.service".text = ''

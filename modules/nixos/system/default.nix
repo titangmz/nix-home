@@ -55,5 +55,6 @@
     hyprlock
     hypridle
     thunar
+    imv
   ];
 }

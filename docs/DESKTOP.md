@@ -28,6 +28,10 @@ an opaque mauve/blue gradient with subdued inactive borders. Rofi automatically
 loads its managed `~/.config/rofi/config.rasi` for the Super-D application
 launcher.
 
+The desktop installs `imv` as the Wayland-native image viewer and registers it
+for common image formats. Launch it with `imv FILE` or open an image from
+Thunar.
+
 The desktop uses the Nix-managed Bibata Modern Classic cursor at 24 pixels.
 Home Manager applies the XCursor theme to GTK and XWayland, while Hyprland uses
 the same XCursor fallback instead of Hyprcursor. Hardware cursors are disabled
