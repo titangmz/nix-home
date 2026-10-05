@@ -29,6 +29,16 @@ hl.monitor({
     scale    = "auto",
 })
 
+-- Optional machine-local monitor layout. setup-monitors.sh creates this file
+-- outside the Home Manager generation, so output names and geometry stay local.
+package.loaded["local_monitors"] = nil
+local local_monitors_ok, local_monitors_error = pcall(require, "local_monitors")
+if not local_monitors_ok
+    and not string.find(local_monitors_error, "module 'local_monitors' not found", 1, true)
+then
+    error(local_monitors_error)
+end
+
 
 ---------------------
 ---- MY PROGRAMS ----
@@ -389,13 +399,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("mako")
     hl.exec_cmd("@systemctl@ --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE && @systemctl@ --user restart desktop-wallpaper.service")
 end)
-
-hl.monitor({
-    output = "eDP-1",
-    mode = "preferred",
-    position = "auto",
-    scale = 1,
-})
 
 hl.config({
   decoration = {

@@ -20,6 +20,10 @@ bootstrap-nixos:
 wallpaper:
     systemctl --user restart desktop-wallpaper.service
 
+# Create a machine-local monitor layout; pass outputs in left-to-right order.
+setup-monitors *outputs:
+    ./setup-monitors.sh "$@"
+
 # Exit the current Hyprland session.
 logout:
     hyprctl dispatch 'hl.dsp.exit()'

@@ -69,6 +69,7 @@ Run commands from the repository checkout.
 | First-time NixOS desktop setup | `./bootstrap-nixos.sh` |
 | Portable Home Manager configuration on Linux or macOS | `just switch` |
 | Any system or home configuration on the NixOS desktop | `just switch-nixos` |
+| Create a local monitor layout | `just setup-monitors LEFT [RIGHT ...]` |
 | Local wallpaper override only | `just wallpaper` |
 | Exit the current Hyprland session | `just logout` |
 | Preview portable Home Manager changes | `just switch --dry-run` |
@@ -84,6 +85,24 @@ files and services.
 `./bootstrap-nixos.sh` (or `just bootstrap-nixos` when `just` is already
 available) is only for initial machine setup. All later NixOS updates use one
 `just switch-nixos` command.
+
+To create the machine-local monitor layout, first get the output names (such as
+`eDP-1`, `DP-1`, or `HDMI-A-1`) from Hyprland:
+
+```bash
+hyprctl monitors all
+```
+
+Then pass those names in physical left-to-right order. For example, with an
+external DisplayPort monitor to the left of the laptop display:
+
+```bash
+just setup-monitors DP-1 eDP-1
+hyprctl reload
+```
+
+Run this inside the Hyprland session. The setup command creates
+`~/.config/hypr/local_monitors.lua` once and refuses to overwrite it.
 
 ## Validate repository changes
 

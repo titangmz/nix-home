@@ -31,6 +31,7 @@ switch.sh              Portable default; explicit --profile for the NixOS deskto
 switch-nixos.sh        Combined NixOS build, system activation, and desktop home switch
 rebuild.sh             Local /etc/nixos build/switch wrapper; build is the default
 bootstrap-nixos.sh     Idempotent fresh-machine system and desktop setup
+setup-monitors.sh      Creates an untracked machine-local Hyprland output layout
 justfile               Bootstrap, switch/logout wrappers, wallpaper restart, and benchmark
 tests/                 Home/system script tests and Neovim behavioral checks
 docs/                  Focused NixOS, desktop, shell, terminal, editor, and development guides
@@ -79,6 +80,13 @@ shared hex colors and GTK flavor/accent. Lua, CSS, and Mako sources use `@color@
 placeholders rendered during evaluation; the Rofi theme uses the same rendering,
 and Mako also replaces `@HOME@` with the profile's home directory. Focused windows
 use an opaque mauve/blue border gradient.
+
+The managed Hyprland configuration optionally loads
+`~/.config/hypr/local_monitors.lua`. `setup-monitors.sh` creates this local file
+once from output names supplied in physical left-to-right order, selecting the
+highest refresh rate at each output's maximum resolution and using automatic
+scaling. The local file is never managed by Home Manager and is not overwritten
+by later switches.
 
 `modules/nixos/desktop/wallpaper` owns `wallpaper.png` and the
 `desktop-wallpaper` user service. Its launcher selects a readable

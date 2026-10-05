@@ -37,6 +37,32 @@ makoctl reload
 
 Restart Waybar when its configuration or CSS changes.
 
+## Machine-local monitors
+
+The shared Hyprland configuration uses a portable fallback monitor rule and
+optionally loads `~/.config/hypr/local_monitors.lua`. To create that local file,
+first find the connector names:
+
+```bash
+hyprctl monitors all
+```
+
+Then pass them in physical left-to-right order:
+
+```bash
+just setup-monitors DP-1 eDP-1
+hyprctl reload
+```
+
+The setup command queries the active outputs and refuses to overwrite an
+existing file. Its generated rules put the first output at `0x0`, place later
+outputs with `auto-right`, use automatic scaling, and select the highest refresh
+rate offered at each monitor's maximum resolution. This avoids Hyprland's raw
+`highrr` behavior choosing a low-resolution mode solely for a slightly higher
+refresh rate. Edit the local file directly if a different resolution, refresh
+rate, scale, vertical offset, or order is needed. Home Manager switches leave
+it untouched.
+
 Exit the current Hyprland session with:
 
 ```bash

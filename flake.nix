@@ -83,6 +83,7 @@
                 nativeBuildInputs = [
                   pkgs.python3
                   pkgs.bash
+                  pkgs.jq
                 ];
               }
               ''
@@ -90,6 +91,7 @@
                 NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
                 REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
                 BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
+                SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
                 touch "$out"
               '';
           neovim =
