@@ -5,7 +5,10 @@
   ...
 }:
 {
-  home.sessionPath = [ "${config.home.homeDirectory}/.cargo/bin" ];
+  home.sessionPath = [
+    "${config.home.homeDirectory}/.local/bin"
+    "${config.home.homeDirectory}/.cargo/bin"
+  ];
 
   programs.zsh = {
     enable = true;
