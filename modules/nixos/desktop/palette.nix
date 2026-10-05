@@ -9,6 +9,7 @@ let
     accent = "cba6f7";
     lavender = "b4befe";
     blue = "89b4fa";
+    sapphire = "74c7ec";
     green = "a6e3a1";
     yellow = "f9e2af";
     red = "f38ba8";

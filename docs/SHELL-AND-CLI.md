@@ -5,6 +5,9 @@ Apply these settings with `just switch` on a portable Home Manager machine or
 
 - Optional machine-local Zsh overrides belong in
   `~/.config/zsh/local.zsh`.
+- Roundy is pinned from GitHub and themed with the shared Catppuccin Mocha
+  palette. Its `R_MODE`, `R_CODE`, `R_MIN`, `R_USR`, and `RT[...]` settings can
+  be overridden in `~/.config/zsh/local.zsh`.
 - Interactive Bash hands off to Zsh.
 - Pyenv uses `~/.pyenv`.
 - Tmux plugins are Nix-managed and do not require TPM.

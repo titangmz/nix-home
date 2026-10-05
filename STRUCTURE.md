@@ -8,7 +8,7 @@ profiles/xray.nix      Username, home directory, Git identity
 profiles/nixos-hyprland.nix  Explicit NixOS desktop profile, extending home.nix
 modules/
   cli/                 General CLI packages and Eza theme
-  shell/               Zsh, Bash handoff, Atuin history, Starship, session paths
+  shell/               Zsh, Bash handoff, Atuin history, Roundy prompt, session paths
   git/                 Git and Lazygit settings
   tmux/                Managed plugins and terminal settings
   wezterm/             Configuration only; externally installed WezTerm
