@@ -30,7 +30,8 @@ launcher.
 
 The desktop installs `imv` as the Wayland-native image viewer and registers it
 for common image formats. Launch it with `imv FILE` or open an image from
-Thunar.
+Thunar. The NixOS system module enables Tumbler so Thunar can generate image
+thumbnails; `imv` handles opening the full image rather than thumbnail creation.
 
 The desktop uses the Nix-managed Bibata Modern Classic cursor at 24 pixels.
 Home Manager applies the XCursor theme to GTK and XWayland, while Hyprland uses
@@ -83,8 +84,8 @@ just logout
 
 The desktop module manages Catppuccin Mocha GTK with mauve accents,
 Papirus-Dark folder icons, and Noto Sans. Thunar uses icon view, the shortcuts
-sidebar, breadcrumbs, and folders-first sorting. Close and reopen Thunar after
-applying theme changes.
+sidebar, breadcrumbs, folders-first sorting, and Tumbler-generated image
+thumbnails. Close and reopen Thunar after applying theme changes.
 
 Xfconf D-Bus activation is provided for the Hyprland user session. Theme
 packages remain Nix-managed.

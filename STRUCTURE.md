@@ -71,7 +71,8 @@ mauve accents, Papirus-Dark icons with matching folders, the Bibata Modern
 Classic cursor, and Noto Sans. The cursor uses the same XCursor theme in
 Hyprland, GTK, and XWayland; Hyprland renders it in software to avoid NVIDIA
 hardware-cursor flicker. Thunar uses an icon view, shortcuts sidebar,
-breadcrumbs, and folders-first sorting.
+breadcrumbs, and folders-first sorting. The reusable NixOS system module enables
+Tumbler to generate Thunar image thumbnails; `imv` remains the image opener.
 The module provides user-session D-Bus activation for Xfconf on Hyprland;
 only the explicit desktop profile enables it.
 Its `hyprland`, `waybar`, `rofi`, and `mako` submodules own the compositor, bar,

@@ -16,6 +16,10 @@
   # activation cannot stop before linkGeneration.
   programs.dconf.enable = true;
 
+  # Thunar delegates image thumbnail generation to Tumbler; imv remains the
+  # default application used when an image is opened.
+  services.tumbler.enable = true;
+
   # Audio
   security.rtkit.enable = true;
 
