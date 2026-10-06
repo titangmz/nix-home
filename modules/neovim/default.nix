@@ -12,4 +12,7 @@
 
   programs.nixvim.enable = true;
   programs.nixvim.extraConfigLuaPre = "vim.fn.mkdir(vim.fn.stdpath('data'), 'p')";
+  programs.nixvim.extraConfigLua = ''
+    pcall(require, "local")
+  '';
 }

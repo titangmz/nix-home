@@ -1,6 +1,9 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
+    curl
+    vim
+    wget
     unar
     cowsay
     lolcat

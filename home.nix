@@ -1,13 +1,15 @@
 {
   imports = [
     ./profiles/xray.nix
+    ./modules/scripts
     ./modules/cli
     ./modules/shell
     ./modules/git
     ./modules/tmux
-    ./modules/wezterm
     ./modules/development
     ./modules/chat
+    ./modules/v2rayn
+    ./modules/proxychains
     ./modules/neovim
   ];
 

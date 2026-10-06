@@ -1,0 +1,44 @@
+# Catppuccin Mocha, matching Waybar.
+font=JetBrainsMono Nerd Font 10
+background-color=#@base@f5
+text-color=#@text@
+border-color=#@accent@
+border-size=1
+border-radius=14
+
+width=360
+height=180
+padding=16
+# Waybar reserves its own top area; keep the remaining gap small.
+outer-margin=8,14,14,14
+margin=0,0,8,0
+anchor=top-right
+layer=overlay
+
+icons=1
+max-icon-size=36
+icon-border-radius=8
+icon-path=/run/current-system/sw/share/icons/hicolor:@HOME@/.nix-profile/share/icons/hicolor
+markup=1
+format=<b>%s</b>\n%b
+text-alignment=left
+progress-color=over #@accent@33
+
+max-visible=4
+max-history=30
+default-timeout=6000
+
+[urgency=low]
+border-color=#@border@
+default-timeout=4000
+
+[urgency=critical]
+border-color=#@red@
+background-color=#@criticalBackground@f5
+default-timeout=0
+ignore-timeout=1
+
+[hidden]
+format=<b>+%h more notifications</b>
+text-color=#@muted@
+border-color=#@border@

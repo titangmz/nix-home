@@ -29,19 +29,23 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       pkgsFor = system: import nixpkgs { inherit system; };
-    in
-    {
-      homeConfigurations = forAllSystems (
-        system:
+      mkHome =
+        system: profile:
         home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsFor system;
           extraSpecialArgs.codexPackage = nixpkgs-codex.legacyPackages.${system}.codex;
           modules = [
-            ./home.nix
+            profile
             nixvim.homeModules.nixvim
           ];
-        }
-      );
+        };
+    in
+    {
+      nixosModules.desktop = import ./modules/nixos/system;
+
+      homeConfigurations = (forAllSystems (system: mkHome system ./home.nix)) // {
+        nixos-hyprland = mkHome "x86_64-linux" ./profiles/nixos-hyprland.nix;
+      };
 
       apps = forAllSystems (system: {
         home-manager = {
@@ -60,17 +64,45 @@
           mappingKeys = map (mapping: "${mapping.mode}:${mapping.key}") editor.keymaps;
         in
         {
-          home = home.activationPackage;
+          home =
+            assert !home.config.gtk.enable;
+            assert home.config.xfconf.settings == { };
+            assert nixpkgs.lib.hasInfix ".local/bin" home.config.programs.zsh.envExtra;
+            assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
+              "hypr/hyprland.lua"
+              "kitty/kitty.conf"
+              "waybar/config.jsonc"
+              "waybar/style.css"
+              "rofi/config.rasi"
+              "mako/config"
+            ];
+            assert !(builtins.hasAttr "xfconfd" home.config.systemd.user.services);
+            assert !(builtins.hasAttr "desktop-wallpaper" home.config.systemd.user.services);
+            assert nixpkgs.lib.any (pkg: (pkg.pname or "") == "v2rayn") home.config.home.packages;
+            assert nixpkgs.lib.any (pkg: (pkg.pname or "") == "proxychains-ng") home.config.home.packages;
+            assert nixpkgs.lib.hasInfix "socks5 127.0.0.1 10808" (
+              builtins.readFile home.config.home.file.".proxychains/proxychains.conf".source
+            );
+            home.activationPackage;
           switch =
             pkgs.runCommand "switch-script-check"
               {
                 nativeBuildInputs = [
                   pkgs.python3
                   pkgs.bash
+                  pkgs.jq
                 ];
               }
               ''
                 SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
+                NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
+                REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
+                BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
+                BOOTSTRAP_HOME_SCRIPT=${./bootstrap-home.sh} python ${./tests/test_bootstrap_home.py}
+                SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
+                SCRIPTS_DIR=${./scripts} python -m unittest discover \
+                  --start-directory ${./tests/scripts} \
+                  --pattern 'test_*.py'
                 touch "$out"
               '';
           neovim =
@@ -84,6 +116,68 @@
               ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${./tests/neovim.lua}"
               touch "$out"
             '';
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          nixos-hyprland =
+            let
+              desktop = self.homeConfigurations.nixos-hyprland;
+            in
+            assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
+            assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
+            assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
+            assert builtins.hasAttr "kitty/kitty.conf" desktop.config.xdg.configFile;
+            assert nixpkgs.lib.hasInfix "background_opacity 0.6"
+              desktop.config.xdg.configFile."kitty/kitty.conf".text;
+            assert nixpkgs.lib.hasInfix "no_hardware_cursors = true" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
+            );
+            assert nixpkgs.lib.hasInfix "hl.plugin.load(\"/etc/hyprland-plugins/libhyprbars.so\")" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
+            );
+            assert nixpkgs.lib.hasInfix "require(\"style\")" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
+            );
+            assert nixpkgs.lib.hasInfix "nix-home/root" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/link-hyprland.sh
+            );
+            assert nixpkgs.lib.hasInfix "link-hyprland" desktop.config.home.activation.linkHyprland.data;
+            desktop.activationPackage;
+
+          nixos-module =
+            let
+              moduleConfig = self.nixosModules.desktop {
+                inherit pkgs;
+                lib = nixpkgs.lib;
+              };
+              features = moduleConfig.nix.settings.experimental-features.content;
+            in
+            assert builtins.elem "nix-command" features;
+            assert builtins.elem "flakes" features;
+            assert moduleConfig.programs.nix-ld.enable;
+            assert
+              moduleConfig.programs.nix-ld.libraries == (with pkgs; [
+                glib
+                alsa-lib
+                wayland
+                libdrm
+                libgbm
+                libglvnd
+                libx11
+                vulkan-loader
+              ]);
+            assert moduleConfig.services.greetd.enable;
+            assert moduleConfig.services.greetd.useTextGreeter;
+            assert nixpkgs.lib.hasInfix "start-hyprland"
+              moduleConfig.services.greetd.settings.default_session.command;
+            assert
+              moduleConfig.environment.etc."hyprland-plugins/libhyprbars.so".source
+              == "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so";
+            assert moduleConfig.programs.dconf.enable;
+            assert moduleConfig.services.flatpak.enable;
+            pkgs.runCommand "nixos-module-check" { } ''
+              touch "$out"
+            '';
+
         }
       );
 

@@ -71,6 +71,31 @@ class SwitchTests(unittest.TestCase):
         self.assertIn("Unsupported system: aarch64-linux", result.stderr)
         self.assertEqual(len(self.calls()), 1)
 
+    def test_desktop_profile_is_explicit_and_forwards_options(self):
+        result = self.invoke("--dry-run", "--profile", "nixos-hyprland", "-b", "backup with spaces")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        call = self.calls()[-1]
+        self.assertEqual(call[5], f"path:{quote(str(self.repo), safe='/')}#nixos-hyprland")
+        self.assertEqual(call[6:], ["--dry-run", "-b", "backup with spaces"])
+
+    def test_desktop_profile_is_rejected_on_macos(self):
+        for system in ["aarch64-darwin", "x86_64-darwin"]:
+            with self.subTest(system=system):
+                self.log.unlink(missing_ok=True)
+                self.env["SWITCH_TEST_SYSTEM"] = system
+                result = self.invoke("--profile", "nixos-hyprland")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("requires x86_64-linux", result.stderr)
+                self.assertEqual(len(self.calls()), 1)
+
+    def test_invalid_or_missing_profile_does_not_run_nix(self):
+        for args in [("--profile",), ("--profile", "unknown")]:
+            with self.subTest(args=args):
+                result = self.invoke(*args)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Usage:", result.stderr)
+                self.assertFalse(self.log.exists())
+
     def test_failed_platform_detection_stops(self):
         self.env["SWITCH_TEST_EXIT"] = "23"
         result = self.invoke()
