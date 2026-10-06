@@ -1,73 +1,106 @@
 @define-color base #@base@;
 @define-color surface #@surface@;
+@define-color border #@border@;
 @define-color text #@text@;
 @define-color muted #@muted@;
 @define-color accent #@accent@;
+@define-color blue #@blue@;
+@define-color green #@green@;
+@define-color yellow #@yellow@;
+@define-color red #@red@;
+@define-color crust #@crust@;
 
 * {
     font-family: "JetBrainsMono Nerd Font";
-    font-size: 13px;
+    font-size: 12px;
     border: none;
     border-radius: 0;
     min-height: 0;
 }
 
 window#waybar {
+    background: alpha(@base, @opacity@);
+    color: @text;
+    border: 2px solid alpha(@border, 0.67);
+    border-radius: 12px;
+}
+
+window#waybar > box {
+    border-radius: 12px;
+}
+
+#workspaces,
+#clock,
+#language,
+#pulseaudio,
+#network,
+#battery,
+#tray {
     background: transparent;
     color: @text;
+    padding: 0 10px;
+    margin: 0;
 }
 
 #workspaces {
-    background: alpha(@surface, @opacity@);
-    padding: 3px;
-    margin: 2px 0;
-    border-radius: 12px;
+    padding: 3px 6px;
 }
+
 #workspaces button {
-    min-width: 24px;
-    padding: 0 7px;
+    min-width: 22px;
+    padding: 0 6px;
     margin: 0 1px;
-    border-radius: 9px;
+    border-radius: 8px;
     background: transparent;
     color: @muted;
     box-shadow: none;
     text-shadow: none;
-    transition: 150ms ease;
 }
-#workspaces button.active {
-    background: linear-gradient(135deg, #@accent@, #@blue@);
-    color: @base;
-    font-weight: bold;
-}
-#workspaces button.urgent { background: #@red@; color: @base; }
-#workspaces button:hover { background: @surface; color: @text; }
 
-#clock {
-    background: @base;
-    border: 1px solid @border;
-    border-radius: 12px;
+#workspaces button.active {
+    background: linear-gradient(135deg, @accent, @blue);
+    color: @crust;
+}
+
+#workspaces button.urgent {
+    background: @red;
+    color: @crust;
+}
+
+#workspaces button:hover {
+    background: @surface;
     color: @text;
-    font-weight: bold;
-    padding: 0 15px;
-    margin: 2px 0;
 }
-#language, #pulseaudio, #network, #battery, #tray {
-    background: alpha(@surface, @opacity@);
-    border: 1px solid alpha(@border, 0.75);
-    border-radius: 11px;
-    margin: 2px 0;
-    padding: 0 12px;
+
+#network {
+    color: @blue;
 }
-#tray { padding: 0 10px; }
-#network { color: #@blue@; }
-#battery.charging, #battery.plugged { color: #@green@; }
-#battery.warning { color: #@yellow@; }
-#battery.critical { color: #@red@; }
-#pulseaudio.muted, #network.disconnected { color: @muted; }
+
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning {
+    color: @yellow;
+}
+
+#battery.critical {
+    color: @red;
+}
+
+#pulseaudio.muted,
+#network.disconnected {
+    color: @muted;
+}
 
 tooltip {
     background: @crust;
     border: 1px solid @border;
-    border-radius: 10px;
+    border-radius: 12px;
 }
-tooltip label { color: @text; padding: 7px 9px; }
+
+tooltip label {
+    color: @text;
+    padding: 7px 9px;
+}
