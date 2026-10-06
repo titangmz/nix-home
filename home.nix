@@ -9,6 +9,8 @@
     ./modules/zed
     ./modules/development
     ./modules/chat
+    ./modules/v2rayn
+    ./modules/proxychains
     ./modules/neovim
   ];
 

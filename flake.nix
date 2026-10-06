@@ -79,6 +79,13 @@
             ];
             assert !(builtins.hasAttr "xfconfd" home.config.systemd.user.services);
             assert !(builtins.hasAttr "desktop-wallpaper" home.config.systemd.user.services);
+            assert nixpkgs.lib.any (pkg: (pkg.pname or "") == "v2rayn") home.config.home.packages;
+            assert nixpkgs.lib.any (pkg: (pkg.pname or "") == "proxychains-ng") home.config.home.packages;
+            assert nixpkgs.lib.hasInfix "socks5 127.0.0.1 10808" (
+              builtins.readFile home.config.home.file.".proxychains/proxychains.conf".source
+            );
+            assert nixpkgs.lib.hasInfix "patterniha/Free-Configs"
+              home.config.home.activation.v2raynSubscription.data;
             home.activationPackage;
           switch =
             pkgs.runCommand "switch-script-check"
