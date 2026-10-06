@@ -95,11 +95,14 @@ packages remain Nix-managed.
 The bundled image is `modules/nixos/desktop/wallpaper/wallpaper.png`. Hyprland
 starts the `desktop-wallpaper` user service at login.
 
-For a machine-local replacement, put a PNG or symlink at:
+For a machine-local replacement, put a PNG or JPEG (or a symlink) at one of:
 
 ```text
 ~/.local/share/wallpapers/override.png
+~/.local/share/wallpapers/override.jpg
 ```
+
+When both files exist, `override.png` takes precedence.
 
 Then run:
 

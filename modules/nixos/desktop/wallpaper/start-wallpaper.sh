@@ -1,10 +1,12 @@
 set -euo pipefail
 
 wallpaper='@DEFAULT@'
-wallpaper_override='@OVERRIDE@'
-if [[ -f "$wallpaper_override" && -r "$wallpaper_override" ]]; then
-  wallpaper="$wallpaper_override"
-fi
+for wallpaper_override in '@OVERRIDE_PNG@' '@OVERRIDE_JPG@'; do
+  if [[ -f "$wallpaper_override" && -r "$wallpaper_override" ]]; then
+    wallpaper="$wallpaper_override"
+    break
+  fi
+done
 
 printf 'Using wallpaper: %s\n' "$wallpaper"
 wallpaper_config="$XDG_RUNTIME_DIR/desktop-wallpaper/hyprpaper.conf"

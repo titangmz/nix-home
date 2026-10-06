@@ -7,10 +7,11 @@
 let
   startWallpaper = pkgs.writeShellScript "desktop-wallpaper" (
     lib.replaceStrings
-      [ "@DEFAULT@" "@OVERRIDE@" "@HYPRPAPER@" ]
+      [ "@DEFAULT@" "@OVERRIDE_PNG@" "@OVERRIDE_JPG@" "@HYPRPAPER@" ]
       [
         (toString ./wallpaper.png)
         "${config.xdg.dataHome}/wallpapers/override.png"
+        "${config.xdg.dataHome}/wallpapers/override.jpg"
         "${pkgs.hyprpaper}/bin/hyprpaper"
       ]
       (builtins.readFile ./start-wallpaper.sh)

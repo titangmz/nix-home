@@ -94,8 +94,9 @@ by later switches.
 
 `modules/nixos/desktop/wallpaper` owns `wallpaper.png` and the
 `desktop-wallpaper` user service. Its launcher selects a readable
-`~/.local/share/wallpapers/override.png` at runtime, falling back to the bundled
-image in the Nix store. The default is also installed under
+`~/.local/share/wallpapers/override.png` or `override.jpg` at runtime, preferring
+PNG when both exist and falling back to the bundled image in the Nix store. The
+default is also installed under
 `~/.local/share/wallpapers/wallpaper.png`. Hyprland imports its current
 Wayland environment and starts the service at login. Restart the service to
 pick up an added, replaced, or removed override; no rebuild is required.
