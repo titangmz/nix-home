@@ -133,6 +133,7 @@
             in
             assert builtins.elem "nix-command" features;
             assert builtins.elem "flakes" features;
+            assert moduleConfig.programs.nix-ld.enable;
             assert moduleConfig.services.greetd.enable;
             assert moduleConfig.services.greetd.useTextGreeter;
             assert nixpkgs.lib.hasInfix "start-hyprland"

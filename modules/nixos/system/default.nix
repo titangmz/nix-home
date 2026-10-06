@@ -8,6 +8,9 @@
     "flakes"
   ];
 
+  # Provide the dynamic linker compatibility layer for non-Nix binaries.
+  programs.nix-ld.enable = true;
+
   # Hyprland
   programs.hyprland.enable = true;
 

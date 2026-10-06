@@ -20,7 +20,7 @@ The bootstrap command:
    `/etc/nixos/machine.nix`.
 2. Replaces `configuration.nix` with a small wrapper importing `machine.nix`
    and this checkout's `modules/nixos/system` module.
-3. Enables `nix-command` and flakes through that shared NixOS module.
+3. Enables `nix-command`, flakes, and nix-ld through that shared NixOS module.
 4. Builds the combined configuration without activating it.
 5. Activates the NixOS configuration only after the build succeeds, making the
    Nix features available without editing `/etc/nix/nix.conf` manually.
@@ -56,7 +56,7 @@ Machine-specific settings remain under `/etc/nixos`, including:
 - the machine's NixOS package source.
 
 Reusable additions live in `modules/nixos/system`. This module owns the
-`nix-command` and flakes opt-in, Hyprland, the greetd/tuigreet login, portals,
+`nix-command` and flakes opt-in, nix-ld, Hyprland, the greetd/tuigreet login, portals,
 audio, fonts, desktop applications, DConf user D-Bus activation, and shared
 system CLI packages. It is also exported as
 `nixosModules.desktop`. Machines and hardware files are not registered in this

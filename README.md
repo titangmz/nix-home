@@ -23,9 +23,9 @@ cd /home/xray/nix-home
 ```
 
 The bootstrap is a one-time, idempotent setup command: it preserves the
-generated machine settings, enables `nix-command` and flakes through the NixOS
-configuration, installs the greetd/tuigreet Hyprland login, and then applies the
-`nixos-hyprland` Home Manager profile. That Home Manager activation installs
+generated machine settings, enables `nix-command`, flakes, and nix-ld through
+the NixOS configuration, installs the greetd/tuigreet Hyprland login, and then
+applies the `nixos-hyprland` Home Manager profile. That Home Manager activation installs
 `just` for later use; no manual `/etc/nix/nix.conf` edit is needed.
 
 Keep the checkout at the same absolute path after bootstrapping. See

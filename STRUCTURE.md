@@ -56,8 +56,9 @@ composed by `profiles/nixos-hyprland.nix`. Desktop modules are never imported by
 the portable outputs, including on Linux. Use `./switch.sh --profile nixos-hyprland`
 or `just switch-nixos` only on machines that should receive this desktop.
 `modules/nixos/system` owns shared NixOS additions, including the `nix-command`
-and flakes opt-in, greetd with the tuigreet Hyprland login, DConf user D-Bus
-activation, plus desktop and CLI packages, and is exported as
+and flakes opt-in, nix-ld compatibility layer, greetd with the tuigreet
+Hyprland login, DConf user D-Bus activation, plus desktop and CLI packages, and
+is exported as
 `nixosModules.desktop`. Each machine's `/etc/nixos/configuration.nix` imports
 it alongside its local hardware file. Boot settings, filesystem UUIDs, users,
 hostname, locale, networking, `system.stateVersion`, and the NixOS package
