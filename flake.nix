@@ -67,6 +67,7 @@
           home =
             assert !home.config.gtk.enable;
             assert home.config.xfconf.settings == { };
+            assert nixpkgs.lib.hasInfix ".local/bin" home.config.programs.zsh.envExtra;
             assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
               "hypr/hyprland.lua"
               "waybar/config.jsonc"
@@ -92,6 +93,9 @@
                 REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
                 BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
                 SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
+                SCRIPTS_DIR=${./scripts} python -m unittest discover \
+                  --start-directory ${./tests/scripts} \
+                  --pattern 'test_*.py'
                 touch "$out"
               '';
           neovim =

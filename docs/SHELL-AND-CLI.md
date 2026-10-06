@@ -24,3 +24,21 @@ atuin import zsh
 
 General CLI tools include `jq`, Mike Farah's `yq` (`yq-go` in Nixpkgs), `just`,
 `hyperfine`, and `watchexec`.
+
+## Personal scripts
+
+Put portable executable scripts directly in the repository's `scripts/`
+directory and mark them executable, for example:
+
+```bash
+chmod +x scripts/my-command
+just switch
+```
+
+On the NixOS desktop, use `just switch-nixos` instead. Home Manager deploys
+each non-hidden top-level file into `~/.local/bin`, which is included in the
+session `PATH` and enforced at Zsh startup even if the user manager retained
+stale Home Manager session variables, so the filename becomes the command name.
+Commit scripts that should be
+available on other machines. Keep platform-specific behavior guarded inside
+the script when it is not shared by Linux and macOS.

@@ -1,6 +1,7 @@
 {
   imports = [
     ./profiles/xray.nix
+    ./modules/scripts
     ./modules/cli
     ./modules/shell
     ./modules/git

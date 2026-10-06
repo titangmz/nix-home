@@ -60,6 +60,9 @@ The first switch installs `just`; later updates use `just switch`. Home Manager
 is run from the locked flake, so no separate Home Manager installation is
 needed.
 
+Portable executable files in `scripts/` are installed into `~/.local/bin` by
+Home Manager. Apply the appropriate switch after adding or changing one.
+
 ## Which command to run
 
 Run commands from the repository checkout.
@@ -70,6 +73,7 @@ Run commands from the repository checkout.
 | Portable Home Manager configuration on Linux or macOS | `just switch` |
 | Any system or home configuration on the NixOS desktop | `just switch-nixos` |
 | Create a local monitor layout | `just setup-monitors LEFT [RIGHT ...]` |
+| Set a PNG or JPEG wallpaper from any directory | `set-wallpaper IMAGE` |
 | Local wallpaper override only | `just wallpaper` |
 | Exit the current Hyprland session | `just logout` |
 | Preview portable Home Manager changes | `just switch --dry-run` |

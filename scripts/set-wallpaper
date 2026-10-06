@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (($# != 1)); then
+  printf 'Usage: set-wallpaper IMAGE.png|IMAGE.jpg\n' >&2
+  exit 2
+fi
+
+source_image=$1
+if [[ ! -f "$source_image" || ! -r "$source_image" ]]; then
+  printf 'Wallpaper is not a readable file: %s\n' "$source_image" >&2
+  exit 1
+fi
+
+case "$source_image" in
+  *.png|*.PNG)
+    extension=png
+    other_extension=jpg
+    ;;
+  *.jpg|*.JPG)
+    extension=jpg
+    other_extension=png
+    ;;
+  *)
+    printf 'Unsupported wallpaper format (expected .png or .jpg): %s\n' "$source_image" >&2
+    exit 1
+    ;;
+esac
+
+if ! command -v systemctl >/dev/null 2>&1; then
+  printf 'set-wallpaper requires the NixOS Hyprland desktop wallpaper service.\n' >&2
+  exit 1
+fi
+
+wallpaper_directory="${XDG_DATA_HOME:-$HOME/.local/share}/wallpapers"
+destination="$wallpaper_directory/override.$extension"
+other_override="$wallpaper_directory/override.$other_extension"
+
+mkdir -p "$wallpaper_directory"
+temporary=$(mktemp "$wallpaper_directory/.override.$extension.XXXXXX")
+trap 'rm -f -- "$temporary"' EXIT
+install -m 0644 -- "$source_image" "$temporary"
+mv -f -- "$temporary" "$destination"
+rm -f -- "$other_override"
+trap - EXIT
+
+systemctl --user restart desktop-wallpaper.service
+printf 'Wallpaper set from %s\n' "$source_image"

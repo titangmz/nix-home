@@ -6,7 +6,9 @@ flake.lock             Pinned dependency revisions
 home.nix               Portable module imports and Home Manager state version
 profiles/xray.nix      Username, home directory, Git identity
 profiles/nixos-hyprland.nix  Explicit NixOS desktop profile, extending home.nix
+scripts/               Portable personal scripts deployed into ~/.local/bin
 modules/
+  scripts/             Deployment of repository scripts and portable PATH entry
   cli/                 General CLI packages and Eza theme
   shell/               Zsh, Bash handoff, Atuin history, Roundy prompt, session paths
   git/                 Git and Lazygit settings
@@ -33,7 +35,8 @@ rebuild.sh             Local /etc/nixos build/switch wrapper; build is the defau
 bootstrap-nixos.sh     Idempotent fresh-machine system and desktop setup
 setup-monitors.sh      Creates an untracked machine-local Hyprland output layout
 justfile               Bootstrap, switch/logout wrappers, wallpaper restart, and benchmark
-tests/                 Home/system script tests and Neovim behavioral checks
+tests/                 Home/system workflow and Neovim behavioral checks
+  scripts/             Auto-discovered behavioral tests for portable scripts
 docs/                  Focused NixOS, desktop, shell, terminal, editor, and development guides
 ```
 
@@ -41,6 +44,11 @@ Each module owns its packages, settings, and raw configuration files. Keep
 plugin-specific Neovim mappings beside the plugin configuration; built-in
 mappings belong in `modules/neovim/keymaps.nix`. Add top-level modules to
 `home.nix` only for shared configuration; keep personal settings in the profile.
+The portable scripts module deploys each non-hidden top-level file from
+`scripts/` into `~/.local/bin`, which is included in the session `PATH` and
+enforced when Zsh starts in case a long-lived user manager retained stale Home
+Manager session variables. Scripts must be executable and portable across every
+machine on which they should run.
 The `x86_64-linux`, `aarch64-darwin`, and `x86_64-darwin` outputs retain the
 portable home configuration. `nixos-hyprland` is a separate x86_64 Linux output,
 composed by `profiles/nixos-hyprland.nix`. Desktop modules are never imported by
@@ -99,7 +107,10 @@ PNG when both exist and falling back to the bundled image in the Nix store. The
 default is also installed under
 `~/.local/share/wallpapers/wallpaper.png`. Hyprland imports its current
 Wayland environment and starts the service at login. Restart the service to
-pick up an added, replaced, or removed override; no rebuild is required.
+pick up an added, replaced, or removed override; no rebuild is required. The
+portable `scripts/set-wallpaper` command accepts a PNG or JPEG from any working
+directory, copies it to the matching local override, removes the other override,
+and restarts the service.
 
 `modules/cli/default.nix` owns general CLI tools, including `jq`, `yq-go` (the
 `yq` command), `just`, `hyperfine`, and `watchexec`; these need no additional

@@ -95,7 +95,18 @@ packages remain Nix-managed.
 The bundled image is `modules/nixos/desktop/wallpaper/wallpaper.png`. Hyprland
 starts the `desktop-wallpaper` user service at login.
 
-For a machine-local replacement, put a PNG or JPEG (or a symlink) at one of:
+After applying Home Manager once, set a wallpaper from any directory with:
+
+```bash
+set-wallpaper path/to/image.jpg
+```
+
+The command accepts `.png` and `.jpg`, copies the image into the local override
+directory, removes any override in the other format, and restarts the wallpaper
+service. The source image can be a relative or absolute path.
+
+To manage the override manually instead, put a PNG or JPEG (or a symlink) at
+one of:
 
 ```text
 ~/.local/share/wallpapers/override.png
