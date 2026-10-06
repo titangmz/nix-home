@@ -6,7 +6,6 @@
     ./modules/shell
     ./modules/git
     ./modules/tmux
-    ./modules/zed
     ./modules/development
     ./modules/chat
     ./modules/v2rayn

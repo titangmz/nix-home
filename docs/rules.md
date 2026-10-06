@@ -2,7 +2,7 @@
 
 Portable Home Manager is the shared layer. The NixOS desktop profile imports it, then adds the desktop. A package belongs in one layer.
 
-- Portable modules own CLI tools, Git, the shell, tmux, Zed, Neovim, scripts, and the theme.
+- Portable modules own CLI tools, Git, the shell, tmux, Neovim, scripts, and the theme.
 - `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, and hyprbars at `/etc/hyprland-plugins/libhyprbars.so`.
 - `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, Waybar, Rofi, Mako, and wallpaper.
 - Users, hardware, hostname, networking, and `system.stateVersion` stay in `/etc/nixos/machine.nix`. This repo does not register machines.
