@@ -56,7 +56,8 @@ Machine-specific settings remain under `/etc/nixos`, including:
 - the machine's NixOS package source.
 
 Reusable additions live in `modules/nixos/system`. This module owns the
-`nix-command` and flakes opt-in, nix-ld, Hyprland, the greetd/tuigreet login, portals,
+`nix-command` and flakes opt-in, nix-ld, Hyprland, compositor-matched Hyprland
+plugins such as hyprbars, the greetd/tuigreet login, portals,
 audio, fonts, desktop applications, DConf user D-Bus activation, and shared
 system CLI packages. It is also exported as
 `nixosModules.desktop`. Machines and hardware files are not registered in this

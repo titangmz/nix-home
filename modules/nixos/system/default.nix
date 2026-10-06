@@ -72,4 +72,9 @@
     thunar
     imv
   ];
+
+  # Keep the compositor-matched plugin at a stable path. Hyprland Lua loads it
+  # from here; systemPackages does not reliably expose plugin .so files.
+  environment.etc."hyprland-plugins/libhyprbars.so".source =
+    "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so";
 }

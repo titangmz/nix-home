@@ -9,6 +9,10 @@
 -- Refer to the wiki for more information.
 -- https://wiki.hypr.land/Configuring/Start/
 
+-- Load hyprbars from the NixOS system profile before plugin settings.
+-- NixOS owns the compositor-matched plugin; Home Manager owns this Lua file.
+hl.plugin.load("/etc/hyprland-plugins/libhyprbars.so")
+
 -- Please note not all available settings / options are set here.
 -- For a full list, see the wiki
 
@@ -154,6 +158,46 @@ hl.config({
     animations = {
         enabled = true,
     },
+})
+
+hl.config({
+    plugin = {
+        hyprbars = {
+            enabled                   = true,
+            bar_color                 = "rgba(@base@99)",
+            ["col.text"]              = "rgb(@text@)",
+            bar_height                = 24,
+            bar_blur                  = true,
+            bar_title_enabled         = true,
+            bar_text_size             = 11,
+            bar_text_font             = "JetBrainsMono Nerd Font",
+            bar_text_align            = "left",
+            bar_buttons_alignment     = "right",
+            bar_part_of_window         = true,
+            bar_precedence_over_border = true,
+            bar_padding               = 8,
+            bar_button_padding        = 6,
+            icon_on_hover             = true,
+            inactive_button_color     = "rgb(@border@)",
+            on_double_click           = "hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = \"maximized\", action = \"toggle\" })'",
+        },
+    },
+})
+
+hl.plugin.hyprbars.add_button({
+    bg_color = "rgb(@red@)",
+    fg_color = "rgb(@crust@)",
+    size     = 11,
+    icon     = "󰖭",
+    action   = "hyprctl dispatch 'hl.dsp.window.close()'",
+})
+
+hl.plugin.hyprbars.add_button({
+    bg_color = "rgb(@yellow@)",
+    fg_color = "rgb(@crust@)",
+    size     = 11,
+    icon     = "",
+    action   = [[hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" })']],
 })
 
 -- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/

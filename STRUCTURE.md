@@ -22,7 +22,7 @@ modules/
     system/            Reusable NixOS additions, including greetd, desktop, and CLI packages; imported by local /etc/nixos
     desktop/           Explicit desktop modules, excluded from portable home.nix
       palette.nix      Shared Catppuccin colors, GTK flavor/accent, template renderer
-      hyprland/        Lua configuration; NixOS owns compositor and portals
+      hyprland/        Lua configuration, including hyprbars; NixOS owns compositor, portals, and plugins
       waybar/          Bar configuration, CSS, packages, and button dependencies
       rofi/            Styled application launcher configuration
       mako/            Notification styling, daemon package, and notify-send
@@ -90,8 +90,10 @@ only the explicit desktop profile enables it.
 Its `hyprland`, `waybar`, `rofi`, and `mako` submodules own the compositor, bar,
 application launcher, and notification configuration files. Home Manager installs
 them under `~/.config`. NixOS owns the Lua-compatible Hyprland
-package and portals; Home Manager owns Waybar/Mako packages. Hyprland startup
-commands launch both, without duplicate systemd services. `palette.nix` provides
+package, portals, and compositor-matched plugins such as hyprbars; Home Manager
+owns Waybar/Mako packages. Hyprland Lua loads hyprbars from
+`/etc/hyprland-plugins/libhyprbars.so` before plugin settings. Hyprland startup commands launch both, without duplicate
+systemd services. `palette.nix` provides
 shared hex colors and GTK flavor/accent. Lua, CSS, and Mako sources use `@color@`
 placeholders rendered during evaluation; the Rofi theme uses the same rendering,
 and Mako also replaces `@HOME@` with the profile's home directory. Focused windows

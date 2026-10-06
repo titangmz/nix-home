@@ -16,11 +16,14 @@ the portable, non-NixOS workflow and excludes desktop files and services.
 Hyprland's Lua configuration lives in `modules/nixos/desktop/hyprland`, Waybar
 configuration and CSS in `modules/nixos/desktop/waybar`, the application launcher
 theme in `modules/nixos/desktop/rofi`, and Mako styling in
-`modules/nixos/desktop/mako`. NixOS owns the Lua-compatible compositor package
-and portals; it also registers DConf on the user D-Bus so Home Manager can apply
-GTK preferences before linking the desktop files. Home Manager owns Waybar,
-Rofi, and Mako. Hyprland startup commands manage Waybar and Mako lifecycle without
-duplicate Home Manager services.
+`modules/nixos/desktop/mako`. NixOS owns the Lua-compatible compositor package,
+portals, and compositor-matched plugins such as hyprbars; it also registers DConf
+on the user D-Bus so Home Manager can apply GTK preferences before linking the
+desktop files. Home Manager owns Waybar, Rofi, and Mako. Hyprland Lua loads
+hyprbars from `/etc/hyprland-plugins/libhyprbars.so` and styles window title
+bars from the shared palette at Kitty's 60% opacity so compositor blur shows
+through. Hyprland startup commands manage Waybar and Mako
+lifecycle without duplicate Home Manager services.
 
 Shared colors live in `modules/nixos/desktop/palette.nix`. Lua, CSS, Rofi, and
 Mako sources use placeholders rendered from that palette. Focused windows use

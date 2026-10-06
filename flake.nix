@@ -121,6 +121,9 @@
             assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
             assert nixpkgs.lib.hasInfix "no_hardware_cursors = true"
               desktop.config.xdg.configFile."hypr/hyprland.lua".text;
+            assert nixpkgs.lib.hasInfix "hl.plugin.load(\"/etc/hyprland-plugins/libhyprbars.so\")"
+              desktop.config.xdg.configFile."hypr/hyprland.lua".text;
+            assert nixpkgs.lib.hasInfix "hyprbars" desktop.config.xdg.configFile."hypr/hyprland.lua".text;
             desktop.activationPackage;
 
           nixos-module =
@@ -138,6 +141,9 @@
             assert moduleConfig.services.greetd.useTextGreeter;
             assert nixpkgs.lib.hasInfix "start-hyprland"
               moduleConfig.services.greetd.settings.default_session.command;
+            assert
+              moduleConfig.environment.etc."hyprland-plugins/libhyprbars.so".source
+              == "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so";
             assert moduleConfig.programs.dconf.enable;
             pkgs.runCommand "nixos-module-check" { } ''
               touch "$out"
