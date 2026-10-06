@@ -62,6 +62,7 @@ needed.
 
 Portable executable files in `scripts/` are installed into `~/.local/bin` by
 Home Manager. Apply the appropriate switch after adding or changing one.
+The portable profile also installs both Neovim and Zed on Linux and macOS.
 
 ## Which command to run
 

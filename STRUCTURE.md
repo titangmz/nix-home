@@ -15,6 +15,7 @@ modules/
   tmux/                Managed plugins and terminal settings
   wezterm/             Configuration only; externally installed WezTerm
   kitty/               Kitty configuration; package remains system-managed
+  zed/                 Portable Zed editor package and settings
   development/         Rust tools, fnm, pyenv
   chat/                Profanity package and configuration
   nixos/
@@ -117,6 +118,9 @@ and restarts the service.
 `modules/cli/default.nix` owns general CLI tools, including `jq`, `yq-go` (the
 `yq` command), `just`, `hyperfine`, and `watchexec`; these need no additional
 shell initialization.
+
+`modules/zed` enables Zed through Home Manager for all three portable outputs;
+the NixOS desktop profile inherits it from the portable home configuration.
 
 `modules/shell/default.nix` owns Atuin's package and Zsh integration through
 Home Manager. `Ctrl-r` opens local history search; the Up binding is preserved,

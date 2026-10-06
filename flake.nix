@@ -67,6 +67,7 @@
           home =
             assert !home.config.gtk.enable;
             assert home.config.xfconf.settings == { };
+            assert home.config.programs.zed-editor.enable;
             assert nixpkgs.lib.hasInfix ".local/bin" home.config.programs.zsh.envExtra;
             assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
               "hypr/hyprland.lua"

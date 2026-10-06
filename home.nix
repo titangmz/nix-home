@@ -8,6 +8,7 @@
     ./modules/tmux
     ./modules/wezterm
     ./modules/kitty
+    ./modules/zed
     ./modules/development
     ./modules/chat
     ./modules/neovim
