@@ -4,10 +4,46 @@
   fetchurl,
   unzip,
   autoPatchelfHook,
+  makeWrapper,
   fontconfig,
+  icu,
+  openssl,
+  zlib,
+  libx11,
+  libxrandr,
+  libxi,
+  libxcursor,
+  libxext,
+  libice,
+  libsm,
+  libxrender,
+  libxinerama,
+  libxkbcommon,
+  dbus,
+  krb5,
 }:
 let
   version = "7.25.4";
+  # .NET and Avalonia dlopen these. NixOS has no FHS path for them.
+  linuxLibraryPath = lib.makeLibraryPath (
+    lib.optionals stdenv.isLinux [
+      icu
+      openssl
+      zlib
+      libx11
+      libxrandr
+      libxi
+      libxcursor
+      libxext
+      libice
+      libsm
+      libxrender
+      libxinerama
+      libxkbcommon
+      dbus
+      krb5
+    ]
+  );
   sources = {
     x86_64-linux = {
       url = "https://github.com/2dust/v2rayN/releases/download/${version}/v2rayN-linux-64.zip";
@@ -41,6 +77,7 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [
     unzip
+    makeWrapper
   ]
   ++ lib.optionals stdenv.isLinux [
     autoPatchelfHook
@@ -68,12 +105,8 @@ stdenv.mkDerivation {
     # Official marker: config and cores are copied to Local Application Data.
     touch $out/lib/v2rayn/NotStoreConfigHere.txt
 
-    cat > $out/bin/v2rayN << EOF
-    #!${stdenv.shell}
-    export V2RAYN_LOCAL_APPLICATION_DATA_V2=1
-    exec "$out/lib/v2rayn/v2rayN" "\$@"
-    EOF
-    chmod +x $out/bin/v2rayN
+    makeWrapper $out/lib/v2rayn/v2rayN $out/bin/v2rayN \
+      --set V2RAYN_LOCAL_APPLICATION_DATA_V2 1 ${lib.optionalString stdenv.isLinux "--prefix LD_LIBRARY_PATH : ${linuxLibraryPath} --set DOTNET_ICU_VERSION_OVERRIDE ${lib.versions.major icu.version}"}
 
     ${lib.optionalString stdenv.isLinux ''
       install -Dm644 $out/lib/v2rayn/v2rayN.png \
@@ -131,6 +164,10 @@ stdenv.mkDerivation {
     test -x $out/lib/v2rayn/v2rayN
     test -x $out/lib/v2rayn/bin/xray/xray
     test -f $out/lib/v2rayn/NotStoreConfigHere.txt
+    ${lib.optionalString stdenv.isLinux ''
+      grep -q LD_LIBRARY_PATH $out/bin/v2rayN
+      grep -q DOTNET_ICU_VERSION_OVERRIDE $out/bin/v2rayN
+    ''}
     ${lib.optionalString stdenv.isDarwin ''
       test -x $out/Applications/v2rayN.app/Contents/MacOS/v2rayN
     ''}
