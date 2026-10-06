@@ -56,11 +56,17 @@ Machine-specific settings remain under `/etc/nixos`, including:
 - the machine's NixOS package source.
 
 Reusable additions live in `modules/nixos/system`. This module owns the
-`nix-command` and flakes opt-in, Hyprland, portals, audio, fonts, desktop
-applications, DConf user D-Bus activation, and shared system CLI packages. It
-is also exported as
+`nix-command` and flakes opt-in, Hyprland, the greetd/tuigreet login, portals,
+audio, fonts, desktop applications, DConf user D-Bus activation, and shared
+system CLI packages. It is also exported as
 `nixosModules.desktop`. Machines and hardware files are not registered in this
 repository.
+
+At boot, greetd runs the text-based tuigreet prompt on TTY1. After successful
+authentication it starts `/run/current-system/sw/bin/start-hyprland`. Tuigreet
+shows the time, remembers the last username, and displays asterisks while a
+password is entered. User definitions and any automatic-login policy remain in
+the machine-local configuration.
 
 Home Manager remains standalone internally. `switch-nixos.sh` coordinates the
 full workflow: it uses `rebuild.sh` with the local

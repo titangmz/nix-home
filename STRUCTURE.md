@@ -18,7 +18,7 @@ modules/
   development/         Rust tools, fnm, pyenv
   chat/                Profanity package and configuration
   nixos/
-    system/            Reusable NixOS additions, including desktop and CLI packages; imported by local /etc/nixos
+    system/            Reusable NixOS additions, including greetd, desktop, and CLI packages; imported by local /etc/nixos
     desktop/           Explicit desktop modules, excluded from portable home.nix
       palette.nix      Shared Catppuccin colors, GTK flavor/accent, template renderer
       hyprland/        Lua configuration; NixOS owns compositor and portals
@@ -55,8 +55,8 @@ composed by `profiles/nixos-hyprland.nix`. Desktop modules are never imported by
 the portable outputs, including on Linux. Use `./switch.sh --profile nixos-hyprland`
 or `just switch-nixos` only on machines that should receive this desktop.
 `modules/nixos/system` owns shared NixOS additions, including the `nix-command`
-and flakes opt-in, DConf user D-Bus activation, plus desktop and CLI packages,
-and is exported as
+and flakes opt-in, greetd with the tuigreet Hyprland login, DConf user D-Bus
+activation, plus desktop and CLI packages, and is exported as
 `nixosModules.desktop`. Each machine's `/etc/nixos/configuration.nix` imports
 it alongside its local hardware file. Boot settings, filesystem UUIDs, users,
 hostname, locale, networking, `system.stateVersion`, and the NixOS package

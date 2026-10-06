@@ -132,6 +132,10 @@
             in
             assert builtins.elem "nix-command" features;
             assert builtins.elem "flakes" features;
+            assert moduleConfig.services.greetd.enable;
+            assert moduleConfig.services.greetd.useTextGreeter;
+            assert nixpkgs.lib.hasInfix "start-hyprland"
+              moduleConfig.services.greetd.settings.default_session.command;
             assert moduleConfig.programs.dconf.enable;
             pkgs.runCommand "nixos-module-check" { } ''
               touch "$out"
