@@ -43,7 +43,9 @@ printf 'Activating the NixOS configuration...\n'
 "${SUDO[@]}" "$REPO_DIR/rebuild.sh" switch
 
 printf 'Activating the nixos-hyprland Home Manager profile...\n'
-# A private bus makes DConf/Xfconf activation independent of the caller's
-# current graphical session while the system configuration still registers
-# DConf for applications at runtime.
-env -u DBUS_SESSION_BUS_ADDRESS "$REPO_DIR/switch.sh" --profile nixos-hyprland -b nix-home-backup
+# Use the systemd user bus directly. This ignores a stale inherited address and
+# avoids Home Manager creating a short-lived private bus whose shutdown makes
+# xfconfd emit a misleading "Name org.xfce.Xfconf lost" warning.
+USER_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$UID}
+DBUS_SESSION_BUS_ADDRESS="unix:path=$USER_RUNTIME_DIR/bus" \
+  "$REPO_DIR/switch.sh" --profile nixos-hyprland -b nix-home-backup

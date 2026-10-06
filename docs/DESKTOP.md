@@ -88,7 +88,9 @@ sidebar, breadcrumbs, folders-first sorting, and Tumbler-generated image
 thumbnails. Close and reopen Thunar after applying theme changes.
 
 Xfconf D-Bus activation is provided for the Hyprland user session. Theme
-packages remain Nix-managed.
+packages remain Nix-managed. `switch-nixos.sh` applies Home Manager settings
+over the canonical systemd user bus rather than creating a temporary D-Bus
+session, so Xfconf remains attached to the running user session.
 
 ## Wallpaper
 

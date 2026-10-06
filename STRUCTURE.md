@@ -63,7 +63,9 @@ hostname, locale, networking, `system.stateVersion`, and the NixOS package
 source remain local. There are no host directories or `nixosConfigurations`
 outputs in this repo. The portable Home Manager and Codex pins are unchanged.
 `just switch-nixos` builds the local OS, activates it with sudo, and then applies
-the complete shared home plus desktop profile. On a fresh installation,
+the complete shared home plus desktop profile over the canonical systemd user
+bus, avoiding stale inherited D-Bus addresses and temporary activation buses.
+On a fresh installation,
 `./bootstrap-nixos.sh` (also wrapped by `just bootstrap-nixos`) preserves the
 generated configuration as `/etc/nixos/machine.nix`, installs a small local
 import wrapper, builds it, and then performs both activations. Its system
