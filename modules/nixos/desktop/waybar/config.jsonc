@@ -6,9 +6,9 @@
   "margin-left": 20,
   "margin-right": 20,
   "spacing": 8,
-  "modules-left": ["hyprland/workspaces"],
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
   "modules-center": ["clock"],
-  "modules-right": ["hyprland/language", "pulseaudio", "network", "battery", "tray"],
+  "modules-right": ["mpris", "hyprland/language", "pulseaudio", "network", "privacy", "tray"],
   "hyprland/workspaces": {
     "format": "{icon}",
     "format-icons": {
@@ -17,6 +17,30 @@
     },
     "all-outputs": false,
     "persistent-workspaces": {"*": [1, 2, 3, 4, 5]}
+  },
+  "hyprland/window": {
+    "format": "{}",
+    "separate-outputs": true,
+    "max-length": 70,
+    "swap-icon-label": false
+  },
+  "mpris": {
+    "format": "{status_icon}  {dynamic}",
+    "format-paused": "{status_icon}  {dynamic}",
+    "dynamic-order": ["title", "artist"],
+    "dynamic-len": 48,
+    "status-icons": {
+      "playing": "󰐊",
+      "paused": "󰏤"
+    }
+  },
+  "privacy": {
+    "icon-spacing": 8,
+    "icon-size": 14,
+    "modules": [
+      {"type": "screenshare"},
+      {"type": "audio-in"}
+    ]
   },
   "hyprland/language": {
     "format": "{}",
@@ -35,19 +59,11 @@
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
   },
   "network": {
-    "format-wifi": "󰤨  {signalStrength}%",
-    "format-ethernet": "󰈀  Ethernet",
+    "format-wifi": "󰤨  {essid}",
+    "format-ethernet": "󰈀  {ipaddr}",
     "format-disconnected": "󰤭  Offline",
     "tooltip-format": "{ifname} · {ipaddr}",
     "tooltip-format-wifi": "{essid} · {ipaddr}"
-  },
-  "battery": {
-    "states": {"warning": 25, "critical": 10},
-    "format": "{icon}  {capacity}%",
-    "format-charging": "󰂄  {capacity}%",
-    "format-plugged": "󰚥  {capacity}%",
-    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-    "tooltip-format": "{timeTo}"
   },
   "tray": {"icon-size": 16, "spacing": 10}
 }

@@ -6,6 +6,7 @@ in
   config = lib.mkIf pkgs.stdenv.isLinux {
     home.packages = with pkgs; [
       waybar
+      playerctl
       wireplumber
       nerd-fonts.jetbrains-mono
     ];

@@ -30,11 +30,13 @@ window#waybar > box {
 }
 
 #workspaces,
+#window,
+#mpris,
 #clock,
 #language,
 #pulseaudio,
 #network,
-#battery,
+#privacy,
 #tray {
     background: transparent;
     color: @text;
@@ -72,25 +74,25 @@ window#waybar > box {
     color: @text;
 }
 
+#window {
+    color: @muted;
+}
+
 #network {
     color: @blue;
 }
 
-#battery.charging,
-#battery.plugged {
-    color: @green;
-}
-
-#battery.warning {
+#privacy-item.screenshare {
     color: @yellow;
 }
 
-#battery.critical {
+#privacy-item.audio-in {
     color: @red;
 }
 
 #pulseaudio.muted,
-#network.disconnected {
+#network.disconnected,
+#mpris.paused {
     color: @muted;
 }
 
