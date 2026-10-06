@@ -4,6 +4,8 @@
 
 `just reload` applies Lua edits. A theme edit needs `just switch-nixos`, then `just reload`.
 
+English (`us`) and Persian (`ir`) are the keyboard layouts. Super+Space switches them.
+
 Software cursors are enabled here. Optional `~/.config/hypr/local.lua` can add machine binds. `just setup-monitors` writes `~/.config/hypr/local_monitors.lua`.
 
 hyprbars loads from `/etc/hyprland-plugins/libhyprbars.so`.

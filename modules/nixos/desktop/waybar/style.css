@@ -51,7 +51,7 @@ window#waybar {
     padding: 0 15px;
     margin: 2px 0;
 }
-#pulseaudio, #network, #battery, #tray {
+#language, #pulseaudio, #network, #battery, #tray {
     background: alpha(@surface, @opacity@);
     border: 1px solid alpha(@border, 0.75);
     border-radius: 11px;

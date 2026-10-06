@@ -8,7 +8,7 @@
   "spacing": 8,
   "modules-left": ["hyprland/workspaces"],
   "modules-center": ["clock"],
-  "modules-right": ["pulseaudio", "network", "battery", "tray"],
+  "modules-right": ["hyprland/language", "pulseaudio", "network", "battery", "tray"],
   "hyprland/workspaces": {
     "format": "{icon}",
     "format-icons": {
@@ -17,6 +17,11 @@
     },
     "all-outputs": false,
     "persistent-workspaces": {"*": [1, 2, 3, 4, 5]}
+  },
+  "hyprland/language": {
+    "format": "{}",
+    "format-en": "EN",
+    "format-fa": "FA"
   },
   "clock": {
     "format": "󰥔  {:%a %d %b  ·  %H:%M}",
