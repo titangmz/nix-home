@@ -162,6 +162,7 @@
               moduleConfig.environment.etc."hyprland-plugins/libhyprbars.so".source
               == "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so";
             assert moduleConfig.programs.dconf.enable;
+            assert moduleConfig.services.flatpak.enable;
             pkgs.runCommand "nixos-module-check" { } ''
               touch "$out"
             '';

@@ -31,6 +31,8 @@
   # default application used when an image is opened.
   services.tumbler.enable = true;
 
+  services.flatpak.enable = true;
+
   # Audio
   security.rtkit.enable = true;
 
