@@ -154,6 +154,17 @@
             assert builtins.elem "nix-command" features;
             assert builtins.elem "flakes" features;
             assert moduleConfig.programs.nix-ld.enable;
+            assert
+              moduleConfig.programs.nix-ld.libraries == (with pkgs; [
+                glib
+                alsa-lib
+                wayland
+                libdrm
+                libgbm
+                libglvnd
+                libx11
+                vulkan-loader
+              ]);
             assert moduleConfig.services.greetd.enable;
             assert moduleConfig.services.greetd.useTextGreeter;
             assert nixpkgs.lib.hasInfix "start-hyprland"

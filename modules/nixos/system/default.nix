@@ -9,7 +9,20 @@
   ];
 
   # Provide the dynamic linker compatibility layer for non-Nix binaries.
+  # The Zed Flatpak re-executes its glibc editor on the host. These libraries
+  # are the ones that binary loads by soname; GPU drivers still come from
+  # /run/opengl-driver.
   programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    glib
+    alsa-lib
+    wayland
+    libdrm
+    libgbm
+    libglvnd
+    libx11
+    vulkan-loader
+  ];
 
   # Hyprland
   programs.hyprland.enable = true;
