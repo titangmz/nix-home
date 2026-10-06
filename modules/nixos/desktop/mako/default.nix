@@ -5,7 +5,7 @@
   ...
 }:
 let
-  palette = import ../palette.nix { inherit lib; };
+  palette = import ../../../theme { inherit lib; };
 in
 {
   config = lib.mkIf pkgs.stdenv.isLinux {

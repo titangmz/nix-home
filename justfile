@@ -4,7 +4,7 @@ set positional-arguments := true
 default:
     @just --list
 
-# Apply the configuration; forward options to Home Manager.
+# Apply the portable Home Manager configuration.
 switch *args:
     ./switch.sh "$@"
 
@@ -12,16 +12,32 @@ switch *args:
 switch-nixos *args:
     ./switch-nixos.sh "$@"
 
-# Bootstrap a fresh NixOS machine, then apply the system and desktop home profiles.
+# First-time setup for a Home Manager-only machine.
+bootstrap:
+    ./bootstrap-home.sh
+
+# First-time setup for a NixOS machine.
 bootstrap-nixos:
     ./bootstrap-nixos.sh
+
+# Format Nix files.
+fmt:
+    nix fmt
+
+# Evaluate and run the repository checks.
+check:
+    nix flake check "path:{{justfile_directory()}}"
+
+# Reload Hyprland after editing its checkout configuration.
+reload:
+    hyprctl reload config-only
 
 # Restart the wallpaper service after changing the local override.
 wallpaper:
     systemctl --user restart desktop-wallpaper.service
 
-# Create a machine-local monitor layout; pass outputs in left-to-right order.
-setup-monitors *outputs:
+# Create a machine-local monitor layout. Names are optional.
+setup-monitors *args:
     ./setup-monitors.sh "$@"
 
 # Exit the current Hyprland session.

@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 let
-  palette = import ./palette.nix { inherit lib; };
+  palette = import ../../theme { inherit lib; };
 in
 {
   imports = [
@@ -8,6 +8,7 @@ in
     ./rofi
     ./mako
     ./hyprland
+    ./kitty
     ./wallpaper
   ];
 

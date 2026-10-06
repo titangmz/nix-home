@@ -5,7 +5,7 @@
   ...
 }:
 let
-  palette = import ../nixos/desktop/palette.nix { inherit lib; };
+  palette = import ../theme { inherit lib; };
   inherit (palette) colors;
   roundyPrompt = pkgs.fetchFromGitHub {
     owner = "metaory";

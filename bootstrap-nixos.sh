@@ -82,6 +82,10 @@ if [[ "$already_bootstrapped" == false ]]; then
 fi
 "${SUDO[@]}" install "${INSTALL_OWNER[@]}" -m 0644 -- "$wrapper" "$SYSTEM_CONFIG"
 
+config_home="${XDG_CONFIG_HOME:-${HOME:?HOME is not set}/.config}"
+mkdir -p "$config_home/nix-home"
+printf '%s\n' "$REPO_DIR" > "$config_home/nix-home/root"
+
 if ((${#SUDO[@]} == 0)); then
   NIX_HOME_NIXOS_NO_SUDO=1 NIX_HOME_NIXOS_TEST="${NIX_HOME_BOOTSTRAP_TEST:-}" \
     "$REPO_DIR/switch-nixos.sh"

@@ -54,19 +54,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # CLI tools shared by the opted-in NixOS machines.
-    git
-    curl
-    vim
-    wget
-
     kitty
     firefox
-    libnotify
-    waybar
-    rofi
-    mako
-    hyprpaper
     hyprlock
     hypridle
     thunar

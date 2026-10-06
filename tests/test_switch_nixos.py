@@ -22,6 +22,7 @@ class NixosSwitchTests(unittest.TestCase):
         self.repo.mkdir()
         self.runtime = Path(self.temp.name) / "runtime"
         self.runtime.mkdir()
+        self.config_home = Path(self.temp.name) / "config"
         shutil.copy2(SCRIPT, self.repo / "switch-nixos.sh")
         self.log = self.repo / "calls"
         for name in ["rebuild.sh", "switch.sh"]:
@@ -36,6 +37,7 @@ class NixosSwitchTests(unittest.TestCase):
             os.environ,
             DBUS_SESSION_BUS_ADDRESS="unix:path=/stale/session/bus",
             XDG_RUNTIME_DIR=str(self.runtime),
+            XDG_CONFIG_HOME=str(self.config_home),
             NIX_HOME_NIXOS_NO_SUDO="1",
             NIX_HOME_NIXOS_TEST="1",
             NIXOS_SWITCH_TEST_LOG=str(self.log),
@@ -58,6 +60,7 @@ class NixosSwitchTests(unittest.TestCase):
             "rebuild.sh switch|DBUS=unix:path=/stale/session/bus",
             f"switch.sh --profile nixos-hyprland -b nix-home-backup|DBUS=unix:path={self.runtime}/bus",
         ])
+        self.assertEqual((self.config_home / "nix-home/root").read_text(), f"{self.repo}\n")
 
     def test_dry_run_builds_and_previews_without_activation(self):
         result = self.invoke("--dry-run")
@@ -66,6 +69,7 @@ class NixosSwitchTests(unittest.TestCase):
             "rebuild.sh build|DBUS=unix:path=/stale/session/bus",
             "switch.sh --profile nixos-hyprland --dry-run -b nix-home-backup|DBUS=unix:path=/stale/session/bus",
         ])
+        self.assertFalse((self.config_home / "nix-home/root").exists())
 
     def test_build_failure_prevents_all_activation(self):
         self.env["NIXOS_SWITCH_TEST_REBUILD_EXIT"] = "23"

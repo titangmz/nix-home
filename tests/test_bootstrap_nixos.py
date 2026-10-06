@@ -26,6 +26,7 @@ class BootstrapNixosTests(unittest.TestCase):
         (self.repo / "modules/nixos/system/default.nix").write_text("{}\n")
         self.config_dir = self.root / "etc/nixos"
         self.config_dir.mkdir(parents=True)
+        self.config_home = self.root / "config"
         self.original = "{ ... }: { imports = [ ./hardware-configuration.nix ]; system.stateVersion = \"26.05\"; }\n"
         (self.config_dir / "configuration.nix").write_text(self.original)
         self.log = self.root / "calls"
@@ -41,6 +42,7 @@ class BootstrapNixosTests(unittest.TestCase):
             NIX_HOME_BOOTSTRAP_CONFIG_DIR=str(self.config_dir),
             NIX_HOME_BOOTSTRAP_NO_SUDO="1",
             NIX_HOME_BOOTSTRAP_TEST="1",
+            XDG_CONFIG_HOME=str(self.config_home),
             BOOTSTRAP_TEST_LOG=str(self.log),
         )
 
@@ -62,6 +64,7 @@ class BootstrapNixosTests(unittest.TestCase):
         self.assertIn("./machine.nix", wrapper)
         self.assertIn(str(self.repo / "modules/nixos/system"), wrapper)
         self.assertEqual(self.calls(), ["switch-nixos.sh "])
+        self.assertEqual((self.config_home / "nix-home/root").read_text(), f"{self.repo}\n")
 
     def test_second_run_is_idempotent(self):
         first = self.invoke()

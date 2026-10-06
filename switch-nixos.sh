@@ -42,6 +42,10 @@ fi
 printf 'Activating the NixOS configuration...\n'
 "${SUDO[@]}" "$REPO_DIR/rebuild.sh" switch
 
+config_home="${XDG_CONFIG_HOME:-${HOME:?HOME is not set}/.config}"
+mkdir -p "$config_home/nix-home"
+printf '%s\n' "$REPO_DIR" > "$config_home/nix-home/root"
+
 printf 'Activating the nixos-hyprland Home Manager profile...\n'
 # Use the systemd user bus directly. This ignores a stale inherited address and
 # avoids Home Manager creating a short-lived private bus whose shutdown makes

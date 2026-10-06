@@ -25,9 +25,9 @@ class SetupMonitorsTests(unittest.TestCase):
         hyprctl.write_text(
             "#!/bin/sh\n"
             "cat <<'EOF'\n"
-            '[{"name":"DP-2","availableModes":'
+            '[{"name":"DP-2","x":2560,"availableModes":'
             '["1920x1080@60.00Hz","1920x1080@239.76Hz","1280x720@240.00Hz"]},'
-            '{"name":"eDP-1","availableModes":'
+            '{"name":"eDP-1","x":0,"availableModes":'
             '["2560x1600@60.00Hz","2560x1600@120.00Hz","1920x1080@144.00Hz"]}]\n'
             "EOF\n"
         )
@@ -38,9 +38,9 @@ class SetupMonitorsTests(unittest.TestCase):
             PATH=f"{self.bin}:{os.environ['PATH']}",
         )
 
-    def invoke(self, *outputs):
+    def invoke(self, *args):
         return subprocess.run(
-            [BASH, str(SCRIPT), *outputs],
+            [BASH, str(SCRIPT), *args],
             env=self.env,
             text=True,
             capture_output=True,
@@ -58,16 +58,33 @@ class SetupMonitorsTests(unittest.TestCase):
         self.assertNotIn('1280x720@240.00', layout)
         self.assertEqual(layout.count('scale = "auto"'), 2)
 
-    def test_existing_layout_is_not_overwritten(self):
+    def test_orders_connected_outputs_from_left_to_right(self):
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layout = self.destination.read_text()
+        self.assertLess(layout.index('output = "eDP-1"'), layout.index('output = "DP-2"'))
+
+    def test_repeat_with_the_same_layout_succeeds(self):
+        first = self.invoke()
+        self.assertEqual(first.returncode, 0, first.stderr)
+        original = self.destination.read_text()
+        second = self.invoke()
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertIn("already matches", second.stdout)
+        self.assertEqual(self.destination.read_text(), original)
+
+    def test_existing_layout_is_kept_until_forced(self):
         self.destination.parent.mkdir(parents=True)
         self.destination.write_text("keep me\n")
-        result = self.invoke("DP-1", "eDP-1")
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("Refusing to overwrite", result.stderr)
+        kept = self.invoke("DP-2", "eDP-1")
+        self.assertEqual(kept.returncode, 0, kept.stderr)
+        self.assertIn("Keeping existing", kept.stdout)
         self.assertEqual(self.destination.read_text(), "keep me\n")
+        replaced = self.invoke("--force", "DP-2", "eDP-1")
+        self.assertEqual(replaced.returncode, 0, replaced.stderr)
+        self.assertIn('output = "DP-2"', self.destination.read_text())
 
-    def test_requires_outputs_and_rejects_unsafe_names(self):
-        self.assertNotEqual(self.invoke().returncode, 0)
+    def test_rejects_unsafe_names(self):
         self.assertNotEqual(self.invoke('DP-1"; error("oops")').returncode, 0)
         self.assertFalse(self.destination.exists())
 

@@ -71,6 +71,7 @@
             assert nixpkgs.lib.hasInfix ".local/bin" home.config.programs.zsh.envExtra;
             assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
               "hypr/hyprland.lua"
+              "kitty/kitty.conf"
               "waybar/config.jsonc"
               "waybar/style.css"
               "rofi/config.rasi"
@@ -93,6 +94,7 @@
                 NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
                 REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
                 BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
+                BOOTSTRAP_HOME_SCRIPT=${./bootstrap-home.sh} python ${./tests/test_bootstrap_home.py}
                 SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
                 SCRIPTS_DIR=${./scripts} python -m unittest discover \
                   --start-directory ${./tests/scripts} \
@@ -119,11 +121,22 @@
             assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
             assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
             assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
-            assert nixpkgs.lib.hasInfix "no_hardware_cursors = true"
-              desktop.config.xdg.configFile."hypr/hyprland.lua".text;
-            assert nixpkgs.lib.hasInfix "hl.plugin.load(\"/etc/hyprland-plugins/libhyprbars.so\")"
-              desktop.config.xdg.configFile."hypr/hyprland.lua".text;
-            assert nixpkgs.lib.hasInfix "hyprbars" desktop.config.xdg.configFile."hypr/hyprland.lua".text;
+            assert builtins.hasAttr "kitty/kitty.conf" desktop.config.xdg.configFile;
+            assert nixpkgs.lib.hasInfix "background_opacity 0.6"
+              desktop.config.xdg.configFile."kitty/kitty.conf".text;
+            assert nixpkgs.lib.hasInfix "no_hardware_cursors = true" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
+            );
+            assert nixpkgs.lib.hasInfix "hl.plugin.load(\"/etc/hyprland-plugins/libhyprbars.so\")" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
+            );
+            assert nixpkgs.lib.hasInfix "require(\"style\")" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
+            );
+            assert nixpkgs.lib.hasInfix "nix-home/root" (
+              builtins.readFile ./modules/nixos/desktop/hyprland/link-hyprland.sh
+            );
+            assert nixpkgs.lib.hasInfix "link-hyprland" desktop.config.home.activation.linkHyprland.data;
             desktop.activationPackage;
 
           nixos-module =

@@ -1,3 +1,7 @@
+{ lib, ... }:
+let
+  theme = import ../../theme { inherit lib; };
+in
 {
   imports = [
     ./lualine.nix
@@ -13,7 +17,7 @@
     colorschemes.catppuccin = {
       enable = true;
       settings = {
-        flavour = "mocha";
+        flavour = theme.flavor;
         transparent_background = false;
         integrations = {
           blink_cmp = true;

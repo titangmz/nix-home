@@ -18,7 +18,7 @@ window#waybar {
 }
 
 #workspaces {
-    background: alpha(@surface, 0.9);
+    background: alpha(@surface, @opacity@);
     padding: 3px;
     margin: 2px 0;
     border-radius: 12px;
@@ -52,7 +52,7 @@ window#waybar {
     margin: 2px 0;
 }
 #pulseaudio, #network, #battery, #tray {
-    background: alpha(@surface, 0.9);
+    background: alpha(@surface, @opacity@);
     border: 1px solid alpha(@border, 0.75);
     border-radius: 11px;
     margin: 2px 0;
