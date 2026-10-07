@@ -35,6 +35,6 @@ Later updates:
 just switch-nixos
 ```
 
-After the first Hyprland login, lay out monitors with `just setup-monitors`.
+After the first Hyprland login, lay out monitors with `just setup-monitors`. `just setup-monitors --list` prints the output names.
 
 The working rules are in [docs/rules.md](docs/rules.md). Each module's README sits next to that module.

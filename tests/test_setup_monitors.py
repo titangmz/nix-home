@@ -25,10 +25,13 @@ class SetupMonitorsTests(unittest.TestCase):
         hyprctl.write_text(
             "#!/bin/sh\n"
             "cat <<'EOF'\n"
-            '[{"name":"DP-2","x":2560,"availableModes":'
+            '[{"name":"DP-2","x":2560,"y":0,"width":1920,"height":1080,'
+            '"refreshRate":239.76,"description":"Dell Inc. U2723QE","availableModes":'
             '["1920x1080@60.00Hz","1920x1080@239.76Hz","1280x720@240.00Hz"]},'
-            '{"name":"eDP-1","x":0,"availableModes":'
-            '["2560x1600@60.00Hz","2560x1600@120.00Hz","1920x1080@144.00Hz"]}]\n'
+            '{"name":"eDP-1","x":0,"y":0,"width":2560,"height":1600,'
+            '"refreshRate":120,"description":"BOE 0x095F","availableModes":'
+            '["2560x1600@60.00Hz","2560x1600@120.00Hz","1920x1080@144.00Hz"]},'
+            '{"name":"HDMI-A-9","disabled":true,"x":0,"y":0,"description":"Unused"}]\n'
             "EOF\n"
         )
         hyprctl.chmod(0o755)
@@ -88,10 +91,34 @@ class SetupMonitorsTests(unittest.TestCase):
         self.assertNotEqual(self.invoke('DP-1"; error("oops")').returncode, 0)
         self.assertFalse(self.destination.exists())
 
+    def test_list_prints_names_without_writing_a_layout(self):
+        result = self.invoke("--list")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertLess(result.stdout.index("eDP-1"), result.stdout.index("DP-2"))
+        self.assertLess(result.stdout.index("DP-2"), result.stdout.index("HDMI-A-9"))
+        self.assertIn("2560x1600 @ 120.00Hz", result.stdout)
+        self.assertIn("BOE 0x095F", result.stdout)
+        self.assertIn("Dell Inc. U2723QE", result.stdout)
+        self.assertIn("disabled", result.stdout)
+        self.assertIn("Pass these names", result.stdout)
+        self.assertFalse(self.destination.exists())
+
+    def test_list_rejects_layout_arguments(self):
+        result = self.invoke("--list", "--force")
+        self.assertEqual(result.returncode, 2)
+        self.assertFalse(self.destination.exists())
+        result = self.invoke("--list", "DP-2")
+        self.assertEqual(result.returncode, 2)
+        self.assertFalse(self.destination.exists())
+
     def test_unknown_output_does_not_create_a_layout(self):
-        result = self.invoke("HDMI-A-9")
+        result = self.invoke("DP-9")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Output not found", result.stderr)
+        self.assertFalse(self.destination.exists())
+        missing_modes = self.invoke("HDMI-A-9")
+        self.assertNotEqual(missing_modes.returncode, 0)
+        self.assertIn("Output not found", missing_modes.stderr)
         self.assertFalse(self.destination.exists())
 
 

@@ -3,25 +3,34 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<'EOF'
-Usage: setup-monitors.sh [--force] [LEFT_OUTPUT RIGHT_OUTPUT ...]
+Usage: setup-monitors.sh [--list | --force] [LEFT_OUTPUT RIGHT_OUTPUT ...]
 
 Write a machine-local Hyprland monitor layout. With no output names, connected
 outputs are ordered from left to right using their current positions. Pass names
-only when that order is wrong. A repeat that would write the same file succeeds
-and leaves it in place. --force replaces an existing layout.
+only when that order is wrong. --list prints each output name with its mode,
+position, and description, and does not write a layout. A repeat that would
+write the same file succeeds and leaves it in place. --force replaces an
+existing layout.
 EOF
 }
 
 force=false
+list=false
 outputs=()
 while (($#)); do
   case "$1" in
     --force) force=true; shift ;;
+    --list) list=true; shift ;;
     -h|--help) usage; exit 0 ;;
     -*) usage; exit 2 ;;
     *) outputs+=("$1"); shift ;;
   esac
 done
+
+if [[ "$list" == true && ( "$force" == true || ${#outputs[@]} -gt 0 ) ]]; then
+  usage
+  exit 2
+fi
 
 for output in "${outputs[@]+"${outputs[@]}"}"; do
   if [[ ! "$output" =~ ^[A-Za-z0-9._:-]+$ ]]; then
@@ -47,6 +56,43 @@ if ! monitor_json=$(hyprctl -j monitors all); then
   exit 1
 fi
 
+if [[ "$list" == true ]]; then
+  count=0
+  printf '%-16s  %-24s  %-12s  %s\n' "NAME" "MODE" "POSITION" "DESCRIPTION"
+  while IFS=$'\t' read -r name width height refresh x y description disabled; do
+    [[ -n "$name" ]] || continue
+    count=$((count + 1))
+    if [[ "$disabled" == "true" ]]; then
+      mode="disabled"
+    else
+      mode=$(printf '%sx%s @ %.2fHz' "$width" "$height" "$refresh")
+    fi
+    printf '%-16s  %-24s  %-12s  %s\n' "$name" "$mode" "${x},${y}" "$description"
+  done < <(
+    jq -r '
+      sort_by([(.disabled == true), (.x // 0), (.y // 0), .name])
+      | .[]
+      | [
+          .name,
+          ((.width // 0) | tostring),
+          ((.height // 0) | tostring),
+          ((.refreshRate // 0) | tostring),
+          ((.x // 0) | tostring),
+          ((.y // 0) | tostring),
+          (.description // ((.make // "") + " " + (.model // ""))),
+          (if .disabled == true then "true" else "false" end)
+        ]
+      | @tsv
+    ' <<< "$monitor_json"
+  )
+  if ((count == 0)); then
+    printf 'No connected outputs found.\n' >&2
+    exit 1
+  fi
+  printf 'Pass these names from left to right when that order is wrong.\n'
+  exit 0
+fi
+
 if ((${#outputs[@]} == 0)); then
   mapfile -t outputs < <(
     jq -r '[.[] | select(.disabled != true)] | sort_by([.x // 0, .name]) | .[].name' <<< "$monitor_json"
@@ -60,7 +106,7 @@ fi
 
 best_mode_for() {
   local output="$1"
-  jq -r --arg output "$output" '.[] | select(.name == $output) | .availableModes[]' <<< "$monitor_json" |
+  jq -r --arg output "$output" '.[] | select(.name == $output) | .availableModes[]?' <<< "$monitor_json" |
     while IFS= read -r mode; do
       if [[ "$mode" =~ ^([0-9]+)x([0-9]+)@([0-9.]+)Hz$ ]]; then
         printf '%d %s %s\n' "$((BASH_REMATCH[1] * BASH_REMATCH[2]))" "${BASH_REMATCH[3]}" "$mode"

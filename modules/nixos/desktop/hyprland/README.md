@@ -6,6 +6,6 @@
 
 English (`us`) and Persian (`ir`) are the keyboard layouts. Super+Space switches them.
 
-Software cursors are enabled here. Optional `~/.config/hypr/local.lua` can add machine binds. `just setup-monitors` writes `~/.config/hypr/local_monitors.lua`.
+Software cursors are enabled here. Optional `~/.config/hypr/local.lua` can add machine binds. `just setup-monitors --list` prints output names. `just setup-monitors` writes `~/.config/hypr/local_monitors.lua`.
 
 hyprbars loads from `/etc/hyprland-plugins/libhyprbars.so`. Waybar's layer is blurred so it matches the window title bars.

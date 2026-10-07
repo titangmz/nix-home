@@ -11,7 +11,7 @@ Portable Home Manager is the shared layer. The NixOS desktop profile imports it,
 
 Hyprland behavior lives in `modules/nixos/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch-nixos`, then `just reload`.
 
-Software cursors are the shared default. Monitor names stay out of git. `just setup-monitors` orders the live outputs left to right. Pass names only when that order is wrong. `--force` replaces an existing layout.
+Software cursors are the shared default. Monitor names stay out of git. `just setup-monitors` orders the live outputs left to right. `just setup-monitors --list` prints each output name with its description and position. Pass names only when that order is wrong. `--force` replaces an existing layout.
 
 Optional local files are loaded when they exist and are not managed:
 
