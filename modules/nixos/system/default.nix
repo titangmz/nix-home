@@ -68,6 +68,8 @@
     ];
   };
 
+  # Bazaar and Warehouse are native clients of the Flatpak service above.
+  # They install and manage Flatpak apps; they are not Flatpaks themselves.
   environment.systemPackages = with pkgs; [
     kitty
     firefox
@@ -75,6 +77,8 @@
     hypridle
     thunar
     imv
+    bazaar
+    warehouse
   ];
 
   # Keep the compositor-matched plugin at a stable path. Hyprland Lua loads it
