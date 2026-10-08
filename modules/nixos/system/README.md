@@ -1,4 +1,12 @@
-# Finding libraries for nix-ld
+# System
+
+## Docker
+
+`virtualisation.docker.enable` in `default.nix` starts the daemon and installs the Docker CLI. Compose is a plugin in that package, so the command is `docker compose`. The shell alias `dco` already points at it.
+
+The socket is owned by the `docker` group. `users.users.xray.extraGroups` adds that user to the group. Log in again after switching so the session picks it up.
+
+## Finding libraries for nix-ld
 
 nix-ld loads a dynamically linked ELF that was not built by Nix. The interpreter `/lib64/ld-linux-x86-64.so.2` is the nix-ld stub. It searches `NIX_LD_LIBRARY_PATH`, which is `/run/current-system/sw/share/nix-ld/lib`.
 

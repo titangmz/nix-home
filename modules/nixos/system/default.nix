@@ -46,6 +46,15 @@
 
   services.flatpak.enable = true;
 
+  # Docker stays on NixOS. The package includes the Compose plugin, so
+  # `docker compose` works. The account itself stays in machine.nix; this
+  # module only adds that user to the docker group.
+  virtualisation.docker = {
+    enable = true;
+    package = pkgs.docker.override { composeSupport = true; };
+  };
+  users.users.xray.extraGroups = [ "docker" ];
+
   # Audio
   security.rtkit.enable = true;
 

@@ -1,6 +1,8 @@
 # NixOS
 
-`modules/nixos/system` is imported by the machine's `/etc/nixos/configuration.nix`. It enables flakes, nix-ld, Hyprland, greetd with tuigreet, portals, audio, DConf, Tumbler, Flatpak, and the system session packages: Firefox, Kitty, Thunar, imv, hyprlock, hypridle, Bazaar, and Warehouse. Bazaar and Warehouse are the native Flatpak store and manager. hyprbars is installed at `/etc/hyprland-plugins/libhyprbars.so`.
+`modules/nixos/system` is imported by the machine's `/etc/nixos/configuration.nix`. It enables flakes, nix-ld, Hyprland, greetd with tuigreet, portals, audio, DConf, Tumbler, Flatpak, Docker, and the system session packages: Firefox, Kitty, Thunar, imv, hyprlock, hypridle, Bazaar, and Warehouse. Bazaar and Warehouse are the native Flatpak store and manager. hyprbars is installed at `/etc/hyprland-plugins/libhyprbars.so`.
+
+Docker starts with the system and installs the CLI with the Compose plugin, so `docker compose` is the command. The module adds user `xray` to the `docker` group. The account itself stays in `/etc/nixos/machine.nix`. Log in again after switching so the group applies.
 
 nix-ld also exposes glib, alsa-lib, Wayland, libdrm, libgbm, libglvnd, libX11, and the Vulkan loader. The Zed Flatpak leaves its sandbox and runs the bundled editor on the host, and that binary needs those libraries. `system/README.md` is how to find the libraries for any other binary and add them to that list.
 
