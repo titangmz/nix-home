@@ -54,7 +54,13 @@ in
 
   programs.bash = {
     enable = true;
-    initExtra = lib.mkAfter "exec ${pkgs.zsh}/bin/zsh";
+    initExtra = lib.mkAfter ''
+      if [[ "''${BASH_SOURCE[1]:-}" == *nix-shell* ]]; then
+        PROMPT_COMMAND='exec ${pkgs.zsh}/bin/zsh'
+        return
+      fi
+      exec ${pkgs.zsh}/bin/zsh
+    '';
   };
 
   programs.atuin = {
