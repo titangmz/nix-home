@@ -174,6 +174,7 @@
               == "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so";
             assert moduleConfig.programs.dconf.enable;
             assert moduleConfig.services.flatpak.enable;
+            assert moduleConfig.services.openssh.enable;
             assert moduleConfig.virtualisation.docker.enable;
             assert moduleConfig.virtualisation.docker.package.pname == "docker";
             assert moduleConfig.users.users.xray.extraGroups == [ "docker" ];

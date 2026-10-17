@@ -1,5 +1,10 @@
 # System
 
+## SSH
+
+`services.openssh.enable` starts the OpenSSH server. Host-specific networking,
+firewall rules, users, and authorized keys remain in `/etc/nixos/machine.nix`.
+
 ## Docker
 
 `virtualisation.docker.enable` in `default.nix` starts the daemon and installs the Docker CLI. Compose is a plugin in that package, so the command is `docker compose`. The shell alias `dco` already points at it.
