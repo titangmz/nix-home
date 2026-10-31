@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 {
   home.packages = with pkgs; [
+    stdenv.cc
     rustc
     cargo
     rust-analyzer
