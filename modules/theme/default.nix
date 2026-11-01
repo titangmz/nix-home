@@ -28,6 +28,10 @@ let
     size = 5;
     passes = 3;
   };
+  ghostty = {
+    opacity = "0.75";
+    blurRadius = 40;
+  };
   tokens = colors // {
     inherit opacity opacityHex;
     blurSize = toString blur.size;
@@ -40,6 +44,7 @@ in
     opacity
     opacityHex
     blur
+    ghostty
     ;
   flavor = "mocha";
   accent = "mauve";

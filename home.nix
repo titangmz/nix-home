@@ -8,6 +8,7 @@
     ./modules/tmux
     ./modules/development
     ./modules/chat
+    ./modules/ghostty
     ./modules/v2rayn
     ./modules/proxychains
     ./modules/neovim
