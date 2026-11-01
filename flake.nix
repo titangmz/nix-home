@@ -101,6 +101,8 @@
             assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
             assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
             assert server.config.programs.nixvim.enable;
+            assert !server.config.programs.zoxide.enable;
+            assert server.config.programs.zsh.oh-my-zsh.plugins == [ "z" ];
             assert lib.all (pname: !(hasPackage server pname)) [
               "codex"
               "cargo"
@@ -157,6 +159,8 @@
               assert hasPackage workstation "codex";
               assert hasPackage workstation "v2rayn";
               assert hasPackage workstation "proxychains-ng";
+              assert workstation.config.programs.zoxide.enable;
+              assert workstation.config.programs.zsh.oh-my-zsh.plugins == [ ];
               assert lib.hasInfix "socks5 127.0.0.1 10808" (
                 builtins.readFile workstation.config.home.file.".proxychains/proxychains.conf".source
               );

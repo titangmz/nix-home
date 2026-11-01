@@ -2,6 +2,8 @@
 
 Zsh, the Bash handoff to Zsh, Atuin, and the Roundy prompt. Prompt colors come from `modules/theme`.
 
+Directory jumping uses the Oh My Zsh `z` plugin, unless the profile enables `modules/zoxide`.
+
 Atuin is initialized only in Zsh. Up keeps normal history. Automatic sync is off.
 
 When running inside Kitty, `ssh` uses Kitty's SSH kitten when available. It

@@ -23,7 +23,8 @@ in
     enable = true;
     oh-my-zsh = {
       enable = true;
-      plugins = [ "z" ];
+      # zoxide provides `z` where it is enabled; two would keep two histories.
+      plugins = lib.optional (!config.programs.zoxide.enable) "z";
     };
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;

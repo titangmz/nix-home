@@ -7,5 +7,6 @@
     ../modules/chat
     ../modules/v2rayn
     ../modules/proxychains
+    ../modules/zoxide
   ];
 }

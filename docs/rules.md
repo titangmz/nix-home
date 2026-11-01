@@ -3,7 +3,7 @@
 Home Manager configurations are built from profiles in `profiles/`. `profiles/default.nix` lists the profiles a machine can switch to and the systems each one supports. The other files there are layers that profiles import:
 
 - `base.nix` holds identity and the terminal core: the shell and prompt, CLI tools, Git, tmux, Neovim, and scripts. Every profile includes it.
-- `workstation.nix` is base plus the Neovim AI module, development tools, chat, v2rayN, and proxychains. Every profile except `server` includes it.
+- `workstation.nix` is base plus the Neovim AI module, development tools, chat, v2rayN, proxychains, and zoxide. Every profile except `server` includes it.
 - `server` is base alone. `pc` is the workstation. `mac` adds Ghostty. `nixos` adds `modules/nixos/desktop`.
 
 Exactly one layer or profile imports each module. Put a module in the lowest layer that every profile including it should have. A new profile is one file in `profiles/` and one line in `profiles/default.nix`. Give it a flake check for what it must and must not contain.
