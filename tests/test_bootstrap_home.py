@@ -18,7 +18,7 @@ class BootstrapHomeTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="nix-home-bootstrap-home-")
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.repo = self.root / "repo"
         self.repo.mkdir()
         shutil.copy2(SCRIPT, self.repo / "bootstrap-home.sh")
@@ -27,7 +27,7 @@ class BootstrapHomeTests(unittest.TestCase):
         switch = self.repo / "switch.sh"
         switch.write_text(
             f"#!{BASH}\n"
-            "printf 'switch\\n' >> \"$BOOTSTRAP_HOME_TEST_LOG\"\n"
+            "printf 'switch%s\\n' \"${1:+ $*}\" >> \"$BOOTSTRAP_HOME_TEST_LOG\"\n"
             "exit \"${BOOTSTRAP_HOME_TEST_SWITCH_EXIT:-0}\"\n"
         )
         switch.chmod(0o755)
@@ -43,9 +43,9 @@ class BootstrapHomeTests(unittest.TestCase):
             BOOTSTRAP_HOME_TEST_LOG=str(self.log),
         )
 
-    def invoke(self):
+    def invoke(self, *args):
         return subprocess.run(
-            [BASH, str(self.repo / "bootstrap-home.sh")],
+            [BASH, str(self.repo / "bootstrap-home.sh"), *args],
             cwd=self.root, env=self.env, text=True, capture_output=True,
         )
 
@@ -79,6 +79,17 @@ class BootstrapHomeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         line = (nix_dir / "nix.conf").read_text().strip()
         self.assertEqual(line, "experimental-features = nix-command flakes")
+
+    def test_profile_is_passed_to_switch(self):
+        result = self.invoke("server")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.log.read_text().splitlines(), ["switch server"])
+
+    def test_extra_arguments_are_rejected(self):
+        result = self.invoke("server", "pc")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Usage: bootstrap-home.sh [PROFILE]", result.stderr)
+        self.assertFalse(self.log.exists())
 
 
 if __name__ == "__main__":

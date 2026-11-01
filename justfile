@@ -4,17 +4,17 @@ set positional-arguments := true
 default:
     @just --list
 
-# Apply the portable Home Manager configuration.
+# Apply a Home Manager profile. Name it once; later runs reuse it.
 switch *args:
     ./switch.sh "$@"
 
-# Build and activate NixOS, then apply the Hyprland home configuration.
+# Build and activate NixOS, then apply the nixos profile.
 switch-nixos *args:
     ./switch-nixos.sh "$@"
 
-# First-time setup for a Home Manager-only machine.
-bootstrap:
-    ./bootstrap-home.sh
+# First-time setup for a non-NixOS machine, for example `just bootstrap server`.
+bootstrap *args:
+    ./bootstrap-home.sh "$@"
 
 # First-time setup for a NixOS machine.
 bootstrap-nixos:

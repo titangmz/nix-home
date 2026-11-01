@@ -85,14 +85,16 @@ function M.apply()
     local was_insert = vim.api.nvim_get_mode().mode:sub(1, 1) == "i"
     tree(geometry.tree)
     local term = require("workspace.terminal")
-    local ai = require("workspace.ai")
-    local shared = geometry.ai_dock == "bottom" and state.ai and state.terminal
+    -- The AI dock exists only in profiles that import modules/neovim/ai.
+    local has_ai, ai = pcall(require, "workspace.ai")
+    local show_ai = has_ai and state.ai
+    local shared = geometry.ai_dock == "bottom" and show_ai and state.terminal
     if state.terminal and geometry.tools and (not shared or state.bottom == "terminal") then
       term.show()
     else term.hide() end
-    if state.ai and geometry.tools and (not shared or state.bottom == "ai") then
+    if show_ai and geometry.tools and (not shared or state.bottom == "ai") then
       ai.show(false, geometry.ai_dock)
-    else ai.hide() end
+    elseif has_ai then ai.hide() end
     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
       local ft = vim.bo[vim.api.nvim_win_get_buf(win)].filetype
       local edge = ft == "neo-tree" and "left" or (ft == "sidekick_terminal" and geometry.ai_dock)

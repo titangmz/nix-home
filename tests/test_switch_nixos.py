@@ -58,7 +58,7 @@ class NixosSwitchTests(unittest.TestCase):
         self.assertEqual(self.calls(), [
             "rebuild.sh build|DBUS=unix:path=/stale/session/bus",
             "rebuild.sh switch|DBUS=unix:path=/stale/session/bus",
-            f"switch.sh --profile nixos-hyprland -b nix-home-backup|DBUS=unix:path={self.runtime}/bus",
+            f"switch.sh nixos -b nix-home-backup|DBUS=unix:path={self.runtime}/bus",
         ])
         self.assertEqual((self.config_home / "nix-home/root").read_text(), f"{self.repo}\n")
 
@@ -67,7 +67,7 @@ class NixosSwitchTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.calls(), [
             "rebuild.sh build|DBUS=unix:path=/stale/session/bus",
-            "switch.sh --profile nixos-hyprland --dry-run -b nix-home-backup|DBUS=unix:path=/stale/session/bus",
+            "switch.sh nixos --dry-run -b nix-home-backup|DBUS=unix:path=/stale/session/bus",
         ])
         self.assertFalse((self.config_home / "nix-home/root").exists())
 

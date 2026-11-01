@@ -1,8 +1,13 @@
 # Rules
 
-Portable Home Manager is the shared layer. The NixOS desktop profile imports it, then adds the desktop. A package belongs in one layer.
+Home Manager configurations are built from profiles in `profiles/`. `profiles/default.nix` lists the profiles a machine can switch to and the systems each one supports. The other files there are layers that profiles import:
 
-- Portable modules own CLI tools, Git, the shell, tmux, Neovim, scripts, and the theme.
+- `base.nix` holds identity and the terminal core: the shell and prompt, CLI tools, Git, tmux, Neovim, and scripts. Every profile includes it.
+- `workstation.nix` is base plus the Neovim AI module, development tools, chat, v2rayN, and proxychains. Every profile except `server` includes it.
+- `server` is base alone. `pc` is the workstation. `mac` adds Ghostty. `nixos` adds `modules/nixos/desktop`.
+
+Exactly one layer or profile imports each module. Put a module in the lowest layer that every profile including it should have. A new profile is one file in `profiles/` and one line in `profiles/default.nix`. Give it a flake check for what it must and must not contain.
+
 - `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds user `xray` to the `docker` group. The account itself stays in `machine.nix`.
 - `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, Waybar, Rofi, Mako, and wallpaper.
 - Users, hardware, hostname, networking, and `system.stateVersion` stay in `/etc/nixos/machine.nix`. This repo does not register machines.

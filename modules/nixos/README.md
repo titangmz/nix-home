@@ -6,6 +6,6 @@ Docker starts with the system and installs the CLI with the Compose plugin, so `
 
 nix-ld also exposes glib, alsa-lib, Wayland, libdrm, libgbm, libglvnd, libX11, and the Vulkan loader. The Zed Flatpak leaves its sandbox and runs the bundled editor on the host, and that binary needs those libraries. `system/README.md` is how to find the libraries for any other binary and add them to that list.
 
-`modules/nixos/desktop` is the Home Manager half, imported only by `profiles/nixos-hyprland.nix`. It adds GTK, Kitty config, Hyprland, Waybar, Rofi, Mako, and wallpaper.
+`modules/nixos/desktop` is the Home Manager half, imported only by `profiles/nixos.nix`. It adds GTK, Kitty config, Hyprland, Waybar, Rofi, Mako, and wallpaper.
 
 `./bootstrap-nixos.sh` preserves the generated configuration as `/etc/nixos/machine.nix`, installs a wrapper that imports this module, and applies the system and desktop. Later updates use `just switch-nixos`. Both can be run again.

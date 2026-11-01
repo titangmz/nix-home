@@ -7,7 +7,6 @@
     ./git.nix
     ./languages.nix
     ./workspace
-    ./ai
   ];
 
   programs.nixvim.enable = true;

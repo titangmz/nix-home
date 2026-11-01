@@ -3,8 +3,8 @@ set -euo pipefail
 
 REPO_DIR=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 
-if (($#)); then
-  printf 'Usage: bootstrap-home.sh\n' >&2
+if (($# > 1)); then
+  printf 'Usage: bootstrap-home.sh [PROFILE]\n' >&2
   exit 1
 fi
 if [[ -e /etc/NIXOS && "${NIX_HOME_BOOTSTRAP_HOME_TEST:-}" != "1" ]]; then
@@ -45,4 +45,4 @@ fi
 mkdir -p "$config_home/nix-home"
 printf '%s\n' "$REPO_DIR" > "$config_home/nix-home/root"
 
-exec "$REPO_DIR/switch.sh"
+exec "$REPO_DIR/switch.sh" "$@"

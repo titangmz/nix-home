@@ -22,12 +22,11 @@
       ...
     }:
     let
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-darwin"
-        "x86_64-darwin"
-      ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+      lib = nixpkgs.lib;
+      # profiles/default.nix maps each switchable profile to its systems.
+      profiles = import ./profiles;
+      supportedSystems = lib.unique (lib.concatLists (lib.attrValues profiles));
+      forAllSystems = lib.genAttrs supportedSystems;
       pkgsFor = system: import nixpkgs { inherit system; };
       mkHome =
         system: profile:
@@ -43,9 +42,15 @@
     {
       nixosModules.desktop = import ./modules/nixos/system;
 
-      homeConfigurations = (forAllSystems (system: mkHome system ./home.nix)) // {
-        nixos-hyprland = mkHome "x86_64-linux" ./profiles/nixos-hyprland.nix;
-      };
+      # One configuration per profile and supported system, named `<profile>-<system>`.
+      homeConfigurations = lib.listToAttrs (
+        lib.concatLists (
+          lib.mapAttrsToList (
+            name: systems:
+            map (system: lib.nameValuePair "${name}-${system}" (mkHome system ./profiles/${name}.nix)) systems
+          ) profiles
+        )
+      );
 
       apps = forAllSystems (system: {
         home-manager = {
@@ -59,33 +64,64 @@
         system:
         let
           pkgs = pkgsFor system;
-          home = self.homeConfigurations.${system};
-          editor = home.config.programs.nixvim;
-          mappingKeys = map (mapping: "${mapping.mode}:${mapping.key}") editor.keymaps;
+          supports = name: builtins.elem system profiles.${name};
+          homeFor = name: self.homeConfigurations."${name}-${system}";
+          hasPackage = home: pname: lib.any (pkg: (pkg.pname or "") == pname) home.config.home.packages;
+          desktopFiles = [
+            "hypr/hyprland.lua"
+            "kitty/kitty.conf"
+            "waybar/config.jsonc"
+            "waybar/style.css"
+            "rofi/config.rasi"
+            "mako/config"
+          ];
+          writesNoDesktopFiles =
+            home: lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) desktopFiles;
+          neovimCheck =
+            name: home: script:
+            let
+              editor = home.config.programs.nixvim;
+            in
+            pkgs.runCommand name { } ''
+              export XDG_CONFIG_HOME="$TMPDIR/config"
+              export XDG_CACHE_HOME="$TMPDIR/cache"
+              export XDG_DATA_HOME="$TMPDIR/data"
+              export XDG_STATE_HOME="$TMPDIR/state"
+              mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+              ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${script}"
+              touch "$out"
+            '';
+          server = homeFor "server";
+          workstationName = if pkgs.stdenv.isDarwin then "mac" else "pc";
         in
         {
-          home =
-            assert !home.config.gtk.enable;
-            assert home.config.xfconf.settings == { };
-            assert nixpkgs.lib.hasInfix ".local/bin" home.config.programs.zsh.envExtra;
-            assert nixpkgs.lib.hasInfix "command kitten ssh" home.config.programs.zsh.initContent;
-            assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
-              "hypr/hyprland.lua"
-              "kitty/kitty.conf"
-              "waybar/config.jsonc"
-              "waybar/style.css"
-              "rofi/config.rasi"
-              "mako/config"
+          server =
+            assert !server.config.gtk.enable;
+            assert writesNoDesktopFiles server;
+            assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
+            assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
+            assert server.config.programs.nixvim.enable;
+            assert lib.all (pname: !(hasPackage server pname)) [
+              "codex"
+              "cargo"
+              "fnm"
+              "profanity"
+              "v2rayn"
+              "proxychains-ng"
             ];
-            assert !(builtins.hasAttr "xfconfd" home.config.systemd.user.services);
-            assert !(builtins.hasAttr "desktop-wallpaper" home.config.systemd.user.services);
-            assert nixpkgs.lib.any (pkg: (pkg.pname or "") == "v2rayn") home.config.home.packages;
-            assert nixpkgs.lib.any (pkg: (pkg.pname or "") == "proxychains-ng") home.config.home.packages;
-            assert nixpkgs.lib.hasInfix "socks5 127.0.0.1 10808" (
-              builtins.readFile home.config.home.file.".proxychains/proxychains.conf".source
-            );
-            home.activationPackage;
+            assert !(builtins.hasAttr ".proxychains/proxychains.conf" server.config.home.file);
+            server.activationPackage;
+          server-neovim = neovimCheck "server-neovim-smoke-check" server ./tests/neovim-server.lua;
           switch =
+            let
+              # These scripts drive NixOS and Hyprland, which run only on Linux.
+              linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
+                NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
+                REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
+                BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
+                SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
+              '';
+            in
             pkgs.runCommand "switch-script-check"
               {
                 nativeBuildInputs = [
@@ -96,59 +132,73 @@
               }
               ''
                 SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
-                NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
-                REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
-                BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
                 BOOTSTRAP_HOME_SCRIPT=${./bootstrap-home.sh} python ${./tests/test_bootstrap_home.py}
-                SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
+                ${linuxScriptTests}
                 SCRIPTS_DIR=${./scripts} python -m unittest discover \
                   --start-directory ${./tests/scripts} \
                   --pattern 'test_*.py'
                 touch "$out"
               '';
-          neovim =
-            assert builtins.length mappingKeys == builtins.length (nixpkgs.lib.unique mappingKeys);
-            pkgs.runCommand "neovim-smoke-check" { } ''
-              export XDG_CONFIG_HOME="$TMPDIR/config"
-              export XDG_CACHE_HOME="$TMPDIR/cache"
-              export XDG_DATA_HOME="$TMPDIR/data"
-              export XDG_STATE_HOME="$TMPDIR/state"
-              mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
-              ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${./tests/neovim.lua}"
-              touch "$out"
-            '';
         }
-        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-          nixos-hyprland =
+        // lib.optionalAttrs (supports workstationName) (
+          let
+            workstation = homeFor workstationName;
+            editor = workstation.config.programs.nixvim;
+            mappingKeys = map (mapping: "${mapping.mode}:${mapping.key}") editor.keymaps;
+          in
+          {
+            # pc on Linux, mac on macOS: both are the workstation layer plus at most one module.
+            workstation =
+              assert !workstation.config.gtk.enable;
+              assert workstation.config.xfconf.settings == { };
+              assert writesNoDesktopFiles workstation;
+              assert !(builtins.hasAttr "xfconfd" workstation.config.systemd.user.services);
+              assert !(builtins.hasAttr "desktop-wallpaper" workstation.config.systemd.user.services);
+              assert hasPackage workstation "codex";
+              assert hasPackage workstation "v2rayn";
+              assert hasPackage workstation "proxychains-ng";
+              assert lib.hasInfix "socks5 127.0.0.1 10808" (
+                builtins.readFile workstation.config.home.file.".proxychains/proxychains.conf".source
+              );
+              assert
+                pkgs.stdenv.isDarwin
+                == builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" workstation.config.home.file;
+              workstation.activationPackage;
+            neovim =
+              assert builtins.length mappingKeys == builtins.length (lib.unique mappingKeys);
+              neovimCheck "neovim-smoke-check" workstation ./tests/neovim.lua;
+          }
+        )
+        // lib.optionalAttrs (supports "nixos") {
+          nixos =
             let
-              desktop = self.homeConfigurations.nixos-hyprland;
+              desktop = homeFor "nixos";
             in
             assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
             assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
             assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
             assert builtins.hasAttr "kitty/kitty.conf" desktop.config.xdg.configFile;
-            assert nixpkgs.lib.hasInfix "background_opacity 0.6"
-              desktop.config.xdg.configFile."kitty/kitty.conf".text;
-            assert nixpkgs.lib.hasInfix "no_hardware_cursors = true" (
+            assert lib.hasInfix "background_opacity 0.6" desktop.config.xdg.configFile."kitty/kitty.conf".text;
+            assert lib.hasInfix "no_hardware_cursors = true" (
               builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
             );
-            assert nixpkgs.lib.hasInfix "hl.plugin.load(\"/etc/hyprland-plugins/libhyprbars.so\")" (
+            assert lib.hasInfix "hl.plugin.load(\"/etc/hyprland-plugins/libhyprbars.so\")" (
               builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
             );
-            assert nixpkgs.lib.hasInfix "require(\"style\")" (
+            assert lib.hasInfix "require(\"style\")" (
               builtins.readFile ./modules/nixos/desktop/hyprland/hyprland.lua
             );
-            assert nixpkgs.lib.hasInfix "nix-home/root" (
+            assert lib.hasInfix "nix-home/root" (
               builtins.readFile ./modules/nixos/desktop/hyprland/link-hyprland.sh
             );
-            assert nixpkgs.lib.hasInfix "link-hyprland" desktop.config.home.activation.linkHyprland.data;
+            assert lib.hasInfix "link-hyprland" desktop.config.home.activation.linkHyprland.data;
             desktop.activationPackage;
 
           nixos-module =
             let
               moduleConfig = self.nixosModules.desktop {
                 inherit pkgs;
-                lib = nixpkgs.lib;
+                inherit lib;
               };
               features = moduleConfig.nix.settings.experimental-features.content;
             in
@@ -168,8 +218,7 @@
               ]);
             assert moduleConfig.services.greetd.enable;
             assert moduleConfig.services.greetd.useTextGreeter;
-            assert nixpkgs.lib.hasInfix "start-hyprland"
-              moduleConfig.services.greetd.settings.default_session.command;
+            assert lib.hasInfix "start-hyprland" moduleConfig.services.greetd.settings.default_session.command;
             assert
               moduleConfig.environment.etc."hyprland-plugins/libhyprbars.so".source
               == "${pkgs.hyprlandPlugins.hyprbars}/lib/libhyprbars.so";

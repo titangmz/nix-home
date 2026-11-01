@@ -21,41 +21,64 @@ encode_path() {
 }
 FLAKE="path:$(encode_path "$REPO_DIR")"
 
-# Opt in explicitly; platform detection alone must not enable a desktop.
+usage() {
+  printf 'Usage: switch.sh [PROFILE] [Home Manager options]\n' >&2
+}
+
+# A profile named once is remembered; the platform alone never picks one.
+config_home="${XDG_CONFIG_HOME:-${HOME:?HOME is not set}/.config}"
+PROFILE_FILE="$config_home/nix-home/profile"
 PROFILE=""
-HM_ARGS=()
-while (($#)); do
-  case "$1" in
-    --profile)
-      if (($# < 2)) || [[ "$2" != "nixos-hyprland" ]]; then
-        printf 'Usage: switch.sh [--profile nixos-hyprland] [Home Manager options]\n' >&2
-        exit 1
-      fi
-      PROFILE="$2"
-      shift 2
-      ;;
-    *) HM_ARGS+=("$1"); shift ;;
-  esac
-done
+if (($#)) && [[ "$1" != -* ]]; then
+  PROFILE="$1"
+  shift
+elif [[ -f "$PROFILE_FILE" ]]; then
+  PROFILE=$(<"$PROFILE_FILE")
+fi
+if [[ -n "$PROFILE" && ! "$PROFILE" =~ ^[a-z0-9-]+$ ]]; then
+  usage
+  exit 1
+fi
 
 if ! command -v nix >/dev/null 2>&1; then
   printf 'Nix is required. See README.md for setup instructions.\n' >&2
   exit 1
 fi
 
-# Read the platform of the installed Nix; home configuration evaluation stays pure.
-SYSTEM=$(nix eval --impure --raw --expr builtins.currentSystem)
-case "$SYSTEM" in
-  x86_64-linux|aarch64-darwin|x86_64-darwin) ;;
-  *)
-    printf 'Unsupported system: %s. Supported: x86_64-linux, aarch64-darwin, x86_64-darwin.\n' "$SYSTEM" >&2
-    exit 1
-    ;;
-esac
+# Print the platform of the installed Nix, then the profiles that support it.
+# Home configuration evaluation itself stays pure.
+detected=$(NIX_HOME_PROFILES="$REPO_DIR/profiles/default.nix" nix eval --impure --raw --expr '
+  let
+    system = builtins.currentSystem;
+    profiles = import (/. + builtins.getEnv "NIX_HOME_PROFILES");
+    here = builtins.filter (name: builtins.elem system profiles.${name}) (builtins.attrNames profiles);
+  in
+  builtins.concatStringsSep " " ([ system ] ++ here)
+')
+read -r SYSTEM AVAILABLE <<<"$detected"
 
-if [[ -n "$PROFILE" && "$SYSTEM" != "x86_64-linux" ]]; then
-  printf 'Profile %s requires x86_64-linux; detected %s.\n' "$PROFILE" "$SYSTEM" >&2
+if [[ -z "$AVAILABLE" ]]; then
+  printf 'No profile supports %s.\n' "$SYSTEM" >&2
+  exit 1
+fi
+if [[ -z "$PROFILE" ]]; then
+  usage
+  printf 'No profile selected. Profiles for %s: %s\n' "$SYSTEM" "$AVAILABLE" >&2
+  exit 1
+fi
+if [[ " $AVAILABLE " != *" $PROFILE "* ]]; then
+  printf 'Profile %s is not available on %s. Profiles for %s: %s\n' "$PROFILE" "$SYSTEM" "$SYSTEM" "$AVAILABLE" >&2
   exit 1
 fi
 
-exec nix run "${FLAKE}#home-manager" -- switch --flake "${FLAKE}#${PROFILE:-$SYSTEM}" "${HM_ARGS[@]}"
+# A preview must not change which profile later switches use.
+preview=false
+for arg in "$@"; do
+  if [[ "$arg" == --dry-run ]]; then preview=true; fi
+done
+if [[ "$preview" == false ]]; then
+  mkdir -p "$(dirname "$PROFILE_FILE")"
+  printf '%s\n' "$PROFILE" > "$PROFILE_FILE"
+fi
+
+exec nix run "${FLAKE}#home-manager" -- switch --flake "${FLAKE}#${PROFILE}-${SYSTEM}" "$@"
