@@ -4,6 +4,14 @@ fi
 
 
 # SSH
+ssh() {
+    if [[ "$TERM" == "xterm-kitty" ]] && (( $+commands[kitten] )); then
+        command kitten ssh "$@"
+    else
+        command ssh "$@"
+    fi
+}
+
 alias x="ssh xray"
 
 # Eza

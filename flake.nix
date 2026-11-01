@@ -68,6 +68,7 @@
             assert !home.config.gtk.enable;
             assert home.config.xfconf.settings == { };
             assert nixpkgs.lib.hasInfix ".local/bin" home.config.programs.zsh.envExtra;
+            assert nixpkgs.lib.hasInfix "command kitten ssh" home.config.programs.zsh.initContent;
             assert nixpkgs.lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) [
               "hypr/hyprland.lua"
               "kitty/kitty.conf"
