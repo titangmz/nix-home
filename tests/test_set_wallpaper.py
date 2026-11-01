@@ -9,8 +9,8 @@ import unittest
 
 
 SCRIPT = Path(os.environ.get(
-    "SCRIPTS_DIR", Path(__file__).resolve().parents[2] / "scripts"
-)) / "set-wallpaper"
+    "SET_WALLPAPER_SCRIPT", Path(__file__).resolve().parents[1] / "modules/scripts/bin/set-wallpaper"
+))
 BASH = shutil.which("bash")
 
 

@@ -8,4 +8,4 @@ nix-ld also exposes glib, alsa-lib, Wayland, libdrm, libgbm, libglvnd, libX11, a
 
 `modules/nixos/desktop` is the Home Manager half, imported only by `profiles/nixos.nix`. It adds GTK, Kitty config, Hyprland, Waybar, Rofi, Mako, and wallpaper.
 
-`./bootstrap.sh nixos` preserves the generated configuration as `/etc/nixos/machine.nix`, installs a wrapper that imports this module, and applies the system and desktop. Later updates use `just switch-nixos`. Both can be run again.
+`./bootstrap.sh nixos` preserves the generated configuration as `/etc/nixos/machine.nix`, installs a wrapper that imports this module, and applies the system and desktop. Later updates use `just switch`, which switches the system before the desktop. Both can be run again.

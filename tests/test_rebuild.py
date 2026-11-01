@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 
-SCRIPT = Path(os.environ.get("REBUILD_SCRIPT", Path(__file__).resolve().parents[1] / "rebuild.sh"))
+SCRIPT = Path(os.environ.get("REBUILD_SCRIPT", Path(__file__).resolve().parents[1] / "scripts/rebuild.sh"))
 BASH = shutil.which("bash")
 
 

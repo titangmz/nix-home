@@ -18,12 +18,7 @@ fail() {
 }
 
 is_nixos() {
-  [[ "$(uname -s)" == Linux && (-e /etc/NIXOS || "${NIX_HOME_BOOTSTRAP_TEST:-}" == 1) ]]
-}
-
-remember_checkout() {
-  mkdir -p "$config_home/nix-home"
-  printf '%s\n' "$REPO_DIR" > "$config_home/nix-home/root"
+  [[ "$(uname -s)" == Linux && (-e /etc/NIXOS || "${NIX_HOME_TEST_NIXOS:-}" == 1) ]]
 }
 
 sha256() {
@@ -45,7 +40,7 @@ install_nix() {
   fi
   # Flakes replace channels, so no nixpkgs channel is added.
   sh "$installer" --daemon --yes --no-channel-add
-  # bootstrap_home ends in exec, which skips the EXIT trap.
+  # The bootstrap ends in exec, which skips the EXIT trap.
   rm -f -- "$installer"
 }
 
@@ -90,23 +85,14 @@ enable_flakes() {
   fi
 }
 
-# Any profile except nixos: Home Manager only, on any OS including NixOS.
-bootstrap_home() {
-  ensure_nix
-  enable_flakes
-  remember_checkout
-  exec "$REPO_DIR/switch.sh" "$PROFILE"
-}
-
-# The nixos profile: wire /etc/nixos to the system module, then switch both halves.
-bootstrap_nixos() {
+# The nixos profile also needs /etc/nixos to import the system module.
+wire_nixos() {
   local config_dir=${NIX_HOME_BOOTSTRAP_CONFIG_DIR:-/etc/nixos}
   local system_config="$config_dir/configuration.nix"
   local machine_config="$config_dir/machine.nix"
   local module="$REPO_DIR/modules/nixos/system"
   local marker="# Managed by nix-home bootstrap."
 
-  is_nixos || fail 'The nixos profile needs NixOS. Install NixOS first, or choose another profile.'
   [[ -f "$system_config" ]] || fail "Missing $system_config; generate the machine configuration first."
   [[ -f "$module/default.nix" ]] || fail "Missing shared NixOS module: $module/default.nix"
   case "$REPO_DIR" in
@@ -116,7 +102,7 @@ bootstrap_nixos() {
   esac
 
   local sudo=(sudo) install_owner=(-o root -g root)
-  if [[ "${NIX_HOME_BOOTSTRAP_NO_SUDO:-}" == "1" ]]; then
+  if [[ "${NIX_HOME_NO_SUDO:-}" == 1 ]]; then
     sudo=()
     install_owner=()
   elif ! command -v sudo >/dev/null 2>&1; then
@@ -155,16 +141,7 @@ bootstrap_nixos() {
     "${sudo[@]}" cp --preserve=mode,ownership,timestamps -- "$system_config" "$machine_config"
   fi
   "${sudo[@]}" install "${install_owner[@]}" -m 0644 -- "$wrapper" "$system_config"
-
-  remember_checkout
-
-  if ((${#sudo[@]} == 0)); then
-    NIX_HOME_NIXOS_NO_SUDO=1 NIX_HOME_NIXOS_TEST="${NIX_HOME_BOOTSTRAP_TEST:-}" \
-      "$REPO_DIR/switch-nixos.sh"
-  else
-    "$REPO_DIR/switch-nixos.sh"
-  fi
-  printf 'NixOS bootstrap complete.\n'
+  rm -rf -- "$temp_dir"
 }
 
 if (($# != 1)) || [[ ! "$1" =~ ^[a-z0-9-]+$ ]]; then
@@ -174,9 +151,13 @@ PROFILE=$1
 if ((EUID == 0)); then
   fail 'Run bootstrap.sh as the target user, not as root; it uses sudo where needed.'
 fi
-
-if [[ "$PROFILE" == nixos ]]; then
-  bootstrap_nixos
-else
-  bootstrap_home
+if [[ "$PROFILE" == nixos ]] && ! is_nixos; then
+  fail 'The nixos profile needs NixOS. Install NixOS first, or choose another profile.'
 fi
+
+ensure_nix
+enable_flakes
+if [[ "$PROFILE" == nixos ]]; then
+  wire_nixos
+fi
+exec "$REPO_DIR/scripts/switch.sh" "$PROFILE"

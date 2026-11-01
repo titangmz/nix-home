@@ -9,7 +9,7 @@ import unittest
 
 
 SCRIPT = Path(os.environ.get(
-    "SETUP_MONITORS_SCRIPT", Path(__file__).resolve().parents[1] / "setup-monitors.sh"
+    "SETUP_MONITORS_SCRIPT", Path(__file__).resolve().parents[1] / "scripts/setup-monitors.sh"
 ))
 BASH = shutil.which("bash")
 

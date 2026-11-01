@@ -1,5 +1,5 @@
 # Profiles a machine can switch to, and the systems each one supports.
-# The flake builds `<profile>-<system>` from this table, and switch.sh reads it.
+# The flake builds `<profile>-<system>` from this table, and scripts/switch.sh reads it.
 # Other files in this directory are layers that profiles import.
 let
   linux = [

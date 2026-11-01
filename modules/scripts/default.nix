@@ -4,7 +4,7 @@
   ...
 }:
 let
-  scriptsDirectory = ../../scripts;
+  scriptsDirectory = ./bin;
   scripts = lib.filterAttrs (
     name: type:
     !(lib.hasPrefix "." name)

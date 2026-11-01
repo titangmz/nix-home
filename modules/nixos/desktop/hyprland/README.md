@@ -2,7 +2,7 @@
 
 `hyprland.lua` is the compositor behavior. Activation symlinks `~/.config/hypr/hyprland.lua` to this checkout file and writes `style.lua` from `modules/theme`.
 
-`just reload` applies Lua edits. A theme edit needs `just switch-nixos`, then `just reload`.
+`just reload` applies Lua edits. A theme edit needs `just switch`, then `just reload`.
 
 English (`us`) and Persian (`ir`) are the keyboard layouts. Super+Space switches them.
 

@@ -20,7 +20,7 @@ Clone this repository and run the bootstrap with a profile. It installs Nix with
 ./bootstrap.sh server
 ```
 
-The profile is remembered. Later updates:
+The profile is remembered. Files already in the way are renamed with a `.nix-home-backup` suffix instead of failing the switch. Later updates:
 
 ```bash
 just switch
@@ -36,11 +36,7 @@ Install NixOS so `/etc/nixos/configuration.nix` exists, clone this repository, t
 ./bootstrap.sh nixos
 ```
 
-Later updates:
-
-```bash
-just switch-nixos
-```
+Later updates use the same `just switch`. On this profile it switches the system, then the desktop.
 
 After the first Hyprland login, lay out monitors with `just setup-monitors`. `just setup-monitors --list` prints the output names.
 

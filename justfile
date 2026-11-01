@@ -4,13 +4,9 @@ set positional-arguments := true
 default:
     @just --list
 
-# Apply a Home Manager profile. Name it once; later runs reuse it.
+# Apply a profile; name it once and later runs reuse it. The nixos profile switches the system too.
 switch *args:
-    ./switch.sh "$@"
-
-# Build and activate NixOS, then apply the nixos profile.
-switch-nixos *args:
-    ./switch-nixos.sh "$@"
+    ./scripts/switch.sh "$@"
 
 # First-time setup: install Nix if needed, then apply a profile, for example `just bootstrap server`.
 bootstrap profile:
@@ -34,7 +30,7 @@ wallpaper:
 
 # Create a machine-local monitor layout. Names are optional.
 setup-monitors *args:
-    ./setup-monitors.sh "$@"
+    ./scripts/setup-monitors.sh "$@"
 
 # Exit the current Hyprland session.
 logout:

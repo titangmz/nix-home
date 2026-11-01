@@ -118,9 +118,8 @@
             let
               # These scripts drive NixOS and Hyprland, which run only on Linux.
               linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
-                NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
-                REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
-                SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
+                REBUILD_SCRIPT=${./scripts/rebuild.sh} python ${./tests/test_rebuild.py}
+                SETUP_MONITORS_SCRIPT=${./scripts/setup-monitors.sh} python ${./tests/test_setup_monitors.py}
               '';
             in
             pkgs.runCommand "switch-script-check"
@@ -132,12 +131,10 @@
                 ];
               }
               ''
-                SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
+                SWITCH_SCRIPT=${./scripts/switch.sh} python ${./tests/test_switch.py}
                 BOOTSTRAP_SCRIPT=${./bootstrap.sh} python ${./tests/test_bootstrap.py}
                 ${linuxScriptTests}
-                SCRIPTS_DIR=${./scripts} python -m unittest discover \
-                  --start-directory ${./tests/scripts} \
-                  --pattern 'test_*.py'
+                SET_WALLPAPER_SCRIPT=${./modules/scripts/bin/set-wallpaper} python ${./tests/test_set_wallpaper.py}
                 touch "$out"
               '';
         }

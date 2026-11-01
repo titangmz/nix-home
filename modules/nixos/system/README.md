@@ -107,7 +107,7 @@ A `RUNPATH` back into that library's own store dependencies means those dependen
 Append the confirmed attributes to `programs.nix-ld.libraries` in `default.nix`. Copy that same list into the assertion in `flake.nix`. The assertion compares the list this module returns. NixOS still concatenates it with nix-ld's built-in set.
 
 ```bash
-just switch-nixos
+just switch
 ```
 
 After activation the new files are in `/run/current-system/sw/share/nix-ld/lib`. A new login picks up `NIX_LD_LIBRARY_PATH`. An existing session can export `NIX_LD` and `NIX_LD_LIBRARY_PATH` from step 4, with `extra` empty, once the system profile contains the libraries.

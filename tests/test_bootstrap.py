@@ -34,10 +34,10 @@ class BootstrapTestCase(unittest.TestCase):
         shutil.copy2(SCRIPT, self.repo / "bootstrap.sh")
         self.config_home = self.root / "config"
         self.log = self.root / "calls"
-        for name in ["switch.sh", "switch-nixos.sh"]:
-            executable(self.repo / name,
-                       f"printf '%s\\n' \"{name} $*\" >> \"$BOOTSTRAP_TEST_LOG\"\n"
-                       "exit \"${BOOTSTRAP_TEST_SWITCH_EXIT:-0}\"\n")
+        (self.repo / "scripts").mkdir()
+        executable(self.repo / "scripts/switch.sh",
+                   "printf '%s\\n' \"switch.sh $*\" >> \"$BOOTSTRAP_TEST_LOG\"\n"
+                   "exit \"${BOOTSTRAP_TEST_SWITCH_EXIT:-0}\"\n")
         self.env = dict(os.environ, XDG_CONFIG_HOME=str(self.config_home), BOOTSTRAP_TEST_LOG=str(self.log))
 
     def invoke(self, *args):
@@ -65,7 +65,7 @@ class BootstrapHomeTests(BootstrapTestCase):
         self.tmp.mkdir()
         self.env.update(PATH=f"{self.nix_bin}:{self.bin}", TMPDIR=str(self.tmp),
                         NIX_HOME_BOOTSTRAP_NIX_PROFILE=str(self.nix_profile))
-        self.env.pop("NIX_HOME_BOOTSTRAP_TEST", None)
+        self.env.pop("NIX_HOME_TEST_NIXOS", None)
 
     def without_nix(self):
         self.env["PATH"] = str(self.bin)
@@ -81,7 +81,7 @@ class BootstrapHomeTests(BootstrapTestCase):
         executable(self.bin / "sha256sum", "printf '%s  %s\\n' \"$BOOTSTRAP_TEST_HASH\" \"$1\"\n")
         self.env["BOOTSTRAP_TEST_HASH"] = PINNED_HASH
 
-    def test_ten_runs_keep_one_flakes_line_and_the_checkout_root(self):
+    def test_ten_runs_keep_one_flakes_line(self):
         for _ in range(10):
             result = self.invoke("server")
             self.assertEqual(result.returncode, 0, result.stderr)
@@ -89,7 +89,6 @@ class BootstrapHomeTests(BootstrapTestCase):
         self.assertEqual(nix_conf.count("experimental-features"), 1)
         self.assertIn("nix-command", nix_conf)
         self.assertIn("flakes", nix_conf)
-        self.assertEqual((self.config_home / "nix-home/root").read_text(), f"{self.repo}\n")
         self.assertEqual(self.calls(), ["switch.sh server"] * 10)
 
     def test_existing_features_are_not_duplicated(self):
@@ -158,7 +157,7 @@ class BootstrapHomeTests(BootstrapTestCase):
 
     @unittest.skipUnless(ON_LINUX, "NixOS detection needs Linux")
     def test_other_profiles_on_nixos_skip_the_system_wiring(self):
-        self.env["NIX_HOME_BOOTSTRAP_TEST"] = "1"
+        self.env["NIX_HOME_TEST_NIXOS"] = "1"
         self.env["NIX_HOME_BOOTSTRAP_CONFIG_DIR"] = str(self.root / "etc/nixos")
         result = self.invoke("server")
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -176,8 +175,11 @@ class BootstrapNixosTests(BootstrapTestCase):
         self.config_dir.mkdir(parents=True)
         self.original = "{ ... }: { imports = [ ./hardware-configuration.nix ]; system.stateVersion = \"26.05\"; }\n"
         (self.config_dir / "configuration.nix").write_text(self.original)
-        self.env.update(NIX_HOME_BOOTSTRAP_CONFIG_DIR=str(self.config_dir),
-                        NIX_HOME_BOOTSTRAP_NO_SUDO="1", NIX_HOME_BOOTSTRAP_TEST="1")
+        nix_bin = self.root / "nix-bin"
+        nix_bin.mkdir()
+        executable(nix_bin / "nix", "exit 0\n")
+        self.env.update(PATH=f"{nix_bin}:{os.environ['PATH']}", NIX_HOME_BOOTSTRAP_CONFIG_DIR=str(self.config_dir),
+                        NIX_HOME_NO_SUDO="1", NIX_HOME_TEST_NIXOS="1")
 
     def test_bootstrap_preserves_machine_and_activates_in_order(self):
         result = self.invoke("nixos")
@@ -187,8 +189,7 @@ class BootstrapNixosTests(BootstrapTestCase):
         self.assertIn("# Managed by nix-home bootstrap.", wrapper)
         self.assertIn("./machine.nix", wrapper)
         self.assertIn(str(self.repo / "modules/nixos/system"), wrapper)
-        self.assertEqual(self.calls(), ["switch-nixos.sh "])
-        self.assertEqual((self.config_home / "nix-home/root").read_text(), f"{self.repo}\n")
+        self.assertEqual(self.calls(), ["switch.sh nixos"])
 
     def test_second_run_is_idempotent(self):
         self.assertEqual(self.invoke("nixos").returncode, 0)
@@ -198,13 +199,13 @@ class BootstrapNixosTests(BootstrapTestCase):
         result = self.invoke("nixos")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(machine.read_text(), "machine settings changed after bootstrap\n")
-        self.assertEqual(self.calls(), ["switch-nixos.sh "])
+        self.assertEqual(self.calls(), ["switch.sh nixos"])
 
     def test_build_failure_prevents_activation(self):
         self.env["BOOTSTRAP_TEST_SWITCH_EXIT"] = "23"
         result = self.invoke("nixos")
         self.assertEqual(result.returncode, 23)
-        self.assertEqual(self.calls(), ["switch-nixos.sh "])
+        self.assertEqual(self.calls(), ["switch.sh nixos"])
 
     def test_existing_machine_file_is_not_overwritten(self):
         machine = self.config_dir / "machine.nix"
