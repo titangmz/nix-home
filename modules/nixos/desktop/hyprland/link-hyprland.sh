@@ -4,7 +4,7 @@ config_home="@CONFIG_HOME@"
 root_file="$config_home/nix-home/root"
 hypr_dir="$config_home/hypr"
 if [[ ! -r "$root_file" ]]; then
-  printf 'Missing %s. Run ./bootstrap-nixos.sh or ./bootstrap-home.sh from the checkout.\n' "$root_file" >&2
+  printf 'Missing %s. Run ./bootstrap.sh nixos from the checkout.\n' "$root_file" >&2
   exit 1
 fi
 root=$(tr -d '\n' < "$root_file")

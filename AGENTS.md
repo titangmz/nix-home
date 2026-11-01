@@ -25,6 +25,7 @@ Run a single flake check:
 ```bash
 nix build "path:$PWD#checks.aarch64-darwin.server"      # or .server-neovim, .workstation, .neovim, .switch
 nix build "path:$PWD#checks.x86_64-linux.nixos-module"  # x86_64-linux only: also .nixos
+# aarch64-linux also has .pi
 ```
 
 The shell-script tests are plain Python `unittest` files. Without env vars they target the scripts in this checkout, so they run directly:
@@ -37,12 +38,12 @@ python3 -m unittest discover -s tests/scripts -p 'test_*.py'
 
 ## Architecture
 
-**Profiles are import trees.** `server` is `base.nix`. `pc`, `mac`, and `nixos` build on `workstation.nix`, which builds on `base.nix`. The module system loads a file once even when several layers import it. The layer rules are in `docs/rules.md`.
+**Profiles are import trees.** `server` is `base.nix`, and `pi` is `server`. `pc`, `mac`, and `nixos` build on `workstation.nix`, which builds on `base.nix`. The module system loads a file once even when several layers import it. The layer rules are in `docs/rules.md`.
 
 **Flake outputs** (`flake.nix`):
 - `homeConfigurations.<profile>-<system>` for every pair in `profiles/default.nix`, such as `server-aarch64-linux` or `mac-aarch64-darwin`. The supported systems are whatever that table lists.
 - `switch.sh [PROFILE]` saves the profile to `~/.config/nix-home/profile` and reuses it later. With neither an argument nor a saved profile it fails and lists the profiles for this system. Platform detection never picks a profile.
-- `nixosModules.desktop` is `modules/nixos/system`. This repo does not define `nixosConfigurations`. `bootstrap-nixos.sh` moves the generated config to `/etc/nixos/machine.nix` and writes a wrapper `configuration.nix` that imports it plus the module by absolute checkout path. `rebuild.sh` runs `nixos-rebuild` against `/etc/nixos/configuration.nix`, so the system uses the machine's own nixpkgs pin, not the flake lock.
+- `nixosModules.desktop` is `modules/nixos/system`. This repo does not define `nixosConfigurations`. `bootstrap.sh nixos` moves the generated config to `/etc/nixos/machine.nix` and writes a wrapper `configuration.nix` that imports it plus the module by absolute checkout path. `rebuild.sh` runs `nixos-rebuild` against `/etc/nixos/configuration.nix`, so the system uses the machine's own nixpkgs pin, not the flake lock.
 - `codexPackage` is passed via `extraSpecialArgs` from a separate `nixpkgs-codex` input. Only Codex uses that input.
 
 **NixOS split.** `modules/nixos/system` is a NixOS module (session, services, system packages, Docker). `modules/nixos/desktop` is a Home Manager module (GTK, Kitty config, Hyprland, Waybar, Rofi, Mako, wallpaper). Users, hardware, hostname, networking, and `stateVersion` live only in `/etc/nixos/machine.nix`.

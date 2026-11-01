@@ -12,13 +12,9 @@ switch *args:
 switch-nixos *args:
     ./switch-nixos.sh "$@"
 
-# First-time setup for a non-NixOS machine, for example `just bootstrap server`.
-bootstrap *args:
-    ./bootstrap-home.sh "$@"
-
-# First-time setup for a NixOS machine.
-bootstrap-nixos:
-    ./bootstrap-nixos.sh
+# First-time setup: install Nix if needed, then apply a profile, for example `just bootstrap server`.
+bootstrap profile:
+    ./bootstrap.sh "$1"
 
 # Format Nix files.
 fmt:

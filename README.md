@@ -5,18 +5,19 @@ Personal Home Manager configuration for servers, workstations, and one NixOS Hyp
 | Profile | For | Systems |
 | --- | --- | --- |
 | `server` | headless machines: shell, CLI tools, Git, tmux, Neovim | Linux and macOS, x86_64 and aarch64 |
+| `pi` | Raspberry Pi: the server stack | aarch64-linux |
 | `pc` | Linux workstations | x86_64-linux |
 | `mac` | macOS workstations | aarch64-darwin, x86_64-darwin |
 | `nixos` | the NixOS Hyprland desktop | x86_64-linux |
 
 `profiles/default.nix` lists the profiles, and `profiles/base.nix` holds the username, home directory, and Git identity.
 
-## Home Manager-only
+## Setup
 
-Install Nix, clone this repository, then run it with a profile:
+Clone this repository and run the bootstrap with a profile. It installs Nix with the official installer when Nix is missing, then applies the profile. It is safe to run again.
 
 ```bash
-./bootstrap-home.sh server
+./bootstrap.sh server
 ```
 
 The profile is remembered. Later updates:
@@ -25,12 +26,14 @@ The profile is remembered. Later updates:
 just switch
 ```
 
-## NixOS
+Any profile except `nixos` works on any supported OS, NixOS included.
+
+## NixOS desktop
 
 Install NixOS so `/etc/nixos/configuration.nix` exists, clone this repository, then run:
 
 ```bash
-./bootstrap-nixos.sh
+./bootstrap.sh nixos
 ```
 
 Later updates:

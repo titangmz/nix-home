@@ -120,7 +120,6 @@
               linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
                 NIXOS_SWITCH_SCRIPT=${./switch-nixos.sh} python ${./tests/test_switch_nixos.py}
                 REBUILD_SCRIPT=${./rebuild.sh} python ${./tests/test_rebuild.py}
-                BOOTSTRAP_SCRIPT=${./bootstrap-nixos.sh} python ${./tests/test_bootstrap_nixos.py}
                 SETUP_MONITORS_SCRIPT=${./setup-monitors.sh} python ${./tests/test_setup_monitors.py}
               '';
             in
@@ -134,7 +133,7 @@
               }
               ''
                 SWITCH_SCRIPT=${./switch.sh} python ${./tests/test_switch.py}
-                BOOTSTRAP_HOME_SCRIPT=${./bootstrap-home.sh} python ${./tests/test_bootstrap_home.py}
+                BOOTSTRAP_SCRIPT=${./bootstrap.sh} python ${./tests/test_bootstrap.py}
                 ${linuxScriptTests}
                 SCRIPTS_DIR=${./scripts} python -m unittest discover \
                   --start-directory ${./tests/scripts} \
@@ -173,6 +172,17 @@
               neovimCheck "neovim-smoke-check" workstation ./tests/neovim.lua;
           }
         )
+        // lib.optionalAttrs (supports "pi") {
+          # The Pi runs the server stack; it may add to it but not drop from it.
+          pi =
+            let
+              pi = homeFor "pi";
+              names = home: map (pkg: pkg.name) home.config.home.packages;
+            in
+            assert lib.all (name: builtins.elem name (names pi)) (names server);
+            assert pi.config.programs.zsh.oh-my-zsh.plugins == server.config.programs.zsh.oh-my-zsh.plugins;
+            pi.activationPackage;
+        }
         // lib.optionalAttrs (supports "nixos") {
           nixos =
             let
