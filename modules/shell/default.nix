@@ -47,7 +47,8 @@ in
       R_MODE=dir-only
       R_CODE=1
       R_MIN=4
-      R_USR='%n'
+      # user@host, with the hostname up to its first dot.
+      R_USR='%n@%m'
 
       ${builtins.readFile ./zshrc}
     '';
