@@ -2,7 +2,7 @@
 
 [v2rayN](https://github.com/2dust/v2rayN) 7.25.4 for Linux and macOS Home Manager, including the NixOS desktop. The package is the official build, with the Xray core. The local inbound is SOCKS on `127.0.0.1:10808`.
 
-Run `v2rayN`. On macOS the same build is linked at `~/Applications/v2rayN.app`.
+Run `v2rayN`. On macOS, Home Manager copies the app into `~/Applications/Home Manager Apps`, where Spotlight finds it. A copy, unlike a link into `/nix/store`, never gets macOS's app protection on store paths, so garbage collection can always delete old versions.
 
 The Linux launcher puts ICU and the X11 libraries on `LD_LIBRARY_PATH`. The .NET runtime loads those by name, and NixOS does not put them on the default library path.
 

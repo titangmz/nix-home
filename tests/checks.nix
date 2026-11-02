@@ -149,6 +149,10 @@ in
       assert
         pkgs.stdenv.isDarwin
         == builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" workstation.config.home.file;
+      # macOS apps must be copied, never linked into /nix/store, or opening one
+      # lets macOS protect the store path and garbage collection fails on it.
+      assert pkgs.stdenv.isDarwin -> workstation.config.targets.darwin.copyApps.enable;
+      assert !(lib.any (lib.hasPrefix "Applications/") (builtins.attrNames workstation.config.home.file));
       workstation.activationPackage;
     neovim =
       assert builtins.length mappingKeys == builtins.length (lib.unique mappingKeys);
