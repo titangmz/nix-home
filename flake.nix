@@ -67,6 +67,18 @@
           supports = name: builtins.elem system profiles.${name};
           homeFor = name: self.homeConfigurations."${name}-${system}";
           hasPackage = home: pname: lib.any (pkg: (pkg.pname or "") == pname) home.config.home.packages;
+          # Neovim keeps these on its own PATH, outside home.packages.
+          hasEditorTool =
+            home: prefix:
+            lib.any (pkg: lib.hasPrefix prefix pkg.name) home.config.programs.nixvim.extraPackages;
+          developmentEditorTools = [
+            "rust-analyzer"
+            "rustc"
+            "cargo"
+            "clippy"
+            "rustfmt"
+            "nixd"
+          ];
           desktopFiles = [
             "hypr/hyprland.lua"
             "kitty/kitty.conf"
@@ -112,6 +124,7 @@
               "proxychains-ng"
             ];
             assert !(builtins.hasAttr ".proxychains/proxychains.conf" server.config.home.file);
+            assert lib.all (tool: !(hasEditorTool server tool)) developmentEditorTools;
             server.activationPackage;
           server-neovim = neovimCheck "server-neovim-smoke-check" server ./tests/neovim-server.lua;
           switch =
@@ -156,6 +169,7 @@
               assert hasPackage workstation "v2rayn";
               assert hasPackage workstation "proxychains-ng";
               assert workstation.config.programs.zoxide.enable;
+              assert lib.all (hasEditorTool workstation) developmentEditorTools;
               assert workstation.config.programs.zsh.oh-my-zsh.plugins == [ ];
               assert lib.hasInfix "socks5 127.0.0.1 10808" (
                 builtins.readFile workstation.config.home.file.".proxychains/proxychains.conf".source

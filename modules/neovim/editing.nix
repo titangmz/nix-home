@@ -26,8 +26,6 @@
       autoread = true;
       clipboard = "unnamedplus";
     };
-    # Also expose the development module's Rust tools to the standalone editor
-    # wrapper used by flake checks.
     extraPackages =
       with pkgs;
       [
@@ -35,10 +33,6 @@
         shfmt
         nodePackages.prettier
         taplo
-        rustfmt
-        rustc
-        cargo
-        clippy
       ]
       ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
         pkgs.wl-clipboard
@@ -76,7 +70,6 @@
         enable = true;
         settings = {
           formatters_by_ft = {
-            rust = [ "rustfmt" ];
             nix = [ "nixfmt" ];
             sh = [ "shfmt" ];
             bash = [ "shfmt" ];

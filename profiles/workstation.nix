@@ -3,6 +3,7 @@
   imports = [
     ./base.nix
     ../modules/neovim/ai
+    ../modules/neovim/development
     ../modules/development
     ../modules/chat
     ../modules/v2rayn

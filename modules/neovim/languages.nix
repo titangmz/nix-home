@@ -15,18 +15,6 @@ in
     plugins.lsp = {
       enable = true;
       servers = {
-        rust_analyzer = {
-          enable = true;
-          installCargo = false;
-          installRustc = false;
-          installRustfmt = false;
-          settings = {
-            check.command = "clippy";
-            cargo.allFeatures = true;
-            cargo.sysrootSrc = "${pkgs.rustPlatform.rustLibSrc}";
-          };
-        };
-        nixd.enable = true;
         bashls.enable = true;
         jsonls.enable = true;
         yamlls.enable = true;

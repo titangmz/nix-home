@@ -2,6 +2,8 @@
 
 Nixvim configuration for editing, navigation, UI, Git, languages, and the workspace layout.
 
+`development` adds rust-analyzer, the Rust tools, and nixd. Like `ai`, only `profiles/workstation.nix` imports it.
+
 `ai` adds the Codex CLI and its dock. It is not imported by `default.nix`; `profiles/workstation.nix` imports it, so servers do without it. The workspace layout skips the AI dock when the module is absent.
 
 `pcall(require, "local")` loads an optional `lua/local.lua` from the Neovim config when that file exists.
