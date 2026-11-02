@@ -1,5 +1,7 @@
 { lib, pkgs, ... }:
-
+let
+  user = import ../../../profiles/user.nix;
+in
 {
   # The bootstrap starts with nixos-rebuild, then uses the flake-based Home
   # Manager switch after this system configuration has been activated.
@@ -55,7 +57,7 @@
     enable = true;
     package = pkgs.docker.override { composeSupport = true; };
   };
-  users.users.xray.extraGroups = [ "docker" ];
+  users.users.${user.username}.extraGroups = [ "docker" ];
 
   # Audio
   security.rtkit.enable = true;

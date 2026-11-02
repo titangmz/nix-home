@@ -1,5 +1,5 @@
 {
-  description = "Home Manager configuration for xray's Linux and macOS machines";
+  description = "Home Manager profiles for Linux and macOS machines and a NixOS desktop";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";

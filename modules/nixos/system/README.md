@@ -9,7 +9,7 @@ firewall rules, users, and authorized keys remain in `/etc/nixos/machine.nix`.
 
 `virtualisation.docker.enable` in `default.nix` starts the daemon and installs the Docker CLI. Compose is a plugin in that package, so the command is `docker compose`. The shell alias `dco` already points at it.
 
-The socket is owned by the `docker` group. `users.users.xray.extraGroups` adds that user to the group. Log in again after switching so the session picks it up.
+The socket is owned by the `docker` group. The module adds the user named in `profiles/user.nix` to that group. Log in again after switching so the session picks it up.
 
 ## Finding libraries for nix-ld
 

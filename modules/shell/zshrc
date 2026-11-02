@@ -12,8 +12,6 @@ ssh() {
     fi
 }
 
-alias x="ssh xray"
-
 # Eza
 alias l="eza -l --icons --git"
 alias ll="eza -l --icons --git -a"

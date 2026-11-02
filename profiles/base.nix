@@ -1,5 +1,8 @@
 # Layer: identity and the terminal core that every profile shares.
 { config, pkgs, ... }:
+let
+  user = import ./user.nix;
+in
 {
   imports = [
     ../modules/scripts
@@ -10,13 +13,12 @@
     ../modules/neovim
   ];
 
-  home.username = "xray";
+  home.username = user.username;
   home.homeDirectory =
     if pkgs.stdenv.isDarwin then "/Users/${config.home.username}" else "/home/${config.home.username}";
 
   programs.git.settings.user = {
-    name = "Pedram Parsa";
-    email = "titangmz@gmail.com";
+    inherit (user) name email;
   };
 
   # Keep switches quiet; read announcements with `home-manager news`.

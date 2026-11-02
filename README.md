@@ -10,7 +10,7 @@ Personal Home Manager configuration for servers, workstations, and one NixOS Hyp
 | `mac` | macOS workstations | aarch64-darwin, x86_64-darwin |
 | `nixos` | the NixOS Hyprland desktop | x86_64-linux |
 
-`profiles/default.nix` lists the profiles, and `profiles/base.nix` holds the username, home directory, and Git identity.
+`profiles/default.nix` lists the profiles, and `profiles/user.nix` holds the username, name, and email that every profile and the NixOS module use.
 
 ## Setup
 

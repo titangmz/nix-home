@@ -8,7 +8,7 @@ Home Manager configurations are built from profiles in `profiles/`. `profiles/de
 
 Exactly one layer or profile imports each module. Put a module in the lowest layer that every profile including it should have. A new profile is one file in `profiles/` and one line in `profiles/default.nix`. Give it a flake check for what it must and must not contain.
 
-- `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds user `xray` to the `docker` group. The account itself stays in `machine.nix`.
+- `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds the user from `profiles/user.nix` to the `docker` group. The account itself stays in `machine.nix`.
 - `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, Waybar, Rofi, Mako, and wallpaper.
 - Users, hardware, hostname, networking, and `system.stateVersion` stay in `/etc/nixos/machine.nix`. This repo does not register machines.
 

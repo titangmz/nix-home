@@ -224,7 +224,8 @@ in
     assert moduleConfig.services.openssh.enable;
     assert moduleConfig.virtualisation.docker.enable;
     assert moduleConfig.virtualisation.docker.package.pname == "docker";
-    assert moduleConfig.users.users.xray.extraGroups == [ "docker" ];
+    assert
+      moduleConfig.users.users.${(import ../profiles/user.nix).username}.extraGroups == [ "docker" ];
     pkgs.runCommand "nixos-module-check" { } ''
       touch "$out"
     '';
