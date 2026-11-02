@@ -9,7 +9,8 @@ let
     lib.replaceStrings
       [ "@DEFAULT@" "@OVERRIDE_PNG@" "@OVERRIDE_JPG@" "@HYPRPAPER@" ]
       [
-        (toString ./wallpaper.png)
+        # Copy only the image; a path into the repo copy changes with every repo edit.
+        "${./wallpaper.png}"
         "${config.xdg.dataHome}/wallpapers/override.png"
         "${config.xdg.dataHome}/wallpapers/override.jpg"
         "${pkgs.hyprpaper}/bin/hyprpaper"
