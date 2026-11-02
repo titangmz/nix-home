@@ -18,6 +18,11 @@ clean:
     # NixOS keeps system generations under root; refresh the boot menu once they are gone.
     if [ -e /etc/NIXOS ]; then sudo nix-collect-garbage -d && sudo /run/current-system/bin/switch-to-configuration boot; fi
 
+# Update all flake inputs, then run the checks. Switch afterwards to apply.
+update:
+    nix flake update --flake "path:{{justfile_directory()}}"
+    nix flake check "path:{{justfile_directory()}}"
+
 # Format Nix files.
 fmt:
     nix fmt

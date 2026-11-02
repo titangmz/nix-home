@@ -15,6 +15,7 @@ just switch server               # apply a profile; the name is saved for later 
 just switch                      # reapply the saved profile
 just switch --dry-run            # preview; on nixos, builds the system without activating
 just clean                       # delete old generations and unused store paths (no rollback)
+just update                      # update flake inputs, then run the checks
 just reload                      # Hyprland: reload after editing hyprland.lua
 ```
 
