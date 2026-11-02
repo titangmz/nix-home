@@ -1,7 +1,7 @@
--- The server profile has no AI module. Its workspace must still lay out cleanly.
+-- The server editor lacks the development tooling. Its workspace must still lay out cleanly.
 local function check()
   assert(vim.v.errmsg == "", vim.v.errmsg)
-  assert(not pcall(require, "workspace.ai"), "The AI module must not be installed on servers")
+  assert(vim.fn.executable("rust-analyzer") == 0, "Development tooling leaked into the server editor")
   local errors = {}
   vim.notify = function(message, level)
     if level == vim.log.levels.ERROR then table.insert(errors, message) end

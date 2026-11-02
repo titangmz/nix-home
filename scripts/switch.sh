@@ -3,7 +3,7 @@
 # Applies a profile and remembers it. The nixos profile switches the system first.
 set -euo pipefail
 
-REPO_DIR=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
+REPO_DIR=$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
 config_home="${XDG_CONFIG_HOME:-${HOME:?HOME is not set}/.config}"
 PROFILE_FILE="$config_home/nix-home/profile"
 # Existing files that Home Manager would replace are renamed with this suffix.
@@ -63,6 +63,7 @@ command -v nix >/dev/null 2>&1 || fail 'Nix is required. Run ./bootstrap.sh PROF
 
 # Print the platform of the installed Nix, then the profiles that support it.
 # Home configuration evaluation itself stays pure.
+# shellcheck disable=SC2016 # The single-quoted text is a Nix expression.
 detected=$(NIX_HOME_PROFILES="$REPO_DIR/profiles/default.nix" nix eval --impure --raw --expr '
   let
     system = builtins.currentSystem;

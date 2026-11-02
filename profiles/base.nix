@@ -19,6 +19,9 @@
     email = "titangmz@gmail.com";
   };
 
+  # Keep switches quiet; read announcements with `home-manager news`.
+  news.display = "silent";
+
   home.stateVersion = "25.11";
   programs.home-manager.enable = true;
 }

@@ -3,7 +3,7 @@
 # Installs Nix if it is missing, then applies the profile. Every step can run again.
 set -euo pipefail
 
-REPO_DIR=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+REPO_DIR=$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 config_home="${XDG_CONFIG_HOME:-${HOME:?HOME is not set}/.config}"
 
 # The official installer, pinned so every machine runs the same script.

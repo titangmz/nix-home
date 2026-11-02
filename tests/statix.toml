@@ -1,0 +1,2 @@
+# Modules set dotted keys like `programs.zsh` and `programs.bash` side by side on purpose.
+disabled = [ "repeated_keys" ]

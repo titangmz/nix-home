@@ -25,20 +25,12 @@ in
         };
         options = {
           left.size = 30;
-          right.size = 50;
           bottom.size = 8;
         };
         left = [
           {
             ft = "neo-tree";
             title = "Project";
-          }
-        ];
-        right = [
-          {
-            ft = "sidekick_terminal";
-            title = "Codex";
-            filter.__raw = "function(buf) return vim.b[buf].workspace_dock ~= 'bottom' end";
           }
         ];
         bottom = [
@@ -54,11 +46,6 @@ in
           {
             ft = "qf";
             title = "Quickfix";
-          }
-          {
-            ft = "sidekick_terminal";
-            title = "Codex";
-            filter.__raw = "function(buf) return vim.b[buf].workspace_dock == 'bottom' end";
           }
         ];
         wo = {

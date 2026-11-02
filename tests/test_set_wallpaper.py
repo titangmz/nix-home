@@ -9,7 +9,7 @@ import unittest
 
 
 SCRIPT = Path(os.environ.get(
-    "SET_WALLPAPER_SCRIPT", Path(__file__).resolve().parents[1] / "modules/scripts/bin/set-wallpaper"
+    "SET_WALLPAPER_SCRIPT", Path(__file__).resolve().parents[1] / "modules/nixos/desktop/wallpaper/set-wallpaper"
 ))
 BASH = shutil.which("bash")
 

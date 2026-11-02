@@ -5,8 +5,6 @@
     vim
     wget
     unar
-    cowsay
-    lolcat
     bat
     tree
     caddy
@@ -27,13 +25,10 @@
     btop
     ctop
     sshuttle
-    rustscan
     dysk
     netcat
     pass
     gnupg
-    tor
-    torsocks
   ];
 
   xdg.configFile."eza/theme.yml".source = ./eza-theme.yml;

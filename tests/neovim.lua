@@ -7,19 +7,17 @@ local function check()
   assert(vim.v.errmsg == "", vim.v.errmsg)
   local workspace = require("workspace")
   local terminal = require("workspace.terminal")
-  local ai = require("workspace.ai")
   local function mapping(key, mode)
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "Sidekick", "WorkspaceLayout", "WorkspaceRestore" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>e", "<leader>E", "<leader>z", "<leader>l1", "<leader>l4",
-    "<leader>tt", "<leader>to", "<leader>aa", "<leader>af", "<leader>cf", "<leader>rr" }) do
+    "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
   end
-  assert(not vim.tbl_isempty(mapping("<leader>av", "x")))
   assert(mapping("<Tab>").rhs == "<cmd>bnext<CR>")
   assert(mapping("<S-Tab>").rhs == "<cmd>bprevious<CR>")
   assert(vim.tbl_isempty(mapping("<leader>q")))
@@ -27,15 +25,12 @@ local function check()
   assert(vim.tbl_isempty(mapping("<leader>tn")))
   assert(vim.tbl_isempty(mapping("<leader>ts")))
   -- Action prefixes must not delay longer mappings in the same namespace.
-  for _, prefix in ipairs({ "f", "g", "l", "t", "a", "c", "b", "w", "r", "x" }) do
+  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "x" }) do
     assert(vim.tbl_isempty(mapping("<leader>" .. prefix)), "Executable prefix: " .. prefix)
   end
   assert(vim.o.termguicolors and vim.o.undofile)
   assert(not vim.diagnostic.config().virtual_text)
   assert(require("nvim-treesitter.configs").get_module("highlight").enable)
-  assert(not require("sidekick.config").nes.enabled)
-  assert(not require("sidekick.config").cli.mux.enabled)
-  assert(vim.deep_equal(require("sidekick.config").cli.tools.codex.cmd, { "codex" }))
 
   local root = vim.fn.tempname() .. " project with spaces"
   io.stderr:write("neovim: project fixture\n")
@@ -62,37 +57,22 @@ local function check()
   vim.api.nvim_buf_set_lines(buf, 0, 1, false, { "# Unsaved heading" })
   vim.api.nvim_win_set_cursor(main, { 3, 2 })
 
-  -- Replace Codex with an input recorder before any sessions are initialized.
-  local input = root .. "/ai-input"
-  require("sidekick.config").cli.tools.codex = {
-    cmd = { "bash", "--noprofile", "--norc", "-c",
-      'printf "Agent fixture\\nContext recorder\\nNo network\\nProject session\\nDocked tool\\nReady\\n>\\n"; while IFS= read -r line; do printf "%s\\n" "$line" >> "$CODEX_TEST_INPUT"; done' },
-    env = { CODEX_TEST_INPUT = input },
-  }
   vim.o.columns, vim.o.lines = 200, 50
   io.stderr:write("neovim: full layout\n")
   workspace.layout("full")
   settle()
-  local shell, agent = terminal.active(), ai.get()
+  local shell = terminal.active()
   assert(terminal.is_visible() and shell.job_id, "Shell output not docked")
-  assert(agent and agent:is_open() and agent:is_running(), "AI not docked")
   local output_buf = terminal.output_buffer()
   assert(output_buf == shell.bufnr and vim.bo[output_buf].buftype == "terminal", "Output lost native terminal rendering")
   assert(vim.bo[output_buf].readonly and not vim.bo[output_buf].modifiable, "Output is writable")
   assert(not pcall(vim.api.nvim_buf_set_lines, output_buf, 0, 0, false, { "unwanted input" }))
   assert(not shell:is_open(), "Full opened an interactive shell")
-  assert(vim.api.nvim_win_get_config(agent.win).relative == "", "AI floated")
-  assert(agent.cwd == root and shell.dir == root, "Tools disagree on project root")
-  assert(agent.opts.layout == "right")
-  local shell_job, ai_job = shell.job_id, agent.job
-  vim.api.nvim_set_current_win(agent.win)
-  workspace.resize("width", 4)
-  settle()
-  assert(workspace.state().sizes.right == 54, "Panel resize was not remembered")
+  assert(shell.dir == root, "Shell is not in the project root")
+  local shell_job = shell.job_id
   workspace.layout("full")
   settle()
-  assert(terminal.active().job_id == shell_job and ai.get().job == ai_job, "Duplicate processes")
-  assert(vim.api.nvim_win_get_width(agent.win) == 54, "Panel resize was lost")
+  assert(terminal.active().job_id == shell_job, "Duplicate shells")
 
   vim.api.nvim_set_current_win(main)
   io.stderr:write("neovim: focus round-trip\n")
@@ -108,32 +88,32 @@ local function check()
   assert(vim.deep_equal(vim.fn.winlayout(), layout), "Focus changed split topology")
   assert(vim.deep_equal(vim.fn.winsaveview(), view), "Focus lost cursor/view")
   assert(vim.bo[buf].modified and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "# Unsaved heading")
-  assert(shell.job_id == shell_job and agent.job == ai_job, "Focus restarted jobs")
+  assert(shell.job_id == shell_job, "Focus restarted the shell")
 
   workspace.layout("code")
   io.stderr:write("neovim: hide and narrow screen\n")
   settle()
-  assert(not terminal.is_visible() and not agent:is_open(), "Code failed to hide tools")
-  assert(vim.fn.jobwait({ shell_job, ai_job }, 0)[1] == -1, "Hidden shell stopped")
-  assert(agent:is_running(), "Hidden AI stopped")
+  assert(not terminal.is_visible(), "Code failed to hide the shell")
+  assert(vim.fn.jobwait({ shell_job }, 0)[1] == -1, "Hidden shell stopped")
   workspace.layout("full")
   settle()
   vim.o.columns = 100
   workspace.apply()
   settle()
-  assert(workspace.geometry().ai_dock == "bottom")
-  assert(not terminal.is_visible() and agent:is_open(), "Narrow bottom slot is not shared")
-  assert(agent.opts.layout == "bottom")
-  assert(vim.api.nvim_win_get_config(agent.win).relative == "", "Narrow AI floated")
+  assert(not workspace.geometry().tree, "Narrow screen kept the tree")
+  assert(terminal.is_visible(), "Narrow screen hid the shell output")
   assert(vim.api.nvim_win_get_width(workspace.main()) >= 40, "Editor crushed on narrow screen")
   terminal.toggle_output()
   settle()
-  assert(terminal.is_visible() and not agent:is_open(), "Output did not select bottom slot")
+  assert(not terminal.is_visible(), "Output toggle did not hide the output")
+  terminal.toggle_output()
+  settle()
+  assert(terminal.is_visible(), "Output toggle did not show the output")
   vim.o.columns = 200
   workspace.apply()
   settle()
-  assert(terminal.is_visible() and agent:is_open(), "Wide screen failed to restore tools")
-  assert(shell.job_id == shell_job and agent.job == ai_job)
+  assert(workspace.geometry().tree and terminal.is_visible(), "Wide screen failed to restore the layout")
+  assert(shell.job_id == shell_job)
 
   io.stderr:write("neovim: shared shell popup\n")
   vim.api.nvim_set_current_win(main)
@@ -159,24 +139,6 @@ local function check()
   assert(terminal.active().job_id == shell_job, "Reopening replaced the shell")
   terminal.close_popup()
   settle()
-
-  vim.api.nvim_set_current_win(main)
-  ai.send("file")
-  io.stderr:write("neovim: AI context\n")
-  assert(vim.wait(6500, function()
-    return vim.fn.filereadable(input) == 1 and table.concat(vim.fn.readfile(input), "\n"):find("README.md", 1, true)
-  end, 20), "AI received no file context: " .. (vim.fn.filereadable(input) == 1 and table.concat(vim.fn.readfile(input), "\n") or "missing recorder output"))
-  local received = table.concat(vim.fn.readfile(input), "\n")
-  assert(received:find("README.md", 1, true), "AI received wrong file context: " .. received)
-  vim.api.nvim_set_current_win(main)
-  vim.fn.delete(input)
-  vim.api.nvim_win_set_cursor(main, { 3, 0 })
-  vim.cmd("normal! V")
-  ai.send("selection")
-  assert(vim.wait(6500, function()
-    return vim.fn.filereadable(input) == 1 and table.concat(vim.fn.readfile(input), "\n"):find("Some text.", 1, true)
-  end, 20), "AI received no selection")
-  assert(table.concat(vim.fn.readfile(input), "\n"):find("Some text.", 1, true))
 
   -- Review leaves the origin's editor windows and modified buffers intact.
   io.stderr:write("neovim: Git review\n")
@@ -244,7 +206,6 @@ local function check()
   local tab = vim.api.nvim_get_current_tabpage()
   workspace.layout("review")
   assert(vim.api.nvim_get_current_tabpage() == tab, "Non-Git review created a tab")
-  ai.hide()
   assert(vim.v.errmsg == "", vim.v.errmsg)
 end
 

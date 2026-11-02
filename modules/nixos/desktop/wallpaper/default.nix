@@ -21,6 +21,8 @@ in
   config = lib.mkIf pkgs.stdenv.isLinux {
     home.packages = [ pkgs.hyprpaper ];
     xdg.dataFile."wallpapers/wallpaper.png".source = ./wallpaper.png;
+    # The scripts module puts ~/.local/bin on PATH for every profile.
+    home.file.".local/bin/set-wallpaper".source = ./set-wallpaper;
     systemd.user.services.desktop-wallpaper = {
       Unit = {
         Description = "Hyprland wallpaper with a local override";

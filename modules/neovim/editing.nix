@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   programs.nixvim = {
     opts = {
@@ -57,6 +57,47 @@
       nvim-surround.enable = true;
       treesitter = {
         enable = true;
+        # Common languages for servers; modules/neovim/development restores all of them.
+        grammarPackages = lib.mkDefault (
+          with pkgs.vimPlugins.nvim-treesitter.builtGrammars;
+          [
+            bash
+            c
+            caddy
+            css
+            diff
+            dockerfile
+            git_config
+            git_rebase
+            gitattributes
+            gitcommit
+            gitignore
+            go
+            html
+            ini
+            javascript
+            json
+            lua
+            luadoc
+            make
+            markdown
+            markdown_inline
+            nginx
+            nix
+            python
+            query
+            regex
+            rust
+            sql
+            ssh_config
+            toml
+            typescript
+            vim
+            vimdoc
+            xml
+            yaml
+          ]
+        );
         nixvimInjections = true;
         folding = true;
         settings = {

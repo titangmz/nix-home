@@ -104,7 +104,7 @@ A `RUNPATH` back into that library's own store dependencies means those dependen
 
 ## 6. Add them here
 
-Append the confirmed attributes to `programs.nix-ld.libraries` in `default.nix`. Copy that same list into the assertion in `flake.nix`. The assertion compares the list this module returns. NixOS still concatenates it with nix-ld's built-in set.
+Append the confirmed attributes to `programs.nix-ld.libraries` in `default.nix`. Copy that same list into the assertion in `tests/checks.nix`. The assertion compares the list this module returns. NixOS still concatenates it with nix-ld's built-in set.
 
 ```bash
 just switch

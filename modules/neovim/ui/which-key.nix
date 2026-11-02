@@ -6,10 +6,6 @@
         delay = 250;
         spec = [
           {
-            __unkeyed-1 = "<leader>a";
-            group = "AI";
-          }
-          {
             __unkeyed-1 = "<leader>b";
             group = "Buffers";
           }

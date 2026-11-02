@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+# writeShellScript adds the shebang; @NAME@ placeholders are filled by default.nix.
 set -euo pipefail
 
 wallpaper='@DEFAULT@'

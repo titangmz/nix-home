@@ -2,7 +2,7 @@
 {
   imports = [
     ./base.nix
-    ../modules/neovim/ai
+    ../modules/cli/extras
     ../modules/neovim/development
     ../modules/development
     ../modules/chat

@@ -182,7 +182,7 @@ function M.toggle_output()
   local workspace = require("workspace")
   workspace.prepare()
   local state = workspace.state()
-  state.terminal, state.bottom = not M.is_visible(), "terminal"
+  state.terminal = not M.is_visible()
   workspace.apply()
 end
 
@@ -205,7 +205,7 @@ function M.cargo(action)
   local marker = "printf '\\033]51;workspace-task:" .. task_id .. ":%s\\007'"
   local command = "( trap \"" .. marker .. " 130; exit 130\" INT; cd " .. vim.fn.shellescape(root)
     .. " && cargo " .. action .. "; __workspace_exit=$?; " .. marker .. " \"$__workspace_exit\" )\n"
-  workspace.state().terminal, workspace.state().bottom = true, "terminal"
+  workspace.state().terminal = true
   workspace.apply()
   vim.api.nvim_chan_send(term.job_id, command)
   return true

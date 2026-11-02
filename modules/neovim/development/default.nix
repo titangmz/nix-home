@@ -1,8 +1,12 @@
-# Editor tooling for development machines: Rust and the Nix language server.
-# Servers skip it; the Rust compiler and LLVM alone are about 1.5 GiB.
-{ pkgs, ... }:
+# Editor tooling for development machines: Rust, the Nix language server, and
+# syntax parsers for every language. Servers skip it; the Rust compiler and LLVM
+# alone are about 1.5 GiB.
+{ config, pkgs, ... }:
 {
   programs.nixvim = {
+    # nixvim's own default, which the shared editor narrows for servers.
+    plugins.treesitter.grammarPackages =
+      config.programs.nixvim.plugins.treesitter.package.passthru.allGrammars;
     # Also expose the development module's Rust tools to the standalone editor
     # wrapper used by flake checks.
     extraPackages = with pkgs; [

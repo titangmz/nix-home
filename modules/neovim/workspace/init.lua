@@ -21,8 +21,8 @@ function M.state()
     local root = vim.fs.root(dir, ".git") or dir
     root = vim.fs.normalize(vim.fn.fnamemodify(root, ":p")):gsub("/$", "")
     if root == "" then root = "/" end
-    states[tab] = { root = root, layout = "code", tree = true, terminal = false, ai = false, sizes = {},
-      bottom = "terminal", main = vim.api.nvim_get_current_win(), tab = tab }
+    states[tab] = { root = root, layout = "code", tree = true, terminal = false, sizes = {},
+      main = vim.api.nvim_get_current_win(), tab = tab }
     vim.cmd.tcd(vim.fn.fnameescape(root))
   end
   return states[tab]
@@ -56,10 +56,8 @@ end
 
 function M.geometry()
   local state = M.state()
-  local left, right = state.sizes.left or 30, state.sizes.right or 50
-  local tree = state.tree and vim.o.columns >= (state.ai and (84 + left + right) or (82 + left))
-  return { tree = tree, ai_dock = vim.o.columns >= (82 + right) and "right" or "bottom",
-    height = M.terminal_height(), tools = vim.o.lines >= 20 }
+  local tree = state.tree and vim.o.columns >= 82 + (state.sizes.left or 30)
+  return { tree = tree, height = M.terminal_height(), tools = vim.o.lines >= 20 }
 end
 
 local function tree(show, reveal)
@@ -85,20 +83,10 @@ function M.apply()
     local was_insert = vim.api.nvim_get_mode().mode:sub(1, 1) == "i"
     tree(geometry.tree)
     local term = require("workspace.terminal")
-    -- The AI dock exists only in profiles that import modules/neovim/ai.
-    local has_ai, ai = pcall(require, "workspace.ai")
-    local show_ai = has_ai and state.ai
-    local shared = geometry.ai_dock == "bottom" and show_ai and state.terminal
-    if state.terminal and geometry.tools and (not shared or state.bottom == "terminal") then
-      term.show()
-    else term.hide() end
-    if show_ai and geometry.tools and (not shared or state.bottom == "ai") then
-      ai.show(false, geometry.ai_dock)
-    elseif has_ai then ai.hide() end
+    if state.terminal and geometry.tools then term.show() else term.hide() end
     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
       local ft = vim.bo[vim.api.nvim_win_get_buf(win)].filetype
-      local edge = ft == "neo-tree" and "left" or (ft == "sidekick_terminal" and geometry.ai_dock)
-        or (ft == "workspace_terminal" and "bottom")
+      local edge = ft == "neo-tree" and "left" or (ft == "workspace_terminal" and "bottom")
       local size = edge and state.sizes[edge]
       if size then vim.w[win]["edgy_" .. (edge == "bottom" and "height" or "width")] = size end
     end
@@ -196,8 +184,7 @@ function M.layout(name)
   M.prepare()
   local state = M.state()
   state.layout, state.tree = name, true
-  state.terminal, state.ai = name == "full", name == "full"
-  state.bottom = "ai"
+  state.terminal = name == "full"
   M.apply()
 end
 
