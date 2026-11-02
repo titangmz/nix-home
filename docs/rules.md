@@ -38,7 +38,9 @@ Validate with:
 
 ```bash
 nix fmt
-nix flake check "path:$PWD"
+just check
 ```
+
+`just check` evaluates every system's checks, so Linux, Pi, and NixOS desktop assertions run even on the Mac. It then builds this machine's checks.
 
 Put module details in that module's README. This file holds the rules. `README.md` holds only what the repo is and how to bootstrap or update it.

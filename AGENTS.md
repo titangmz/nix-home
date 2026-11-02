@@ -4,13 +4,14 @@ Read [docs/rules.md](docs/rules.md) before changing configuration. Module detail
 
 Profiles nest by import, so server stays a subset of every workstation profile. Keep colors, opacity, and blur in `modules/theme`.
 
-Validate with `nix fmt` and `nix flake check "path:$PWD"`.
+Validate with `nix fmt` and `just check`.
 
 ## Commands
 
 ```bash
 nix fmt                          # format (nixfmt-tree)
-nix flake check "path:$PWD"      # all checks for the current system
+just check                       # evaluate every system's checks, then build this machine's
+nix flake check "path:$PWD"      # build and run only this machine's checks
 just switch server               # apply a profile; the name is saved for later runs
 just switch                      # reapply the saved profile
 just switch --dry-run            # preview; on nixos, builds the system without activating
@@ -33,6 +34,8 @@ The shell-script tests are plain Python `unittest` files. Without env vars they 
 ```bash
 python3 tests/test_switch.py
 python3 tests/test_switch.py SwitchTests.<test_name>
+python3 tests/test_bootstrap.py
+python3 tests/test_bin_scripts.py
 python3 tests/test_set_wallpaper.py
 ```
 
@@ -53,4 +56,4 @@ python3 tests/test_set_wallpaper.py
 
 **Hyprland is not in the store.** Activation symlinks `~/.config/hypr/hyprland.lua` to the checkout's `modules/nixos/desktop/hyprland/hyprland.lua`, using the path that `scripts/switch.sh` writes to `~/.config/nix-home/root`. Lua edits need only `just reload`. `~/.config/hypr/style.lua` is generated from the theme, so theme changes need `just switch` then `just reload`.
 
-**Checks are assertions.** `tests/checks.nix` asserts concrete facts about the evaluated configs. Examples: the server must not contain workstation packages, workstations must not write desktop config files, Kitty opacity, nix-ld libraries, Docker group membership, and strings inside `hyprland.lua`. When you move or rename something these reference, update the assertion too. The `neovim` check runs `tests/neovim.lua` headless against the workstation editor and asserts no duplicate keymaps. `server-neovim` runs `tests/neovim-server.lua` against the editor without the development tooling. `lint` runs shellcheck on every shell script and statix and deadnix on the Nix files; statix reads `tests/statix.toml`. A Mac can only build its own system's checks, and the NixOS and Hyprland script tests run only on Linux.
+**Checks are assertions.** `tests/checks.nix` asserts concrete facts about the evaluated configs. Examples: the server must not contain workstation packages, workstations must not write desktop config files, Kitty opacity, nix-ld libraries, Docker group membership, and strings inside `hyprland.lua`. When you move or rename something these reference, update the assertion too. The `neovim` check runs `tests/neovim.lua` headless against the workstation editor and asserts no duplicate keymaps. `server-neovim` runs `tests/neovim-server.lua` against the editor without the development tooling. `lint` runs shellcheck on every shell script and statix and deadnix on the Nix files; statix reads `tests/statix.toml`. A Mac can only build its own system's checks, so `just check` first evaluates every system's checks without building; that runs every assertion for Linux, the Pi, and the NixOS desktop. The NixOS and Hyprland script tests run only on Linux.

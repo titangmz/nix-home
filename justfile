@@ -21,14 +21,15 @@ clean:
 # Update all flake inputs, then run the checks. Switch afterwards to apply.
 update:
     nix flake update --flake "path:{{justfile_directory()}}"
-    nix flake check "path:{{justfile_directory()}}"
+    just check
 
 # Format Nix files.
 fmt:
     nix fmt
 
-# Evaluate and run the repository checks.
+# Evaluate every machine's config, then build and run this machine's checks.
 check:
+    nix flake check --all-systems --no-build "path:{{justfile_directory()}}"
     nix flake check "path:{{justfile_directory()}}"
 
 # Reload Hyprland after editing its checkout configuration.
