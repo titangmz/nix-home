@@ -4,8 +4,7 @@ Personal Home Manager configuration for servers, workstations, and one NixOS Hyp
 
 | Profile | For | Systems |
 | --- | --- | --- |
-| `server` | headless machines: shell, CLI tools, Git, tmux, Neovim | Linux and macOS, x86_64 and aarch64 |
-| `pi` | Raspberry Pi: the server stack | aarch64-linux |
+| `server` | headless machines, Raspberry Pi included: shell, CLI tools, Git, tmux, Neovim | Linux and macOS, x86_64 and aarch64 |
 | `pc` | Linux workstations | x86_64-linux |
 | `mac` | macOS workstations | aarch64-darwin, x86_64-darwin |
 | `nixos` | the NixOS Hyprland desktop | x86_64-linux |

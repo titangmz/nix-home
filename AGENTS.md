@@ -25,7 +25,6 @@ Run a single flake check:
 ```bash
 nix build "path:$PWD#checks.aarch64-darwin.server"      # or .server-neovim, .workstation, .neovim, .switch, .lint
 nix build "path:$PWD#checks.x86_64-linux.nixos-module"  # x86_64-linux only: also .nixos
-# aarch64-linux also has .pi
 ```
 
 The shell-script tests are plain Python `unittest` files. Without env vars they target the scripts in this checkout, so they run directly:
@@ -40,7 +39,7 @@ python3 tests/test_set_wallpaper.py
 
 **Layout.** `profiles/` composes `modules/`. `scripts/` holds the repo tooling that `just` runs. `modules/scripts/bin/` holds commands installed into `~/.local/bin`. `tests/` holds the flake checks (`tests/checks.nix`), the Python script tests, and the Neovim smoke tests.
 
-**Profiles are import trees.** `server` is `base.nix`, and `pi` is `server`. `pc`, `mac`, and `nixos` build on `workstation.nix`, which builds on `base.nix`. The module system loads a file once even when several layers import it. The layer rules are in `docs/rules.md`.
+**Profiles are import trees.** `server` is `base.nix`. `pc`, `mac`, and `nixos` build on `workstation.nix`, which builds on `base.nix`. The module system loads a file once even when several layers import it. The layer rules are in `docs/rules.md`.
 
 **Flake outputs** (`flake.nix`):
 - `homeConfigurations.<profile>-<system>` for every pair in `profiles/default.nix`, such as `server-aarch64-linux` or `mac-aarch64-darwin`. The supported systems are whatever that table lists.

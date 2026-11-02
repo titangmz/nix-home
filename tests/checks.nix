@@ -155,17 +155,6 @@ in
       neovimCheck "neovim-smoke-check" workstation ./neovim.lua;
   }
 )
-// lib.optionalAttrs (supports "pi") {
-  # The Pi runs the server stack; it may add to it but not drop from it.
-  pi =
-    let
-      pi = homeFor "pi";
-      names = home: map (pkg: pkg.name) home.config.home.packages;
-    in
-    assert lib.all (name: builtins.elem name (names pi)) (names server);
-    assert pi.config.programs.zsh.oh-my-zsh.plugins == server.config.programs.zsh.oh-my-zsh.plugins;
-    pi.activationPackage;
-}
 // lib.optionalAttrs (supports "nixos") {
   nixos =
     let

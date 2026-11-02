@@ -14,7 +14,6 @@ let
 in
 {
   server = linux ++ darwin;
-  pi = [ "aarch64-linux" ];
   pc = [ "x86_64-linux" ];
   mac = darwin;
   nixos = [ "x86_64-linux" ];

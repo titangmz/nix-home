@@ -95,7 +95,7 @@ class BootstrapHomeTests(BootstrapTestCase):
         nix_dir = self.config_home / "nix"
         nix_dir.mkdir(parents=True)
         (nix_dir / "nix.conf").write_text("experimental-features = nix-command flakes\n")
-        result = self.invoke("pi")
+        result = self.invoke("server")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((nix_dir / "nix.conf").read_text(), "experimental-features = nix-command flakes\n")
 
