@@ -12,6 +12,12 @@ switch *args:
 bootstrap profile:
     ./bootstrap.sh "$1"
 
+# Delete old generations and everything in the Nix store they alone used. Rollbacks are lost.
+clean:
+    nix-collect-garbage -d
+    # NixOS keeps system generations under root; refresh the boot menu once they are gone.
+    if [ -e /etc/NIXOS ]; then sudo nix-collect-garbage -d && sudo /run/current-system/bin/switch-to-configuration boot; fi
+
 # Format Nix files.
 fmt:
     nix fmt

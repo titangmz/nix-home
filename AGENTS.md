@@ -14,6 +14,7 @@ nix flake check "path:$PWD"      # all checks for the current system
 just switch server               # apply a profile; the name is saved for later runs
 just switch                      # reapply the saved profile
 just switch --dry-run            # preview; on nixos, builds the system without activating
+just clean                       # delete old generations and unused store paths (no rollback)
 just reload                      # Hyprland: reload after editing hyprland.lua
 ```
 
