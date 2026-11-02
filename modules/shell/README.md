@@ -2,7 +2,7 @@
 
 Zsh, the Bash handoff to Zsh, Atuin, and the Roundy prompt. Prompt colors come from `modules/theme`. The right side of the prompt shows `user@host`, so SSH sessions are easy to tell apart.
 
-Directory jumping uses the Oh My Zsh `z` plugin, unless the profile enables `modules/zoxide`.
+Directory jumping is zoxide, from `modules/zoxide`.
 
 Atuin is initialized only in Zsh. Up keeps normal history. Automatic sync is off.
 

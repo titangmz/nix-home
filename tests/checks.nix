@@ -57,8 +57,9 @@ in
     assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
-    assert !server.config.programs.zoxide.enable;
-    assert server.config.programs.zsh.oh-my-zsh.plugins == [ "z" ];
+    # zoxide is the only `z`; the Oh My Zsh plugin would keep a second history.
+    assert server.config.programs.zoxide.enable;
+    assert server.config.programs.zsh.oh-my-zsh.plugins == [ ];
     assert lib.all (pname: !(hasPackage server pname)) [
       "cargo"
       "fnm"
@@ -138,12 +139,10 @@ in
       assert !(builtins.hasAttr "desktop-wallpaper" workstation.config.systemd.user.services);
       assert hasPackage workstation "v2rayn";
       assert hasPackage workstation "proxychains-ng";
-      assert workstation.config.programs.zoxide.enable;
       assert lib.all (hasEditorTool workstation) developmentEditorTools;
       assert
         workstation.config.programs.nixvim.plugins.treesitter.grammarPackages
         == workstation.config.programs.nixvim.plugins.treesitter.package.passthru.allGrammars;
-      assert workstation.config.programs.zsh.oh-my-zsh.plugins == [ ];
       assert lib.hasInfix "socks5 127.0.0.1 10808" (
         builtins.readFile workstation.config.home.file.".proxychains/proxychains.conf".source
       );

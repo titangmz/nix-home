@@ -11,6 +11,7 @@ in
     ../modules/git
     ../modules/tmux
     ../modules/neovim
+    ../modules/zoxide
   ];
 
   home.username = user.username;

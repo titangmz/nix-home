@@ -21,11 +21,8 @@ in
 
   programs.zsh = {
     enable = true;
-    oh-my-zsh = {
-      enable = true;
-      # zoxide provides `z` where it is enabled; two would keep two histories.
-      plugins = lib.optional (!config.programs.zoxide.enable) "z";
-    };
+    # modules/zoxide provides `z`, so no Oh My Zsh plugins are loaded.
+    oh-my-zsh.enable = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     history.size = 10000;
