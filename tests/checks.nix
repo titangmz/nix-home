@@ -117,6 +117,7 @@ in
         SWITCH_SCRIPT=${../scripts/switch.sh} python ${./test_switch.py}
         BOOTSTRAP_SCRIPT=${../bootstrap.sh} python ${./test_bootstrap.py}
         ${linuxScriptTests}
+        SCRIPTS_BIN=${../modules/scripts/bin} python ${./test_bin_scripts.py}
         SET_WALLPAPER_SCRIPT=${../modules/nixos/desktop/wallpaper/set-wallpaper} python ${./test_set_wallpaper.py}
         touch "$out"
       '';

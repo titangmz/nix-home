@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Attach to a tmux session, creating it in the current directory if needed.
+# Usage: tm [NAME]  NAME defaults to the current directory's name.
+set -euo pipefail
+
+if (($# > 1)); then
+  printf 'Usage: tm [NAME]\n' >&2
+  exit 2
+fi
+
+name=${1:-$(basename "$PWD")}
+# tmux reads "." and ":" in a target as window and pane separators.
+name=${name//[.:]/_}
+if [[ -z "$name" || "$name" == / ]]; then
+  name=root
+fi
+
+if [[ -n "${TMUX:-}" ]]; then
+  # Inside tmux, switch the current client instead of nesting a session.
+  tmux has-session -t "=$name" 2>/dev/null || tmux new-session -d -s "$name" -c "$PWD"
+  exec tmux switch-client -t "=$name"
+fi
+exec tmux new-session -A -s "$name" -c "$PWD"

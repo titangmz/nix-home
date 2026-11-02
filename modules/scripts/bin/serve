@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Share a directory over HTTP with a browsable file listing. Ctrl-C stops it.
+# Usage: serve [DIR] [PORT]  Defaults: the current directory and port 8000.
+set -euo pipefail
+
+fail() {
+  printf '%s\n' "$1" >&2
+  exit 2
+}
+
+if (($# > 2)); then
+  fail 'Usage: serve [DIR] [PORT]'
+fi
+dir=${1:-.}
+port=${2:-8000}
+[[ -d "$dir" ]] || fail "Not a directory: $dir"
+if [[ ! "$port" =~ ^[0-9]+$ ]] || ((10#$port < 1 || 10#$port > 65535)); then
+  fail "Not a port number: $port"
+fi
+port=$((10#$port))
+
+# It listens on every interface so other machines on the network can reach it.
+printf 'Serving %s at http://%s:%s (Ctrl-C to stop)\n' "$dir" "$(hostname)" "$port"
+exec caddy file-server --root "$dir" --listen ":$port" --browse
