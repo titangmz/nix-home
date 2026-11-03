@@ -22,6 +22,7 @@
     tldr
     procs
     gping
+    mtr
     btop
     ctop
     sshuttle

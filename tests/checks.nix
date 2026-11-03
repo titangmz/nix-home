@@ -57,6 +57,7 @@ in
     assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
+    assert hasPackage server "mtr";
     # zoxide is the only `z`; the Oh My Zsh plugin would keep a second history.
     assert server.config.programs.zoxide.enable;
     assert server.config.programs.zsh.oh-my-zsh.plugins == [ ];
