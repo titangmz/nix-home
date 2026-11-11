@@ -29,8 +29,15 @@
     dysk
     netcat
     pass
-    gnupg
   ];
+
+  programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    pinentry.package = pkgs.pinentry-curses;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+  };
 
   xdg.configFile."eza/theme.yml".source = ./eza-theme.yml;
 }

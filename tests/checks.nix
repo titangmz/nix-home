@@ -58,6 +58,14 @@ in
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
     assert hasPackage server "mtr";
+    assert server.config.programs.gpg.enable;
+    assert server.config.services.gpg-agent.enable;
+    assert server.config.services.gpg-agent.pinentry.package == pkgs.pinentry-curses;
+    assert builtins.elem "pinentry-program ${lib.getExe pkgs.pinentry-curses}" (
+      lib.splitString "\n"
+        server.config.home.file."${server.config.programs.gpg.homedir}/gpg-agent.conf".text
+    );
+    assert lib.hasInfix "export GPG_TTY=$TTY" server.config.programs.zsh.initContent;
     # zoxide is the only `z`; the Oh My Zsh plugin would keep a second history.
     assert server.config.programs.zoxide.enable;
     assert server.config.programs.zsh.oh-my-zsh.plugins == [ ];
