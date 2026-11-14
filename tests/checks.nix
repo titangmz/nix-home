@@ -59,6 +59,9 @@ in
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
     assert lib.hasInfix "set -g renumber-windows on" server.config.programs.tmux.extraConfig;
+    assert lib.all (
+      i: lib.hasInfix "bind -n M-${toString i} " server.config.programs.tmux.extraConfig
+    ) (lib.range 1 9);
     assert hasPackage server "mtr";
     assert server.config.programs.gpg.enable;
     assert server.config.services.gpg-agent.enable;
@@ -161,6 +164,10 @@ in
       assert
         pkgs.stdenv.isDarwin
         == builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" workstation.config.home.file;
+      assert
+        pkgs.stdenv.isDarwin
+        -> lib.hasInfix "macos-option-as-alt = left"
+          workstation.config.home.file."Library/Application Support/com.mitchellh.ghostty/config".text;
       # macOS apps must be copied, never linked into /nix/store, or opening one
       # lets macOS protect the store path and garbage collection fails on it.
       assert pkgs.stdenv.isDarwin -> workstation.config.targets.darwin.copyApps.enable;
