@@ -32,12 +32,19 @@ in
             cond = wide 100;
           }
           {
-            __unkeyed-1 = "filename";
-            path = 1;
-            shorting_target = 30;
+            __unkeyed-1 = "buffers";
+            mode = 0;
+            show_filename_only = true;
+            show_modified_status = true;
+            max_length.__raw = "function() return math.floor(vim.o.columns * 0.5) end";
             symbols = {
-              modified = "●";
-              readonly = " ";
+              modified = " ●";
+              alternate_file = "";
+              directory = "";
+            };
+            buffers_color = {
+              active = "StatusBufferActive";
+              inactive = "StatusBufferInactive";
             };
           }
         ];

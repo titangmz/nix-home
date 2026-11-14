@@ -70,6 +70,20 @@ local function check()
   vim.api.nvim_buf_set_lines(buf, 0, 1, false, { "# Unsaved heading" })
   vim.api.nvim_win_set_cursor(main, { 3, 2 })
 
+  -- Neovim draws nothing on its first row, and every editor window has a
+  -- header: blank alone, naming the file once the window is split.
+  assert(vim.o.showtabline == 0, "A tabline runs into the tmux status bar")
+  local function header(win)
+    assert(vim.wo[win].winbar ~= "", "Editor window has no header row")
+    return vim.api.nvim_eval_statusline(vim.wo[win].winbar, { winid = win, use_winbar = true }).str
+  end
+  assert(header(main):find("README.md", 1, true), "Split header does not name its file: " .. header(main))
+  vim.cmd.tabnew()
+  local alone = vim.api.nvim_get_current_win()
+  assert(vim.trim(header(alone)) == "", "A single window's header is not blank")
+  vim.cmd.tabclose()
+  vim.api.nvim_set_current_win(main)
+
   vim.o.columns, vim.o.lines = 200, 50
   io.stderr:write("neovim: main layout with docked output\n")
   workspace.layout("main")
@@ -121,6 +135,7 @@ local function check()
   workspace.toggle_tree()
   settle()
   assert(popup(), "Space Space did not open a focused popup")
+  assert(vim.wo.winbar == "", "The file tree popup has a header row")
   assert(vim.tbl_isempty(vim.fn.maparg(" ", "n", false, true)), "The tree steals the leader key")
   vim.api.nvim_feedkeys("q", "x", false)
   settle()

@@ -174,6 +174,38 @@ function M.toggle_tree()
     dir = M.root(), reveal_file = current_file() })
 end
 
+-- Every editor window starts with a header row. With one window it is blank,
+-- a gap between the code and whatever sits above Neovim, such as a tmux status
+-- bar. With splits it names each window's file, the current one highlighted.
+M.winbar_expr = "%{%v:lua.require'workspace'.winbar()%}"
+
+function M.winbar()
+  local win = vim.g.statusline_winid or vim.api.nvim_get_current_win()
+  local tab = vim.api.nvim_win_get_tabpage(win)
+  local editors = 0
+  for _, other in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+    if normal_window(other) then editors = editors + 1 end
+  end
+  if editors < 2 then return "" end
+  local buf = vim.api.nvim_win_get_buf(win)
+  local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":t")
+  if name == "" then name = "[No Name]" end
+  local ok, devicons = pcall(require, "nvim-web-devicons")
+  local icon = ok and devicons.get_icon(name, nil, { default = true }) or ""
+  local hl = win == vim.api.nvim_get_current_win() and "WinBarFileActive" or "WinBarFile"
+  local label = " " .. icon .. " " .. name .. (vim.bo[buf].modified and " ●" or "") .. " "
+  return "%=%#" .. hl .. "#" .. label:gsub("%%", "%%%%") .. "%*%="
+end
+
+local function set_winbars()
+  local tab = vim.api.nvim_get_current_tabpage()
+  -- Diffview aligns its panes line by line; a header on only some would skew them.
+  if review_origin[tab] then return end
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+    if normal_window(win) and vim.wo[win].winbar ~= M.winbar_expr then vim.wo[win].winbar = M.winbar_expr end
+  end
+end
+
 function M.pick(picker)
   local opts = { cwd = M.root() }
   if picker == "all_files" then
@@ -204,6 +236,8 @@ function M.setup()
   vim.api.nvim_create_autocmd("VimResized", { group = group, callback = function()
     vim.schedule(M.apply)
   end })
+  vim.api.nvim_create_autocmd({ "VimEnter", "BufWinEnter", "WinNew", "WinEnter", "FileType" }, {
+    group = group, callback = set_winbars })
   vim.api.nvim_create_autocmd("TabEnter", { group = group, callback = function()
     local tab = vim.api.nvim_get_current_tabpage()
     if states[tab] and not review_origin[tab] then vim.schedule(M.apply) end

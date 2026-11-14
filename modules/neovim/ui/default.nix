@@ -11,6 +11,9 @@ in
     opts = {
       termguicolors = true;
       laststatus = 3;
+      # Nothing is drawn on Neovim's first row, so it never runs into a tmux
+      # status bar above it. Buffers are listed in the statusline instead.
+      showtabline = 0;
       showmode = false;
       winborder = "rounded";
     };
@@ -50,6 +53,12 @@ in
               TelescopePreviewBorder = border,
               TelescopeSelection = { bg = C.surface0, style = { "bold" } },
               WhichKeyBorder = border,
+              WinBar = clear,
+              WinBarNC = clear,
+              WinBarFile = { fg = C.overlay1, bg = C.none },
+              WinBarFileActive = { fg = C.crust, bg = C.lavender, style = { "bold" } },
+              StatusBufferActive = { fg = C.crust, bg = C.lavender, style = { "bold" } },
+              StatusBufferInactive = { fg = C.overlay1, bg = C.none },
             }
           end
         '';
@@ -67,21 +76,6 @@ in
     };
     plugins = {
       web-devicons.enable = true;
-      bufferline = {
-        enable = true;
-        settings.highlights.__raw = "require('catppuccin.special.bufferline').get_theme()";
-        settings.options = {
-          diagnostics = "nvim_lsp";
-          always_show_bufferline = false;
-          show_close_icon = false;
-          show_buffer_close_icons = false;
-          separator_style = "thin";
-          indicator.style = "underline";
-          modified_icon = "●";
-          max_name_length = 22;
-          truncate_names = true;
-        };
-      };
       snacks = {
         enable = true;
         settings = {
