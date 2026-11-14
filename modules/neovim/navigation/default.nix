@@ -2,6 +2,7 @@
   imports = [
     ./telescope.nix
     ./neo-tree.nix
+    ./oil.nix
   ];
   programs.nixvim = {
     plugins.trouble.enable = true;

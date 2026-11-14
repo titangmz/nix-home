@@ -12,11 +12,12 @@ local function check()
   vim.fn.writefile({ "hello" }, root .. "/notes.txt")
   vim.cmd.edit(vim.fn.fnameescape(root .. "/notes.txt"))
   vim.o.columns, vim.o.lines = 200, 50
-  require("workspace").layout("full")
+  require("workspace").layout("main")
+  require("workspace.terminal").toggle_output()
   vim.wait(180, function() return false end, 10)
 
   assert(#errors == 0, table.concat(errors, "\n"))
-  assert(require("workspace.terminal").is_visible(), "Full layout did not dock the shell")
+  assert(require("workspace.terminal").is_visible(), "Main layout did not dock the shell")
   assert(vim.v.errmsg == "", vim.v.errmsg)
 end
 

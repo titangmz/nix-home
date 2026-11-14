@@ -24,15 +24,8 @@ in
           "<c-w>-".__raw = "function() require('workspace').resize('height', -2) end";
         };
         options = {
-          left.size = 30;
           bottom.size = 8;
         };
-        left = [
-          {
-            ft = "neo-tree";
-            title = "Project";
-          }
-        ];
         bottom = [
           {
             ft = "workspace_terminal";
@@ -56,13 +49,8 @@ in
       };
     };
     keymaps = [
-      (map "<leader>z" "<cmd>lua require('workspace').focus()<CR>" "Toggle Focus / restore workspace")
-      (map "<leader>l1" "<cmd>WorkspaceLayout focus<CR>" "Focus layout")
-      (map "<leader>l2" "<cmd>WorkspaceLayout code<CR>" "Code layout")
-      (map "<leader>l3" "<cmd>WorkspaceLayout review<CR>" "Review layout")
-      (map "<leader>l4" "<cmd>WorkspaceLayout full<CR>" "Full layout")
-      (map "<leader>ll" "<cmd>WorkspaceLayout<CR>" "Choose layout")
-      (map "<leader>lr" "<cmd>WorkspaceRestore<CR>" "Restore workspace")
+      (map "<leader>l1" "<cmd>WorkspaceLayout main<CR>" "Main layout")
+      (map "<leader>l2" "<cmd>WorkspaceLayout review<CR>" "Git review layout")
     ];
   };
 }

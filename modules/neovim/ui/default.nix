@@ -24,6 +24,9 @@ in
           gitsigns = true;
           treesitter = true;
           neotree = true;
+          telescope.enabled = true;
+          snacks.enabled = true;
+          native_lsp.enabled = true;
           which_key = true;
         };
       };
@@ -38,14 +41,10 @@ in
           show_close_icon = false;
           show_buffer_close_icons = false;
           separator_style = "thin";
-          offsets = [
-            {
-              filetype = "neo-tree";
-              text = "Project";
-              highlight = "Directory";
-              text_align = "left";
-            }
-          ];
+          indicator.style = "underline";
+          modified_icon = "●";
+          max_name_length = 22;
+          truncate_names = true;
         };
       };
       snacks = {
@@ -58,21 +57,6 @@ in
           input.enabled = true;
           bufdelete.enabled = true;
           bigfile.enabled = true;
-          zen = {
-            enabled = true;
-            center = false;
-            toggles = { };
-            show = {
-              statusline = false;
-              tabline = false;
-            };
-            win = {
-              width = 0;
-              height = 0;
-              backdrop = false;
-              border = "none";
-            };
-          };
         };
       };
     };
