@@ -86,14 +86,10 @@ in
           # Always a popup, like the Telescope pickers.
           position = "float";
           popup = {
-            title = "Files";
             position = "50%";
-            size.__raw = ''
-              function()
-                return { width = math.max(20, math.min(64, vim.o.columns - 8)),
-                  height = math.max(8, math.floor(vim.o.lines * 0.8)) }
-              end
-            '';
+            size.__raw = "function() return require('workspace').tree_popup_size() end";
+            # The title on top, the main keys along the bottom edge.
+            border.__raw = "function() return require('workspace').tree_popup_border() end";
           };
           mappings = {
             # Space stays the leader inside the tree.

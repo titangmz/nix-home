@@ -16,7 +16,7 @@ local function check()
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
     "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "-", "<leader>-",
-    "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf" }) do
+    "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf", "<leader>np", "<leader>na", "<leader>nx", "<leader>nX", "<leader>nc" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
   end
   assert(mapping("<leader><space>").rhs:find("toggle_tree", 1, true), "Space Space is not the file tree")
@@ -136,6 +136,26 @@ local function check()
   settle()
   assert(popup(), "Space Space did not open a focused popup")
   assert(vim.wo.winbar == "", "The file tree popup has a header row")
+  -- The border carries the title on top and the key hints along the bottom.
+  local function border_text()
+    local text = {}
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if vim.api.nvim_win_get_config(win).relative ~= "" then
+        vim.list_extend(text, vim.api.nvim_buf_get_lines(vim.api.nvim_win_get_buf(win), 0, -1, false))
+      end
+    end
+    return table.concat(text, "\n")
+  end
+  local edges = border_text()
+  assert(edges:find("Files", 1, true) and edges:find("A folder", 1, true), "Tree popup lacks its title or hints:\n" .. edges)
+  local columns = vim.o.columns
+  for _, case in ipairs({ { 200, "A folder" }, { 40, " a · A · r · d · ? help " }, { 24, " ? help " } }) do
+    vim.o.columns = case[1]
+    local hint = workspace.tree_popup_border().text.bottom:content()
+    assert(hint:find(case[2], 1, true), case[1] .. " columns got hint: " .. hint)
+    assert(vim.fn.strdisplaywidth(hint) <= workspace.tree_popup_size().width - 4, "Hint overflows at " .. case[1])
+  end
+  vim.o.columns = columns
   assert(vim.tbl_isempty(vim.fn.maparg(" ", "n", false, true)), "The tree steals the leader key")
   vim.api.nvim_feedkeys("q", "x", false)
   settle()
@@ -276,6 +296,26 @@ local function check()
   vim.wait(1000, function() return false end, 50)
   assert(vim.api.nvim_buf_get_name(0) == entry, "A second Space nd did not reopen the entry")
   assert(#vim.fn.readdir(notebook .. "/journal") == 1, "A second Space nd created another entry")
+  -- The todo list is one file from todo.md, and the checkbox toggle cycles.
+  local notes = require("notes")
+  notes.todo()
+  assert(vim.wait(15000, function() return vim.api.nvim_buf_get_name(0) == notebook .. "/todo.md" end, 50),
+    "Space nx did not open todo.md: " .. vim.api.nvim_buf_get_name(0))
+  assert(table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n"):find("## Someday", 1, true), "Todo ignored todo.md")
+  vim.cmd.enew()
+  for _, case in ipairs({ { "buy milk", "- [ ] buy milk" }, { "- [ ] buy milk", "- [x] buy milk" },
+    { "- [x] buy milk", "- [ ] buy milk" }, { "  * call Sam", "  * [ ] call Sam" } }) do
+    vim.api.nvim_set_current_line(case[1])
+    notes.toggle_task()
+    assert(vim.api.nvim_get_current_line() == case[2], case[1] .. " -> " .. vim.api.nvim_get_current_line())
+  end
+  for _, case in ipairs({ { "- [ ] call Sam", true }, { "  * [ ] nested", true }, { "- [ ] ", false },
+    { "- [x] done", false } }) do
+    local found = vim.fn.system({ "rg", "--quiet", notes.task_pattern }, case[1] .. "\n")
+    assert((vim.v.shell_error == 0) == case[2], "Task pattern wrong for: " .. case[1])
+  end
+  vim.cmd("bwipeout!")
+
   -- Re-editing any Markdown buffer runs the stock ftplugin's undo, whose
   -- `silent! nunmap <buffer> gO` still records E31. Nothing else may fail.
   assert(vim.v.errmsg == "" or vim.v.errmsg == "E31: No such mapping", vim.v.errmsg)

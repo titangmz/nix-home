@@ -47,6 +47,7 @@ in
               BlinkCmpSignatureHelpBorder = border,
               NeoTreeFloatBorder = border,
               NeoTreeFloatTitle = { fg = C.mauve, bg = C.none, style = { "bold" } },
+              NeoTreeFloatHint = { fg = C.overlay1, bg = C.none },
               TelescopeBorder = border,
               TelescopePromptBorder = border,
               TelescopeResultsBorder = border,

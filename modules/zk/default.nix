@@ -41,6 +41,14 @@ in
           template = "meeting.md";
         };
       };
+      group.projects = {
+        paths = [ "projects" ];
+        note.template = "project.md";
+      };
+      group.prompts = {
+        paths = [ "prompts" ];
+        note.template = "prompt.md";
+      };
       format.markdown = {
         link-format = "wiki";
         hashtags = true;
@@ -58,6 +66,12 @@ in
       alias = {
         daily = ''zk new --no-input "$ZK_NOTEBOOK_DIR/journal"'';
         meeting = ''zk new --title "$*" "$ZK_NOTEBOOK_DIR/meetings"'';
+        project = ''zk new --title "$*" "$ZK_NOTEBOOK_DIR/projects"'';
+        prompt = ''zk new --title "$*" "$ZK_NOTEBOOK_DIR/prompts"'';
+        projects = ''zk edit --interactive "$ZK_NOTEBOOK_DIR/projects"'';
+        prompts = ''zk edit --interactive "$ZK_NOTEBOOK_DIR/prompts"'';
+        todo = ''zk new --no-input --title Todo --template todo.md "$ZK_NOTEBOOK_DIR"'';
+        tasks = ''rg --line-number --no-heading --glob '*.md' '^\s*[-*] \[ \] \S' "$ZK_NOTEBOOK_DIR"'';
         recent = "zk edit --sort modified- --modified-after 'last two weeks' --interactive";
         ls = "zk edit --interactive";
       };
@@ -68,7 +82,14 @@ in
   # zk needs the notebook's .zk directory and each group's folder to exist. The
   # shared config and templates in ~/.config/zk cover everything else.
   home.activation.zkNotebook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    run mkdir -p "${notebook}/.zk" "${notebook}/journal" "${notebook}/meetings"
+    run mkdir -p "${notebook}/.zk" ${
+      lib.concatMapStringsSep " " (dir: ''"${notebook}/${dir}"'') [
+        "journal"
+        "meetings"
+        "projects"
+        "prompts"
+      ]
+    }
   '';
 
   programs.nixvim = {
@@ -87,6 +108,11 @@ in
       (map "<leader>nn" (notes "new()") "New note")
       (map "<leader>nd" (notes "today()") "Today's journal")
       (map "<leader>nm" (notes "new('meetings')") "New meeting note")
+      (map "<leader>np" (notes "new('projects')") "New project")
+      (map "<leader>na" (notes "new('prompts')") "New AI prompt")
+      (map "<leader>nx" (notes "todo()") "Todo list")
+      (map "<leader>nX" (notes "tasks()") "Open tasks everywhere")
+      (map "<leader>nc" (notes "toggle_task()") "Toggle checkbox")
       (map "<leader>nf" (notes "find()") "Find notes")
       (map "<leader>ns" (notes "search()") "Search notes")
       (map "<leader>nt" (notes "tags()") "Browse tags")

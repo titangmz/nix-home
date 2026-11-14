@@ -164,6 +164,30 @@ function M.layout(name)
   M.apply()
 end
 
+function M.tree_popup_size()
+  return { width = math.max(20, math.min(64, vim.o.columns - 8)),
+    height = math.max(8, math.floor(vim.o.lines * 0.8)) }
+end
+
+-- Key hints for the tree popup's bottom border, longest first; the popup shows
+-- the longest that fits its width.
+M.tree_hints = {
+  " a file · A folder · r rename · d delete · ? help ",
+  " a · A · r · d · ? help ",
+  " ? help ",
+}
+
+function M.tree_popup_border()
+  local room, hint = M.tree_popup_size().width - 4, M.tree_hints[#M.tree_hints]
+  for _, text in ipairs(M.tree_hints) do
+    if vim.fn.strdisplaywidth(text) <= room then hint = text; break end
+  end
+  local Text = require("nui.text")
+  return { style = "rounded", highlight = "NeoTreeFloatBorder", text = {
+    top = Text(" Files ", "NeoTreeFloatTitle"), top_align = "center",
+    bottom = Text(hint, "NeoTreeFloatHint"), bottom_align = "center" } }
+end
+
 -- The file tree is a popup: it opens at the current file and closes on q,
 -- Esc, the same key, or once a file is opened from it.
 function M.toggle_tree()

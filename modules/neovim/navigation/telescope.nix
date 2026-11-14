@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 let
   map = key: picker: desc: {
     mode = "n";
@@ -11,6 +12,12 @@ let
 in
 {
   programs.nixvim = {
+    # Text search and the hidden-files picker run these; the editor carries
+    # them so it does not depend on the shell's PATH.
+    extraPackages = [
+      pkgs.ripgrep
+      pkgs.fd
+    ];
     plugins.telescope = {
       enable = true;
       settings.defaults = {
