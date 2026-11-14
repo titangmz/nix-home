@@ -1,3 +1,5 @@
 .DS_Store
 result
 result-*
+# A stray `zk init` here would make the repo a notebook.
+.zk/

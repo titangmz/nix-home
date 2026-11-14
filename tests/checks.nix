@@ -44,6 +44,10 @@ let
       export XDG_DATA_HOME="$TMPDIR/data"
       export XDG_STATE_HOME="$TMPDIR/state"
       mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+      # Editor plugins that read their own config, such as zk, get the generated one.
+      if [ -d ${home.config.home-files}/.config/zk ]; then
+        ln -s ${home.config.home-files}/.config/zk "$XDG_CONFIG_HOME/zk"
+      fi
       ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${script}"
       touch "$out"
     '';
@@ -55,6 +59,8 @@ in
     assert !server.config.gtk.enable;
     assert writesNoDesktopFiles server;
     assert !(hasPackage server "hyprshot");
+    assert !(hasPackage server "zk");
+    assert !server.config.programs.nixvim.plugins.zk.enable;
     assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
@@ -150,6 +156,11 @@ in
       assert workstation.config.xfconf.settings == { };
       assert writesNoDesktopFiles workstation;
       assert !(hasPackage workstation "hyprshot");
+      assert hasPackage workstation "zk";
+      assert workstation.config.programs.nixvim.plugins.zk.enable;
+      assert
+        workstation.config.home.sessionVariables.ZK_NOTEBOOK_DIR
+        == "${workstation.config.home.homeDirectory}/notes";
       assert !(builtins.hasAttr "xfconfd" workstation.config.systemd.user.services);
       assert !(builtins.hasAttr "desktop-wallpaper" workstation.config.systemd.user.services);
       assert hasPackage workstation "v2rayn";
@@ -166,8 +177,9 @@ in
         == builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" workstation.config.home.file;
       assert
         pkgs.stdenv.isDarwin
-        -> lib.hasInfix "macos-option-as-alt = left"
-          workstation.config.home.file."Library/Application Support/com.mitchellh.ghostty/config".text;
+        ->
+          lib.hasInfix "macos-option-as-alt = left"
+            workstation.config.home.file."Library/Application Support/com.mitchellh.ghostty/config".text;
       # macOS apps must be copied, never linked into /nix/store, or opening one
       # lets macOS protect the store path and garbage collection fails on it.
       assert pkgs.stdenv.isDarwin -> workstation.config.targets.darwin.copyApps.enable;

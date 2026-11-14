@@ -11,12 +11,12 @@ local function check()
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "ZkNew", "ZkNotes", "ZkBacklinks" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
     "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "-", "<leader>-",
-    "<leader><space>", "<C-s>" }) do
+    "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
   end
   assert(mapping("<leader><space>").rhs:find("toggle_tree", 1, true), "Space Space is not the file tree")
@@ -30,7 +30,7 @@ local function check()
   assert(vim.tbl_isempty(mapping("<leader>tn")))
   assert(vim.tbl_isempty(mapping("<leader>ts")))
   -- Action prefixes must not delay longer mappings in the same namespace.
-  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "x" }) do
+  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "x", "n" }) do
     assert(vim.tbl_isempty(mapping("<leader>" .. prefix)), "Executable prefix: " .. prefix)
   end
   assert(vim.o.termguicolors and vim.o.undofile)
@@ -259,6 +259,27 @@ local function check()
   local nix_buf = vim.api.nvim_get_current_buf()
   assert(vim.wait(15000, function() return #vim.diagnostic.get(nix_buf) > 0 end, 20), "nixd produced no diagnostics")
   assert(#vim.lsp.get_clients({ bufnr = nix_buf, name = "nixd" }) == 1, "nixd did not attach")
+
+  -- Today's journal through the zk language server, from the shared template.
+  io.stderr:write("neovim: zk journal\n")
+  local notebook = vim.fn.tempname() .. " notes"
+  vim.fn.mkdir(notebook .. "/.zk", "p")
+  vim.fn.mkdir(notebook .. "/journal", "p")
+  vim.env.ZK_NOTEBOOK_DIR = notebook
+  local entry = notebook .. "/journal/" .. os.date("%Y-%m-%d") .. ".md"
+  require("notes").today()
+  assert(vim.wait(15000, function() return vim.api.nvim_buf_get_name(0) == entry end, 50),
+    "Space nd did not open today's journal: " .. vim.api.nvim_buf_get_name(0))
+  local journal = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+  assert(journal:find("## Focus", 1, true) and journal:find("tags: [journal]", 1, true), "Journal ignored daily.md:\n" .. journal)
+  require("notes").today()
+  vim.wait(1000, function() return false end, 50)
+  assert(vim.api.nvim_buf_get_name(0) == entry, "A second Space nd did not reopen the entry")
+  assert(#vim.fn.readdir(notebook .. "/journal") == 1, "A second Space nd created another entry")
+  -- Re-editing any Markdown buffer runs the stock ftplugin's undo, whose
+  -- `silent! nunmap <buffer> gO` still records E31. Nothing else may fail.
+  assert(vim.v.errmsg == "" or vim.v.errmsg == "E31: No such mapping", vim.v.errmsg)
+  vim.v.errmsg = ""
 
   -- A non-repository workspace must still support the tree and terminals.
   local plain = vim.fn.tempname() .. " plain directory"
