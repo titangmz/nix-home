@@ -22,6 +22,8 @@ let
 in
 {
   config = lib.mkIf pkgs.stdenv.isLinux {
+    home.packages = [ pkgs.hyprshot ];
+
     # hyprland.lua stays in the checkout so Hyprland can reload it.
     # style.lua is rendered from modules/theme on each activation.
     home.activation.linkHyprland = lib.hm.dag.entryAfter [ "linkGeneration" ] ''

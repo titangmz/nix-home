@@ -54,6 +54,7 @@ in
   server =
     assert !server.config.gtk.enable;
     assert writesNoDesktopFiles server;
+    assert !(hasPackage server "hyprshot");
     assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
@@ -144,6 +145,7 @@ in
       assert !workstation.config.gtk.enable;
       assert workstation.config.xfconf.settings == { };
       assert writesNoDesktopFiles workstation;
+      assert !(hasPackage workstation "hyprshot");
       assert !(builtins.hasAttr "xfconfd" workstation.config.systemd.user.services);
       assert !(builtins.hasAttr "desktop-wallpaper" workstation.config.systemd.user.services);
       assert hasPackage workstation "v2rayn";
@@ -174,6 +176,7 @@ in
       desktop = homeFor "nixos";
     in
     assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
+    assert hasPackage desktop "hyprshot";
     assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
     assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
     assert builtins.hasAttr "kitty/kitty.conf" desktop.config.xdg.configFile;
