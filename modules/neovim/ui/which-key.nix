@@ -34,6 +34,10 @@
             group = "Terminal";
           }
           {
+            __unkeyed-1 = "<leader>u";
+            group = "UI";
+          }
+          {
             __unkeyed-1 = "<leader>w";
             group = "Windows";
           }

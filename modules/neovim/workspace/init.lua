@@ -242,7 +242,27 @@ function M.pick(picker)
   require("telescope.builtin")[picker](opts)
 end
 
+-- The tree marks its current row with the cursor line, so the terminal cursor
+-- is hidden there. Nvim hides it when 'guicursor' uses a group with blend=100.
+-- It comes back on leaving the tree and for the command line.
+local saved_guicursor
+local function hide_cursor(hide)
+  if hide and not saved_guicursor then
+    saved_guicursor = vim.o.guicursor
+    vim.o.guicursor = "a:WorkspaceHiddenCursor"
+  elseif not hide and saved_guicursor then
+    vim.o.guicursor = saved_guicursor
+    saved_guicursor = nil
+  end
+end
+
+function M.cursor_hidden() return saved_guicursor ~= nil end
+
 function M.setup()
+  local function hidden_cursor_group()
+    vim.api.nvim_set_hl(0, "WorkspaceHiddenCursor", { blend = 100, nocombine = true })
+  end
+  hidden_cursor_group()
   local layouts = { "main", "review" }
   vim.api.nvim_create_user_command("WorkspaceLayout", function(opts)
     if opts.args ~= "" then M.layout(opts.args); return end
@@ -262,6 +282,10 @@ function M.setup()
   end })
   vim.api.nvim_create_autocmd({ "VimEnter", "BufWinEnter", "WinNew", "WinEnter", "FileType" }, {
     group = group, callback = set_winbars })
+  vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = hidden_cursor_group })
+  vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter", "FileType", "CmdlineLeave" }, { group = group,
+    callback = function() hide_cursor(vim.bo.filetype == "neo-tree") end })
+  vim.api.nvim_create_autocmd("CmdlineEnter", { group = group, callback = function() hide_cursor(false) end })
   vim.api.nvim_create_autocmd("TabEnter", { group = group, callback = function()
     local tab = vim.api.nvim_get_current_tabpage()
     if states[tab] and not review_origin[tab] then vim.schedule(M.apply) end

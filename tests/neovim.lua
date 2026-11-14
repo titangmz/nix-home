@@ -11,12 +11,12 @@ local function check()
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "ZkNew", "ZkNotes", "ZkBacklinks" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "ZkNew", "ZkNotes", "ZkBacklinks", "RenderMarkdown" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
     "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "-", "<leader>-",
-    "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf", "<leader>np", "<leader>na", "<leader>nx", "<leader>nX", "<leader>nc" }) do
+    "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf", "<leader>np", "<leader>na", "<leader>nx", "<leader>nX", "<leader>nc", "<leader>um" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
   end
   assert(mapping("<leader><space>").rhs:find("toggle_tree", 1, true), "Space Space is not the file tree")
@@ -30,7 +30,7 @@ local function check()
   assert(vim.tbl_isempty(mapping("<leader>tn")))
   assert(vim.tbl_isempty(mapping("<leader>ts")))
   -- Action prefixes must not delay longer mappings in the same namespace.
-  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "x", "n" }) do
+  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "x", "n", "u" }) do
     assert(vim.tbl_isempty(mapping("<leader>" .. prefix)), "Executable prefix: " .. prefix)
   end
   assert(vim.o.termguicolors and vim.o.undofile)
@@ -136,6 +136,9 @@ local function check()
   settle()
   assert(popup(), "Space Space did not open a focused popup")
   assert(vim.wo.winbar == "", "The file tree popup has a header row")
+  assert(workspace.cursor_hidden() and vim.o.guicursor == "a:WorkspaceHiddenCursor", "Cursor shows in the tree")
+  assert(vim.api.nvim_get_hl(0, { name = "WorkspaceHiddenCursor" }).blend == 100)
+  assert(vim.wo.cursorline, "The tree does not mark its current row")
   -- The border carries the title on top and the key hints along the bottom.
   local function border_text()
     local text = {}
@@ -161,6 +164,7 @@ local function check()
   settle()
   assert(not workspace.tree_window(), "q did not close the popup")
   assert(vim.api.nvim_get_current_win() == main, "Closing the popup lost the editor")
+  assert(not workspace.cursor_hidden() and vim.o.guicursor ~= "a:WorkspaceHiddenCursor", "Cursor stayed hidden in the editor")
   workspace.toggle_tree()
   settle()
   assert(popup(), "Popup did not reopen")
@@ -181,6 +185,40 @@ local function check()
   assert(vim.api.nvim_get_current_win() == main, "Popup opened the file outside the editor")
   assert(vim.api.nvim_buf_get_name(0) == root .. "/README.md", "Popup opened the wrong file")
   assert(vim.bo.modified, "Popup lost unsaved edits")
+
+  -- Folders keep their own rows, Enter toggles them, and add prompts start
+  -- from the folder's editable path.
+  vim.fn.mkdir(root .. "/outer/inner", "p")
+  vim.fn.writefile({ "x" }, root .. "/outer/inner/leaf.txt")
+  vim.api.nvim_set_current_win(main)
+  workspace.toggle_tree()
+  settle()
+  assert(popup(), "Tree popup did not open")
+  -- Rows end in padding and a Git mark, so match the name as a whole word.
+  local function row(name) return vim.fn.search("\\V\\<" .. name .. "\\>", "w") end
+  local function shows(name) return vim.fn.search("\\V\\<" .. name .. "\\>", "nw") > 0 end
+  assert(row("outer") > 0, "outer is missing:\n" .. table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n"))
+  assert(not shows("outer/inner"), "Folders were merged into one row")
+  vim.api.nvim_feedkeys(vim.keycode("<CR>"), "x", false)
+  settle()
+  assert(shows("inner"), "Enter did not expand the folder")
+  row("outer")
+  vim.api.nvim_feedkeys(vim.keycode("<CR>"), "x", false)
+  settle()
+  assert(not shows("inner"), "Enter did not collapse the open folder")
+  vim.api.nvim_feedkeys(vim.keycode("<CR>"), "x", false)
+  settle()
+  row("inner")
+  local input, offered = vim.ui.input, nil
+  vim.ui.input = function(opts, done) offered = opts.default; done(nil) end
+  vim.api.nvim_feedkeys("a", "x", false)
+  settle()
+  vim.ui.input = input
+  assert(offered == "outer/inner/", "Add did not offer the editable folder path: " .. tostring(offered))
+  vim.api.nvim_feedkeys("q", "x", false)
+  settle()
+  vim.fn.delete(root .. "/outer", "rf")
+  vim.api.nvim_set_current_win(main)
 
   -- Narrow windows get the same popup; the tree never docks as a split.
   vim.o.columns = 90
@@ -279,6 +317,24 @@ local function check()
   local nix_buf = vim.api.nvim_get_current_buf()
   assert(vim.wait(15000, function() return #vim.diagnostic.get(nix_buf) > 0 end, 20), "nixd produced no diagnostics")
   assert(#vim.lsp.get_clients({ bufnr = nix_buf, name = "nixd" }) == 1, "nixd did not attach")
+
+  -- Markdown renders in the buffer, and the toggle switches it off.
+  io.stderr:write("neovim: rendered markdown\n")
+  local doc = vim.fn.tempname() .. ".md"
+  vim.fn.writefile({ "# Heading", "", "- [ ] open task", "- [x] done task", "", "| a | b |", "| - | - |", "| 1 | 2 |" }, doc)
+  vim.cmd.edit(vim.fn.fnameescape(doc))
+  vim.api.nvim_win_set_cursor(0, { 2, 0 })
+  local function decorations()
+    local ns = vim.api.nvim_get_namespaces()["render-markdown.nvim"]
+    return ns and #vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, {}) or 0
+  end
+  assert(vim.wait(3000, function() return decorations() > 0 end, 20), "Markdown was not rendered")
+  -- Updates within the plugin's 100 ms debounce of a render are dropped.
+  settle()
+  vim.cmd("RenderMarkdown toggle")
+  assert(vim.wait(3000, function() return decorations() == 0 end, 20), "Space um did not switch rendering off")
+  vim.cmd("RenderMarkdown toggle")
+  vim.cmd("bwipeout!")
 
   -- Today's journal through the zk language server, from the shared template.
   io.stderr:write("neovim: zk journal\n")

@@ -7,6 +7,20 @@ let
       inherit desc;
     };
   };
+  # Enter toggles a folder open or closed, and opens a file.
+  toggleOrOpen.__raw = ''
+    function(state)
+      local node = state.tree:get_node()
+      local commands = require("neo-tree.sources.filesystem.commands")
+      if node.type == "directory" then commands.toggle_node(state) else commands.open(state) end
+    end
+  '';
+  # Prompts start with the target path relative to the project root, so it can
+  # be edited: backspace over the last folder to create in its parent instead.
+  withPath = command: {
+    __unkeyed-1 = command;
+    config.show_path = "relative";
+  };
 in
 {
   programs.nixvim = {
@@ -94,10 +108,14 @@ in
           mappings = {
             # Space stays the leader inside the tree.
             "<space>" = "none";
-            "<cr>" = "open";
+            "<cr>" = toggleOrOpen;
+            o = toggleOrOpen;
             l = "open";
             h = "close_node";
-            o = "open";
+            a = withPath "add";
+            A = withPath "add_directory";
+            c = withPath "copy";
+            m = withPath "move";
             v = "open_vsplit";
             s = "open_split";
             S = "none";
@@ -130,7 +148,9 @@ in
             enabled = true;
             leave_dirs_open = false;
           };
-          group_empty_dirs = true;
+          # Every folder on its own row, so the cursor is never on a merged
+          # folder/subfolder row that hides which one new files land in.
+          group_empty_dirs = false;
           use_libuv_file_watcher = true;
           # Oil edits directories in place; the tree stays a sidebar.
           hijack_netrw_behavior = "disabled";

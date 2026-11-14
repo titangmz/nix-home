@@ -6,6 +6,7 @@ in
   imports = [
     ./lualine.nix
     ./which-key.nix
+    ./markdown.nix
   ];
   programs.nixvim = {
     opts = {
