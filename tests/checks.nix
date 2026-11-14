@@ -58,6 +58,7 @@ in
     assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
+    assert lib.hasInfix "set -g renumber-windows on" server.config.programs.tmux.extraConfig;
     assert hasPackage server "mtr";
     assert server.config.programs.gpg.enable;
     assert server.config.services.gpg-agent.enable;
