@@ -41,6 +41,16 @@
     plugins = {
       blink-cmp = {
         enable = true;
+        # Bordered, so the clear menus stand apart from the code around them.
+        settings.completion = {
+          menu.border = "rounded";
+          documentation = {
+            auto_show = true;
+            auto_show_delay_ms = 300;
+            window.border = "rounded";
+          };
+        };
+        settings.signature.window.border = "rounded";
         settings.keymap = {
           "<C-q>" = [
             "cancel"

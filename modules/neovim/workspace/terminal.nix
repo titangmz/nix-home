@@ -20,6 +20,11 @@ in
         persist_mode = false;
         persist_size = true;
         close_on_exit = false;
+        # Lazygit's float stays solid over a transparent editor.
+        highlights = {
+          NormalFloat.link = "NormalFloat";
+          FloatBorder.link = "FloatBorder";
+        };
       };
     };
     extraFiles."lua/workspace/terminal.lua".source = ./terminal.lua;

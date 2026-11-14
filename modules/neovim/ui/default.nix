@@ -18,7 +18,41 @@ in
       enable = true;
       settings = {
         flavour = theme.flavor;
-        transparent_background = false;
+        transparent_background = theme.neovim.transparent;
+        # Popups are clear glass too: the terminal blurs what is behind the
+        # window, and a float with no fill still hides the code beneath it as
+        # long as winblend stays 0. A coloured rounded border marks each edge.
+        float = {
+          transparent = true;
+          solid = false;
+        };
+        custom_highlights.__raw = ''
+          function(C)
+            local clear = { bg = C.none }
+            local border = { fg = C.lavender, bg = C.none }
+            return {
+              NormalFloat = { fg = C.text, bg = C.none },
+              FloatBorder = border,
+              FloatTitle = { fg = C.mauve, bg = C.none, style = { "bold" } },
+              Pmenu = { fg = C.overlay2, bg = C.none },
+              PmenuSel = { bg = C.surface0, style = { "bold" } },
+              BlinkCmpMenu = { fg = C.text, bg = C.none },
+              BlinkCmpMenuBorder = border,
+              BlinkCmpDoc = clear,
+              BlinkCmpDocBorder = border,
+              BlinkCmpSignatureHelp = clear,
+              BlinkCmpSignatureHelpBorder = border,
+              NeoTreeFloatBorder = border,
+              NeoTreeFloatTitle = { fg = C.mauve, bg = C.none, style = { "bold" } },
+              TelescopeBorder = border,
+              TelescopePromptBorder = border,
+              TelescopeResultsBorder = border,
+              TelescopePreviewBorder = border,
+              TelescopeSelection = { bg = C.surface0, style = { "bold" } },
+              WhichKeyBorder = border,
+            }
+          end
+        '';
         integrations = {
           blink_cmp = true;
           gitsigns = true;
@@ -35,6 +69,7 @@ in
       web-devicons.enable = true;
       bufferline = {
         enable = true;
+        settings.highlights.__raw = "require('catppuccin.special.bufferline').get_theme()";
         settings.options = {
           diagnostics = "nvim_lsp";
           always_show_bufferline = false;

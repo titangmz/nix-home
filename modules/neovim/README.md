@@ -8,6 +8,10 @@ Nixvim configuration for editing, navigation, UI, Git, languages, and the worksp
 
 Blink completion uses Insert-mode Ctrl-e to accept and Ctrl-q to dismiss. The workspace keeps one shell for both views. `Space tt` opens its floating input. Cargo uses that shell. Lazygit is a separate floating overlay.
 
+## Transparency
+
+`neovim.transparent` in `modules/theme` clears the editor background so the terminal's glass shows through. Popups are clear as well, with a lavender rounded border: pickers, the file tree, completion, hover and diagnostic windows, which-key, notifications, Oil, Lazygit, and the shell popup. Neovim cannot blur; the terminal blurs the desktop behind its window, and a float with no fill still hides the code beneath it while `winblend` and `pumblend` stay 0. The smoke test checks both.
+
 ## Layouts
 
 There are two. `Space l1` is the main layout: the editor, with the shell output docked below once `Space to` or a Cargo task shows it. `Space l2` opens the Git review (Diffview) in its own tab; `Space l1` closes it and returns to the editor with its splits and unsaved edits intact.

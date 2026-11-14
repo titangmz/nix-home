@@ -32,6 +32,9 @@ let
     opacity = "0.75";
     blurRadius = 40;
   };
+  # Neovim leaves its editor background clear so the terminal's glass shows
+  # through, popups included.
+  neovim.transparent = true;
   tokens = colors // {
     inherit opacity opacityHex;
     blurSize = toString blur.size;
@@ -45,6 +48,7 @@ in
     opacityHex
     blur
     ghostty
+    neovim
     ;
   flavor = "mocha";
   accent = "mauve";

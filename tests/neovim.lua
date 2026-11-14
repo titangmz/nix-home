@@ -34,6 +34,14 @@ local function check()
     assert(vim.tbl_isempty(mapping("<leader>" .. prefix)), "Executable prefix: " .. prefix)
   end
   assert(vim.o.termguicolors and vim.o.undofile)
+  -- Editor and popups are clear glass. Popups must still hide the code behind
+  -- them, which holds only while blending is off.
+  local function bg(group) return vim.api.nvim_get_hl(0, { name = group, link = false }).bg end
+  for _, group in ipairs({ "Normal", "NormalFloat", "Pmenu", "BlinkCmpMenu", "NeoTreeNormal", "TelescopeNormal" }) do
+    assert(bg(group) == nil, "Background is not clear: " .. group)
+  end
+  assert(vim.o.winblend == 0 and vim.o.pumblend == 0, "Blending lets code show through popups")
+  assert(vim.api.nvim_get_hl(0, { name = "FloatBorder", link = false }).fg, "Popup borders have no colour")
   assert(not vim.diagnostic.config().virtual_text)
   assert(require("nvim-treesitter.configs").get_module("highlight").enable)
 
