@@ -16,9 +16,15 @@ Neovim draws nothing on its first row, so it never runs into a tmux status bar a
 
 render-markdown draws Markdown in the buffer: heading bars, checkboxes, tables, code blocks, and callouts. The line under the cursor shows the raw text. Ticked checkboxes are struck through. `Space um` switches between rendered and raw.
 
+## Command line
+
+[noice.nvim](https://github.com/folke/noice.nvim) shows `:` commands and `/` `?` searches in a rounded popup in the middle of the screen, with completion beneath it. Neovim's messages and errors go to the snacks notifier, so they look like every other notification in the top-right corner; only the "written" line after a save stays a quiet hint in the bottom-right corner. Output too long for a notification opens in a split. `Space un` lists past notifications. Hover and signature help stay with the LSP and blink.
+
 ## Transparency
 
 `neovim.transparent` in `modules/theme` clears the editor background so the terminal's glass shows through. Popups are clear as well, with a lavender rounded border: pickers, the file tree, completion, hover and diagnostic windows, which-key, notifications, Oil, Lazygit, and the shell popup. Neovim cannot blur; the terminal blurs the desktop behind its window, and a float with no fill still hides the code beneath it while `winblend` and `pumblend` stay 0. The smoke test checks both.
+
+Selected text, the current row in pickers and completion, and the file tree's cursor row all use the theme's `selection` colour, the same one Ghostty, Kitty, and tmux use for selected text.
 
 ## Layouts
 

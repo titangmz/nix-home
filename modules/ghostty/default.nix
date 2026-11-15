@@ -10,5 +10,7 @@ in
     # Left Option sends Alt, so tmux's Alt+number window keys work. Right
     # Option still types special characters.
     macos-option-as-alt = left
+    selection-background = #${theme.colors.selection}
+    selection-foreground = #${theme.colors.text}
   '';
 }

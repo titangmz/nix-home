@@ -7,3 +7,5 @@ and blur come from `modules/theme`.
 Linux keeps using the NixOS desktop's Kitty package and configuration.
 
 The left Option key acts as Alt, so tmux's Alt+1 to Alt+9 window keys work; the right Option key still types special characters.
+
+Selected text uses the theme's `selection` colour with the normal text colour on top.

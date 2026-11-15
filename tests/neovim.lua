@@ -42,6 +42,16 @@ local function check()
   end
   assert(vim.o.winblend == 0 and vim.o.pumblend == 0, "Blending lets code show through popups")
   assert(vim.api.nvim_get_hl(0, { name = "FloatBorder", link = false }).fg, "Popup borders have no colour")
+  -- The command line is a noice popup in the middle of the screen.
+  -- noice skips its own setup without a UI, so check that it loads and that
+  -- its popup has the clear background and lavender border.
+  assert(pcall(require, "noice"), "noice is missing")
+  assert(bg("NoiceCmdlinePopup") == nil, "noice popup is not clear")
+  assert(vim.api.nvim_get_hl(0, { name = "NoiceCmdlinePopupBorder", link = false }).fg, "noice popup has no border colour")
+  -- Selections share one colour that stands out on the clear background.
+  for _, group in ipairs({ "Visual", "PmenuSel", "TelescopeSelection", "NeoTreeCursorLine" }) do
+    assert(bg(group) == 0x525677, "Selection colour not applied: " .. group)
+  end
   assert(not vim.diagnostic.config().virtual_text)
   assert(require("nvim-treesitter.configs").get_module("highlight").enable)
 

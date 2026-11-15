@@ -15,6 +15,10 @@ let
     red = "f38ba8";
     crust = "11111b";
     criticalBackground = "30202b";
+    # Selected text and the highlighted row in pickers and the file tree:
+    # lavender mixed into the base, light enough to stand out on the glass
+    # background, dark enough that the text colour stays readable on it.
+    selection = "525677";
   };
   # Shared glass opacity for Kitty, window title bars, and Waybar surfaces.
   opacity = "0.6";

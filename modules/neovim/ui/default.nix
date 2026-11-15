@@ -7,6 +7,7 @@ in
     ./lualine.nix
     ./which-key.nix
     ./markdown.nix
+    ./noice.nix
   ];
   programs.nixvim = {
     opts = {
@@ -34,12 +35,17 @@ in
           function(C)
             local clear = { bg = C.none }
             local border = { fg = C.lavender, bg = C.none }
+            -- One selection colour, shared with the terminal and tmux.
+            local selected = { bg = "#${theme.colors.selection}", style = { "bold" } }
             return {
               NormalFloat = { fg = C.text, bg = C.none },
               FloatBorder = border,
               FloatTitle = { fg = C.mauve, bg = C.none, style = { "bold" } },
               Pmenu = { fg = C.overlay2, bg = C.none },
-              PmenuSel = { bg = C.surface0, style = { "bold" } },
+              PmenuSel = selected,
+              -- Selected code keeps its own weight; list rows go bold.
+              Visual = { bg = selected.bg },
+              VisualNOS = { bg = selected.bg },
               BlinkCmpMenu = { fg = C.text, bg = C.none },
               BlinkCmpMenuBorder = border,
               BlinkCmpDoc = clear,
@@ -53,8 +59,16 @@ in
               TelescopePromptBorder = border,
               TelescopeResultsBorder = border,
               TelescopePreviewBorder = border,
-              TelescopeSelection = { bg = C.surface0, style = { "bold" } },
+              TelescopeSelection = selected,
+              NeoTreeCursorLine = selected,
               WhichKeyBorder = border,
+              NoiceCmdlinePopup = { fg = C.text, bg = C.none },
+              NoiceCmdlinePopupBorder = border,
+              NoiceCmdlinePopupBorderSearch = { fg = C.yellow, bg = C.none },
+              NoiceCmdlinePopupTitle = { fg = C.mauve, bg = C.none, style = { "bold" } },
+              NoiceCmdlineIcon = { fg = C.mauve, bg = C.none },
+              NoiceCmdlineIconSearch = { fg = C.yellow, bg = C.none },
+              NoiceMini = clear,
               WinBar = clear,
               WinBarNC = clear,
               WinBarFile = { fg = C.overlay1, bg = C.none },

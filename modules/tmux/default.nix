@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  theme = import ../theme { inherit lib; };
+in
 {
   programs.tmux = {
     enable = true;
@@ -35,6 +38,9 @@
     extraConfig = ''
       set -g default-command "${pkgs.zsh}/bin/zsh"
       ${builtins.readFile ./tmux.conf}
+      # Copy-mode and mouse selections use the theme's selection colour, not
+      # Catppuccin's surface0 grey, which is hard to see on a clear background.
+      set -g mode-style "bg=#${theme.colors.selection},fg=#${theme.colors.text},bold"
     '';
   };
 }

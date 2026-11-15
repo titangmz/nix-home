@@ -65,6 +65,7 @@ in
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
     assert lib.hasInfix "set -g renumber-windows on" server.config.programs.tmux.extraConfig;
+    assert lib.hasInfix "set -g mode-style \"bg=#525677" server.config.programs.tmux.extraConfig;
     assert lib.all (
       i: lib.hasInfix "bind -n M-${toString i} " server.config.programs.tmux.extraConfig
     ) (lib.range 1 9);
