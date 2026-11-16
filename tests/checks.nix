@@ -21,6 +21,8 @@ let
     "cargo"
     "clippy"
     "rustfmt"
+    "go-"
+    "gopls"
     "nixd"
   ];
   desktopFiles = [
@@ -83,6 +85,8 @@ in
     assert server.config.programs.zsh.oh-my-zsh.plugins == [ ];
     assert lib.all (pname: !(hasPackage server pname)) [
       "cargo"
+      "go"
+      "gopls"
       "fnm"
       "profanity"
       "v2rayn"
@@ -158,6 +162,8 @@ in
       assert writesNoDesktopFiles workstation;
       assert !(hasPackage workstation "hyprshot");
       assert hasPackage workstation "zk";
+      assert hasPackage workstation "go";
+      assert hasPackage workstation "gopls";
       assert workstation.config.programs.nixvim.plugins.zk.enable;
       assert
         workstation.config.home.sessionVariables.ZK_NOTEBOOK_DIR

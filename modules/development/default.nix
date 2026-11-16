@@ -8,6 +8,8 @@
     rustPlatform.rustLibSrc
     clippy
     rustfmt
+    go
+    gopls
     fnm
   ];
 

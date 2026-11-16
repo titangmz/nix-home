@@ -2,7 +2,7 @@
 
 Nixvim configuration for editing, navigation, UI, Git, languages, and the workspace layout.
 
-`development` adds rust-analyzer, the Rust tools, nixd, and every syntax parser. It is not imported by `default.nix`; only `profiles/workstation.nix` imports it, so servers do without it.
+`development` adds rust-analyzer, the Rust tools, Go and gopls, nixd, and every syntax parser. It is not imported by `default.nix`; only `profiles/workstation.nix` imports it, so servers do without it.
 
 `pcall(require, "local")` loads an optional `lua/local.lua` from the Neovim config when that file exists.
 

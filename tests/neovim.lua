@@ -320,6 +320,17 @@ local function check()
   vim.api.nvim_buf_set_lines(0, 0, -1, false, { 'fn main(){println!("hi");}' })
   require("conform").format({ async = false, timeout_ms = 5000, lsp_format = "never" })
   assert(#vim.api.nvim_buf_get_lines(0, 0, -1, false) > 1, "Rust formatter failed")
+  vim.cmd.enew()
+  vim.bo.filetype = "go"
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { "package main", "func main(){println(1)}" })
+  require("conform").format({ async = false, timeout_ms = 5000, lsp_format = "never" })
+  assert(vim.api.nvim_buf_get_lines(0, 1, 2, false)[1] == "", "Go formatter failed")
+  vim.fn.writefile({ "module example.com/smoke", "", "go 1.21" }, root .. "/go.mod")
+  vim.fn.writefile({ "package main", "func main() { unknown() }" }, root .. "/main.go")
+  vim.cmd.edit(vim.fn.fnameescape(root .. "/main.go"))
+  local go_buf = vim.api.nvim_get_current_buf()
+  assert(vim.wait(15000, function() return #vim.diagnostic.get(go_buf) > 0 end, 20), "gopls produced no diagnostics")
+  assert(#vim.lsp.get_clients({ bufnr = go_buf, name = "gopls" }) == 1, "gopls did not attach")
   -- A real language-server diagnostic; this malformed expression needs no
   -- external Nix inputs or network access.
   vim.fn.writefile({ "{ broken = ; }" }, root .. "/broken.nix")

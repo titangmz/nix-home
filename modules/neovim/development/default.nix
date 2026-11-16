@@ -1,4 +1,4 @@
-# Editor tooling for development machines: Rust, the Nix language server, and
+# Editor tooling for development machines: Rust, Go, the Nix language server, and
 # syntax parsers for every language. Servers skip it; the Rust compiler and LLVM
 # alone are about 1.5 GiB.
 { config, pkgs, ... }:
@@ -14,6 +14,7 @@
       rustc
       cargo
       clippy
+      go
     ];
     plugins.lsp.servers = {
       rust_analyzer = {
@@ -28,7 +29,9 @@
         };
       };
       nixd.enable = true;
+      gopls.enable = true;
     };
     plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];
+    plugins.conform-nvim.settings.formatters_by_ft.go = [ "gofmt" ];
   };
 }
