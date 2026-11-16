@@ -19,6 +19,14 @@ in
     "${config.home.homeDirectory}/.cargo/bin"
   ];
 
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    enableZshIntegration = true;
+    # Interactive Bash hands off to Zsh.
+    enableBashIntegration = false;
+  };
+
   programs.zsh = {
     enable = true;
     # modules/zoxide provides `z`, so no Oh My Zsh plugins are loaded.
