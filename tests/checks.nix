@@ -192,6 +192,11 @@ in
       assert hasPackage workstation "go";
       assert hasPackage workstation "gopls";
       assert hasPackage workstation "nodejs";
+      # The shell and the editor both run the Node LTS line, and pnpm runs on it too.
+      assert lib.any (
+        pkg: (pkg.pname or "") == "nodejs" && lib.versions.major pkg.version == "26"
+      ) workstation.config.home.packages;
+      assert hasEditorTool workstation "nodejs-26";
       assert hasPackage workstation "pnpm";
       assert workstation.config.programs.nixvim.plugins.zk.enable;
       assert

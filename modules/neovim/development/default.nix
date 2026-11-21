@@ -38,7 +38,7 @@ in
         clippy
         rustfmt
         # Node runs and debugs TypeScript; tsc is the fallback type checker.
-        nodejs
+        nodejs_26
         typescript
       ]
       # codelldb, the debug adapter rustaceanvim looks for. macOS uses Apple's instead.

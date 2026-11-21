@@ -11,8 +11,12 @@
     go
     gopls
     fnm
-    nodejs
-    pnpm
+    # Node 26 is the active LTS; npm ships with it. pnpm runs on the same Node.
+    nodejs_26
+    (pnpm.override {
+      nodejs = nodejs_26;
+      nodejs-slim = nodejs-slim_26;
+    })
   ];
 
   programs.pyenv = {
