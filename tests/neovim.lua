@@ -7,15 +7,19 @@ local function check()
   assert(vim.v.errmsg == "", vim.v.errmsg)
   local workspace = require("workspace")
   local terminal = require("workspace.terminal")
+  local task = require("workspace.task")
+  local rust = require("workspace.rust")
   local function mapping(key, mode)
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "ZkNew", "ZkNotes", "ZkBacklinks", "RenderMarkdown" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "DapContinue", "DapViewToggle", "ZkNew", "ZkNotes", "ZkBacklinks", "RenderMarkdown" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
-    "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "-", "<leader>-",
+    "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "<leader>rt", "<leader>rT", "<leader>rc",
+    "<leader>rl", "<leader>rs", "<leader>rx", "<leader>ri", "<leader>rd", "<leader>db", "<leader>dc", "<leader>du",
+    "<leader>uh", "<C-/>", "<C-_>", "-", "<leader>-",
     "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf", "<leader>np", "<leader>na", "<leader>nx", "<leader>nX", "<leader>nc", "<leader>um" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
   end
@@ -30,7 +34,8 @@ local function check()
   assert(vim.tbl_isempty(mapping("<leader>tn")))
   assert(vim.tbl_isempty(mapping("<leader>ts")))
   -- Action prefixes must not delay longer mappings in the same namespace.
-  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "x", "n", "u" }) do
+  assert(not vim.tbl_isempty(mapping("<C-/>", "i")), "The shell toggle is missing in Insert mode")
+  for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "d", "x", "n", "u" }) do
     assert(vim.tbl_isempty(mapping("<leader>" .. prefix)), "Executable prefix: " .. prefix)
   end
   assert(vim.o.termguicolors and vim.o.undofile)
@@ -95,46 +100,13 @@ local function check()
   vim.api.nvim_set_current_win(main)
 
   vim.o.columns, vim.o.lines = 200, 50
-  io.stderr:write("neovim: main layout with docked output\n")
+  io.stderr:write("neovim: main layout\n")
   workspace.layout("main")
   settle()
   assert(workspace.label() == "Main")
-  assert(not terminal.is_visible(), "Main layout docked the output before it was asked for")
-  terminal.toggle_output()
-  settle()
-  local shell = terminal.active()
-  assert(terminal.is_visible() and shell.job_id, "Shell output not docked")
-  local output_buf = terminal.output_buffer()
-  assert(output_buf == shell.bufnr and vim.bo[output_buf].buftype == "terminal", "Output lost native terminal rendering")
-  assert(vim.bo[output_buf].readonly and not vim.bo[output_buf].modifiable, "Output is writable")
-  assert(not pcall(vim.api.nvim_buf_set_lines, output_buf, 0, 0, false, { "unwanted input" }))
-  assert(not shell:is_open(), "Docking the output opened an interactive shell")
-  assert(shell.dir == root, "Shell is not in the project root")
-  local shell_job = shell.job_id
-  workspace.layout("main")
-  settle()
-  assert(terminal.active().job_id == shell_job, "Duplicate shells")
-  assert(terminal.is_visible(), "Main layout dropped the docked output")
-  assert(vim.bo[buf].modified and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "# Unsaved heading")
-
-  io.stderr:write("neovim: hide and narrow screen\n")
-  terminal.toggle_output()
-  settle()
-  assert(not terminal.is_visible(), "Output toggle did not hide the output")
-  assert(vim.fn.jobwait({ shell_job }, 0)[1] == -1, "Hidden shell stopped")
-  terminal.toggle_output()
-  settle()
-  vim.o.columns = 100
-  workspace.apply()
-  settle()
-  assert(terminal.is_visible(), "Narrow screen hid the shell output")
-  assert(vim.api.nvim_win_get_width(workspace.main()) >= 40, "Editor crushed on narrow screen")
-  vim.o.columns = 200
-  workspace.apply()
-  settle()
-  assert(terminal.is_visible(), "Wide screen failed to restore the layout")
+  assert(not task.is_visible(), "Main layout docked a pane before anything ran")
   assert(not workspace.tree_window(), "Layouts opened the tree; it is a popup by default")
-  assert(shell.job_id == shell_job)
+  assert(vim.bo[buf].modified and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == "# Unsaved heading")
 
   io.stderr:write("neovim: explorer popup\n")
   local function popup()
@@ -248,30 +220,36 @@ local function check()
   assert(not workspace.tree_window(), "Wide screen docked a tree")
   vim.api.nvim_set_current_win(main)
 
-  io.stderr:write("neovim: shared shell popup\n")
+  -- One key opens the shell ready for typing and puts the editor back as it was.
+  io.stderr:write("neovim: shell toggle\n")
   vim.api.nvim_set_current_win(main)
   local before_popup = vim.fn.winlayout()
+  local cursor = vim.api.nvim_win_get_cursor(main)
   terminal.toggle()
   settle()
-  local popup = vim.api.nvim_get_current_win()
-  assert(shell.window == popup and vim.api.nvim_win_get_config(popup).relative == "editor")
-  assert(terminal.is_visible(), "Popup hid the read-only output")
-  assert(terminal.active().job_id == shell_job, "Popup created another shell")
-  vim.api.nvim_chan_send(shell_job, "printf 'shared-shell-output\\n'\n")
-  assert(vim.wait(3000, function()
-    return vim.tbl_contains(vim.api.nvim_buf_get_lines(output_buf, 0, -1, false), "shared-shell-output")
-  end, 20), "Bottom output did not update from popup shell")
-  local escape = vim.fn.maparg("<Esc><Esc>", "t", false, true)
-  assert(type(escape.callback) == "function", "Popup has no close mapping")
-  escape.callback()
+  local shell = terminal.active()
+  local shell_job = shell.job_id
+  local shell_win = vim.api.nvim_get_current_win()
+  assert(shell.window == shell_win and vim.api.nvim_win_get_config(shell_win).relative == "editor", "Shell is not a popup")
+  assert(vim.bo[shell.bufnr].buftype == "terminal" and shell.dir == root, "Shell is not a terminal in the project root")
+  vim.api.nvim_chan_send(shell_job, "printf 'shell-%s\\n' output\n")
+  assert(vim.wait(5000, function()
+    return table.concat(vim.api.nvim_buf_get_lines(shell.bufnr, 0, -1, false), "\n"):find("shell-output", 1, true) ~= nil
+  end, 20), "Shell did not run a command")
+  for _, key in ipairs(terminal.toggle_keys) do
+    assert(type(vim.fn.maparg(key, "t", false, true).callback) == "function", "Shell cannot be left with " .. key)
+  end
+  vim.fn.maparg("<C-/>", "t", false, true).callback()
   settle()
-  assert(not shell:is_open() and vim.api.nvim_get_current_win() == main, "Escape failed to return to editor")
-  assert(vim.deep_equal(before_popup, vim.fn.winlayout()), "Popup changed editor topology")
+  assert(not terminal.popup_open() and vim.api.nvim_get_current_win() == main, "Toggle failed to return to the editor")
+  assert(vim.deep_equal(cursor, vim.api.nvim_win_get_cursor(main)), "Returning moved the cursor")
+  assert(vim.deep_equal(before_popup, vim.fn.winlayout()), "Shell changed editor topology")
   terminal.toggle()
   settle()
   assert(terminal.active().job_id == shell_job, "Reopening replaced the shell")
   terminal.close_popup()
   settle()
+  assert(vim.bo[buf].modified, "Shell lost unsaved edits")
 
   -- Review leaves the origin's editor windows and modified buffers intact.
   io.stderr:write("neovim: Git review\n")
@@ -293,20 +271,205 @@ local function check()
   assert(vim.deep_equal(vim.fn.winlayout(), origin_layout), "Review damaged original workspace")
   assert(vim.bo[buf].modified, "Review lost unsaved edits")
 
-  io.stderr:write("neovim: Cargo tasks\n")
+  -- Tasks run in their own pane and leave focus, mode, and the shell alone.
+  io.stderr:write("neovim: tasks\n")
   vim.fn.writefile({ '[package]', 'name = "workspace-smoke"', 'version = "0.1.0"', 'edition = "2021"' }, root .. "/Cargo.toml")
-  assert(terminal.cargo("check"), "Cargo check did not start")
-  local task = terminal.task()
-  assert(task.running and terminal.active().job_id == shell_job, "Cargo created another shell")
-  assert(not terminal.cargo("test"), "Busy task accepted a second command")
-  assert(vim.wait(10000, function() return not task.running end, 20), "Cargo check timed out")
-  assert(task.exit_code == 0, "Cargo check failed")
-  assert(vim.wait(2000, function()
-    return table.concat(vim.api.nvim_buf_get_lines(output_buf, 0, -1, false), "\n"):find("Finished", 1, true) ~= nil
-  end, 20), "Task output was not mirrored")
+  vim.api.nvim_set_current_win(main)
+  local function finished(timeout)
+    local current = task.task()
+    assert(vim.wait(timeout or 60000, function() return not current.running and current.elapsed ~= nil end, 20),
+      current.name .. " timed out")
+    settle()
+    return current
+  end
+  local function output()
+    return table.concat(vim.api.nvim_buf_get_lines(task.task().buf, 0, -1, false), "\n")
+  end
+  assert(task.run({ name = "echo", cmd = { "sh", "-c", "echo task-ran; exit 3" }, cwd = root }), "Task did not start")
+  assert(vim.api.nvim_get_current_win() == main, "Running a task took focus")
+  assert(not vim.bo[buf].modified, "Running a task did not save the open buffers")
+  local done = finished()
+  assert(done.exit_code == 3 and output():find("task-ran", 1, true), "Task output or exit code lost: " .. output())
+  assert(task.is_visible(), "A failed task did not show its output")
+  assert(task.status() == "✗ echo", "Statusline shows: " .. task.status())
+  assert(vim.api.nvim_get_current_win() == main, "A finished task took focus")
+  -- A quiet task that succeeds quickly never opens the pane, and closes one it opened.
+  task.toggle()
+  settle()
+  assert(not task.is_visible(), "Space to did not hide the output")
+  assert(task.run({ name = "quiet", cmd = { "true" }, cwd = root, quiet = true }))
+  done = finished()
+  assert(done.exit_code == 0 and not task.is_visible(), "A quick quiet task opened the pane")
+  task.quiet_delay = 50
+  assert(task.run({ name = "slow", cmd = { "sh", "-c", "sleep 0.4" }, cwd = root, quiet = true }))
+  assert(vim.wait(2000, task.is_visible, 10), "A slow quiet task never showed its output")
+  done = finished()
+  assert(not task.is_visible(), "A quiet task left its pane open after succeeding")
+  task.quiet_delay = 800
+  -- Rerun restarts a task that is still going; stop ends it.
+  assert(task.run({ name = "server", cmd = { "sh", "-c", "echo up; sleep 60" }, cwd = root }))
+  local first = task.task()
+  assert(task.rerun() and task.task() ~= first and task.task().name == "server", "Rerun did not restart the task")
+  assert(vim.wait(5000, function() return not first.running end, 20), "Rerun left the old task running")
+  assert(#vim.tbl_filter(function(win)
+    return vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "workspace_task"
+  end, vim.api.nvim_tabpage_list_wins(0)) == 1, "Rerun opened a second pane")
+  -- The pane takes input when asked, and the toggle key leaves it.
+  task.focus()
+  settle()
+  assert(vim.api.nvim_get_current_buf() == task.task().buf, "Space ri did not enter the task")
+  vim.fn.maparg("<C-/>", "t", false, true).callback()
+  settle()
+  assert(vim.api.nvim_get_current_win() == main, "Toggle did not leave the task pane")
+  task.stop()
+  done = finished()
+  assert(done.stopped and task.status() == "■ server", "Stop did not end the task: " .. task.status())
+  assert(terminal.active().job_id == shell_job, "Tasks replaced the shell")
+
+  io.stderr:write("neovim: Cargo\n")
+  vim.cmd.edit(vim.fn.fnameescape(root .. "/src/main.rs"))
+  -- A pane that was already open stays open; one the task opened goes away again.
+  task.toggle()
+  settle()
+  assert(not task.is_visible())
+  assert(rust.cargo({ "check" }, { quiet = true }), "Cargo check did not start")
+  done = finished(120000)
+  assert(done.exit_code == 0, "Cargo check failed:\n" .. output())
+  assert(output():find("Finished", 1, true), "Cargo output was not captured:\n" .. output())
+  assert(not task.is_visible(), "A clean check left its pane open")
+  -- Compiler errors become quickfix entries at the right file.
+  vim.fn.writefile({ "fn main() {", "    let unused = 1;", "    let x: u32 = \"text\";", "}" }, root .. "/src/main.rs")
+  vim.cmd("edit!")
+  assert(rust.cargo({ "check" }, { quiet = true }))
+  done = finished(120000)
+  assert(done.exit_code ~= 0 and task.is_visible(), "A failed check did not show its output")
+  local qf = vim.fn.getqflist({ items = 1, title = 1 })
+  local errors = vim.tbl_filter(function(item) return item.type == "E" end, qf.items)
+  assert(#errors == 1, "Expected one compiler error in quickfix:\n" .. vim.inspect(qf.items) .. output())
+  assert(vim.api.nvim_buf_get_name(errors[1].bufnr) == root .. "/src/main.rs" and errors[1].lnum == 3,
+    "Quickfix points at the wrong place: " .. vim.inspect(errors[1]))
+  assert(errors[1].text:find("mismatched types", 1, true), "Quickfix lost the message: " .. errors[1].text)
+  -- A clean run clears the list it made.
+  vim.fn.writefile({ "fn main() {}" }, root .. "/src/main.rs")
+  vim.cmd("edit!")
+  assert(task.rerun())
+  done = finished(120000)
+  assert(done.exit_code == 0 and #vim.fn.getqflist() == 0, "A clean check left stale errors in quickfix")
+  -- Panics from a run or a test are locations too.
+  local items = rust.parse({ "thread 'main' panicked at src/main.rs:1:13:", "boom", "note: run with `RUST_BACKTRACE=1`",
+    "warning: unused variable: `x`", " --> src/main.rs:1:5" }, { cwd = root })
+  assert(#items == 2 and items[1].text == "boom" and items[1].lnum == 1 and items[2].type == "W",
+    "Panic parsing is wrong: " .. vim.inspect(items))
+
+  -- rust-analyzer attaches through rustaceanvim, once, and finds what is runnable.
+  io.stderr:write("neovim: rust-analyzer\n")
+  vim.fn.writefile({ "fn main() {", "    println!(\"hi\");", "}", "", "#[cfg(test)]", "mod tests {", "    #[test]",
+    "    fn passes() {", "        assert_eq!(1 + 1, 2);", "    }", "}" }, root .. "/src/main.rs")
+  vim.cmd("edit!")
+  local rust_buf = vim.api.nvim_get_current_buf()
+  assert(vim.fn.exists(":RustLsp") == 2, "rustaceanvim did not load for a Rust buffer")
+  assert(vim.wait(30000, function() return #vim.lsp.get_clients({ bufnr = rust_buf, name = "rust-analyzer" }) == 1 end, 50),
+    "rust-analyzer did not attach exactly once")
+  local function runnable_at(line, expect)
+    vim.api.nvim_win_set_cursor(0, { line, 4 })
+    local name
+    assert(vim.wait(120000, function()
+      local started = line == 9 and rust.test() or line ~= 9 and rust.run()
+      vim.wait(1500, function() return task.task().name:find(expect, 1, true) ~= nil end, 20)
+      name = task.task().name
+      return started and name:find(expect, 1, true) ~= nil
+    end, 500), "No runnable matching " .. expect .. " at line " .. line .. "; last task: " .. tostring(name))
+    return finished(120000)
+  end
+  done = runnable_at(2, "run workspace-smoke")
+  assert(done.exit_code == 0 and output():find("hi", 1, true), "Space rr did not run the binary:\n" .. output())
+  assert(task.is_visible(), "A run's output did not stay open")
+  done = runnable_at(9, "passes")
+  assert(done.exit_code == 0 and output():find("1 passed", 1, true), "Space rt did not run the test:\n" .. output())
+  vim.api.nvim_set_current_win(main)
   workspace.layout("main")
   settle()
-  assert(terminal.active().job_id == shell_job and terminal.output_buffer() == output_buf, "Layout lost shell/output")
+
+  -- The same keys drive TypeScript, with the tools the project and Node provide.
+  io.stderr:write("neovim: TypeScript\n")
+  local ts, lang = require("workspace.ts"), require("workspace.lang")
+  local web = root .. "/web"
+  vim.fn.mkdir(web .. "/src", "p")
+  vim.fn.mkdir(web .. "/test", "p")
+  vim.fn.writefile({ '{ "name": "web", "type": "module", "scripts": { "hello": "echo script-ran" } }' }, web .. "/package.json")
+  vim.fn.writefile({ '{ "compilerOptions": { "strict": true, "module": "nodenext", "target": "es2022", "types": [] },',
+    '  "include": ["src"] }' }, web .. "/tsconfig.json")
+  vim.fn.writefile({ "const total: number = 2 + 3;", "console.log(`total = ${total}`);" }, web .. "/src/app.ts")
+  vim.fn.writefile({ 'import { test } from "node:test";', 'import assert from "node:assert";', "",
+    'test("adds (1)", () => {', "  assert.equal(1 + 1, 2);", "});", "",
+    'test("breaks", () => {', "  assert.equal(1, 2);", "});" }, web .. "/test/app.test.ts")
+  vim.cmd.edit(vim.fn.fnameescape(web .. "/src/app.ts"))
+  local ts_buf = vim.api.nvim_get_current_buf()
+  assert(ts.root() == web, "Wrong package root: " .. tostring(ts.root()))
+  assert(lang.run(), "Space rr did not start in a TypeScript file")
+  done = finished()
+  assert(done.name == "run app.ts" and done.exit_code == 0 and output():find("total = 5", 1, true),
+    "Space rr did not run the file:\n" .. output())
+  -- Only the test under the cursor runs; its name is passed literally.
+  vim.cmd.edit(vim.fn.fnameescape(web .. "/test/app.test.ts"))
+  vim.api.nvim_win_set_cursor(0, { 5, 2 })
+  assert(lang.test(), "Space rt did not start")
+  done = finished()
+  assert(done.name == "test adds (1)" and done.exit_code == 0, "Space rt ran the wrong test: " .. done.name .. "\n" .. output())
+  -- A failing test opens the pane and points quickfix at the assertion.
+  vim.api.nvim_win_set_cursor(0, { 9, 2 })
+  assert(lang.run(), "Space rr did not run the test under the cursor")
+  done = finished()
+  assert(done.name == "test breaks" and done.exit_code ~= 0 and task.is_visible(), "A failing test did not show:\n" .. output())
+  qf = vim.fn.getqflist()
+  assert(#qf >= 1 and vim.api.nvim_buf_get_name(qf[1].bufnr) == web .. "/test/app.test.ts" and qf[1].lnum == 9,
+    "Quickfix missed the failing assertion: " .. vim.inspect(qf) .. output())
+  -- The type checker's errors become quickfix entries.
+  vim.fn.writefile({ "const total: number = 2 + 3;", 'const bad: number = "text";', "console.log(total, bad);" }, web .. "/src/app.ts")
+  vim.api.nvim_set_current_buf(ts_buf)
+  vim.cmd("edit!")
+  assert(lang.check(), "Space rc did not start")
+  done = finished(120000)
+  qf = vim.fn.getqflist()
+  assert(done.name == "tsc" and done.exit_code ~= 0 and #qf == 1, "Type errors missing from quickfix:\n" .. output())
+  assert(vim.api.nvim_buf_get_name(qf[1].bufnr) == web .. "/src/app.ts" and qf[1].lnum == 2 and qf[1].text:find("TS2322", 1, true),
+    "Quickfix points at the wrong place: " .. vim.inspect(qf[1]))
+  -- The language server reports the same error in the buffer.
+  assert(vim.wait(60000, function() return #vim.diagnostic.get(ts_buf) > 0 end, 50), "vtsls produced no diagnostics")
+  assert(#vim.lsp.get_clients({ bufnr = ts_buf, name = "vtsls" }) == 1, "vtsls did not attach")
+  -- Lint findings and stack frames in other tools' formats.
+  items = ts.parse({ web .. "/src/app.ts", "  2:7  error  'bad' is never used  no-unused-vars", "",
+    " ❯ test/app.test.ts:9:10", "    at run (node:internal/test_runner/test:1:1)",
+    "    at thing (" .. web .. "/node_modules/x/index.js:1:1)" }, { cwd = web })
+  assert(#items == 2 and items[1].lnum == 2 and items[1].type == "E" and items[2].lnum == 9,
+    "Lint or stack parsing is wrong: " .. vim.inspect(items))
+  assert(vim.deep_equal(ts.formatters(ts_buf), { "prettier" }), "Prettier is not the default formatter")
+  vim.fn.writefile({ "{}" }, web .. "/biome.json")
+  vim.fn.mkdir(web .. "/node_modules/.bin", "p")
+  vim.fn.writefile({ "#!/bin/sh" }, web .. "/node_modules/.bin/biome")
+  assert(vim.deep_equal(ts.formatters(ts_buf), { "biome" }), "A Biome project is not formatted with Biome")
+  vim.fn.delete(web .. "/biome.json")
+  vim.fn.delete(web .. "/node_modules", "rf")
+  -- A package script, picked once.
+  local select = vim.ui.select
+  vim.ui.select = function(choices, _, on_choice) on_choice(choices[1]) end
+  assert(ts.script(), "Space rs did not offer the scripts")
+  vim.ui.select = select
+  done = finished()
+  assert(done.name == "npm run hello" and done.exit_code == 0 and output():find("script-ran", 1, true),
+    "Space rs did not run the script:\n" .. output())
+  -- Outside a source file, the nearest project file picks the language.
+  vim.cmd.edit(vim.fn.fnameescape(web .. "/tsconfig.json"))
+  assert(lang.check() and task.task().name == "tsc", "package.json did not select TypeScript")
+  finished(120000)
+  vim.cmd.edit(vim.fn.fnameescape(root .. "/Cargo.toml"))
+  assert(lang.check() and task.task().name == "cargo clippy", "Cargo.toml did not select Rust")
+  task.stop()
+  finished()
+  vim.fn.writefile({ "const total: number = 2 + 3;", "console.log(total);" }, web .. "/src/app.ts")
+  vim.api.nvim_set_current_win(main)
+  workspace.layout("main")
+  settle()
 
   -- Format real fixtures using Nix-provided executables.
   io.stderr:write("neovim: formatters\n")
@@ -404,6 +567,7 @@ local function check()
   vim.cmd.tabnew(vim.fn.fnameescape(plain .. "/new.txt"))
   assert(workspace.root() == plain)
   assert(terminal.active().job_id == shell_job, "Another project created a second shell")
+  assert(not task.is_visible(), "A new tab inherited the task pane")
   workspace.layout("main")
   settle()
   local tab = vim.api.nvim_get_current_tabpage()

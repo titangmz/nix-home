@@ -2,11 +2,17 @@
 
 Nixvim configuration for editing, navigation, UI, Git, languages, and the workspace layout.
 
-`development` adds rust-analyzer, the Rust tools, Go and gopls, nixd, and every syntax parser. It is not imported by `default.nix`; only `profiles/workstation.nix` imports it, so servers do without it.
+`development` adds the Rust and TypeScript workflow (language servers, run, test, and debug keys, a task pane), Go and gopls, nixd, and every syntax parser. It is not imported by `default.nix`; only `profiles/workstation.nix` imports it, so servers do without it. Its README has the keys.
 
 `pcall(require, "local")` loads an optional `lua/local.lua` from the Neovim config when that file exists.
 
-Blink completion uses Insert-mode Ctrl-e to accept and Ctrl-q to dismiss. The workspace keeps one shell for both views. `Space tt` opens its floating input. Cargo uses that shell. Lazygit is a separate floating overlay.
+Blink completion uses Insert-mode Ctrl-e to accept and Ctrl-q to dismiss.
+
+## Terminal
+
+There is one shell, in a popup. `Ctrl-/` opens it ready for typing, from Normal or Insert mode, and `Ctrl-/` again puts the editor back as it was: same window, same cursor, and still in Insert mode if that is where you were. `Space tt` does the same from Normal mode. The shell starts in the background when Neovim opens, so the first toggle shows a ready prompt, and it keeps running while hidden. `Esc Esc` leaves terminal input to scroll or copy; `q` there closes the popup. Typing `exit` ends the shell, and the next toggle starts a new one. Lazygit is a separate floating overlay.
+
+Terminals without the extended key protocol send `Ctrl-/` as `Ctrl-_`, so both are mapped.
 
 ## Screen
 
@@ -28,7 +34,7 @@ Selected text, the current row in pickers and completion, and the file tree's cu
 
 ## Layouts
 
-There are two. `Space l1` is the main layout: the editor, with the shell output docked below once `Space to` or a Cargo task shows it. `Space l2` opens the Git review (Diffview) in its own tab; `Space l1` closes it and returns to the editor with its splits and unsaved edits intact.
+There are two. `Space l1` is the main layout: the editor, with the task output docked below on workstations once a task or `Space to` shows it. `Space l2` opens the Git review (Diffview) in its own tab; `Space l1` closes it and returns to the editor with its splits and unsaved edits intact.
 
 ## File tree
 
@@ -39,6 +45,7 @@ The file tree is always a popup, like the Telescope pickers; it never docks as a
 | `Space Space` | Toggle the file tree popup at the current file |
 | `Space ff` / `Space fg` | Find files, search text |
 | `-` / `Space -` | Oil: edit the parent directory as a buffer, in place or floating |
+| `Ctrl-/` | Toggle the shell popup |
 | `Ctrl-h/j/k/l` | Move between editor and terminal windows |
 | `Ctrl-arrows` | Resize the current window |
 | `Ctrl-s` | Save |

@@ -44,7 +44,7 @@ in
         use_popups_for_input = false;
         open_files_do_not_replace_types = [
           "terminal"
-          "workspace_terminal"
+          "workspace_task"
           "trouble"
           "qf"
           "edgy"

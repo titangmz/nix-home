@@ -1,24 +1,22 @@
 let
-  map = key: action: desc: {
-    mode = "n";
-    inherit key action;
+  mapIn = mode: key: action: desc: {
+    inherit mode key action;
     options = {
       silent = true;
       inherit desc;
     };
   };
+  toggle = "<cmd>lua require('workspace.terminal').toggle()<CR>";
 in
 {
   programs.nixvim = {
+    # Only Lazygit's float goes through ToggleTerm; the shell is workspace.terminal.
     plugins.toggleterm = {
       enable = true;
       settings = {
-        direction = "horizontal";
-        size.__raw = "function() return require('workspace').terminal_height() end";
         shade_terminals = false;
         start_in_insert = false;
         persist_mode = false;
-        persist_size = true;
         close_on_exit = false;
         # Lazygit's float stays solid over a transparent editor.
         highlights = {
@@ -29,14 +27,20 @@ in
     };
     extraFiles."lua/workspace/terminal.lua".source = ./terminal.lua;
     extraConfigLua = "require('workspace.terminal').setup()";
+    # Ctrl-/ arrives as Ctrl-_ from terminals without the extended key protocol.
+    # The shell buffer maps the same keys to close itself.
     keymaps = [
-      (map "<leader>tt" "<cmd>lua require('workspace.terminal').toggle()<CR>" "Toggle shell popup")
-      (map "<leader>to" "<cmd>lua require('workspace.terminal').toggle_output()<CR>"
-        "Toggle read-only terminal output"
-      )
-      (map "<leader>rr" "<cmd>lua require('workspace.terminal').cargo('run')<CR>" "Cargo run")
-      (map "<leader>rc" "<cmd>lua require('workspace.terminal').cargo('check')<CR>" "Cargo check")
-      (map "<leader>rt" "<cmd>lua require('workspace.terminal').cargo('test')<CR>" "Cargo test")
-    ];
+      (mapIn "n" "<leader>tt" toggle "Toggle shell")
+    ]
+    ++
+      builtins.concatMap
+        (key: [
+          (mapIn "n" key toggle "Toggle shell")
+          (mapIn "i" key toggle "Toggle shell")
+        ])
+        [
+          "<C-/>"
+          "<C-_>"
+        ];
   };
 }

@@ -13,11 +13,20 @@ local function check()
   vim.cmd.edit(vim.fn.fnameescape(root .. "/notes.txt"))
   vim.o.columns, vim.o.lines = 200, 50
   require("workspace").layout("main")
-  require("workspace.terminal").toggle_output()
+  local editor = vim.api.nvim_get_current_win()
+  local terminal = require("workspace.terminal")
+  terminal.toggle()
   vim.wait(180, function() return false end, 10)
+  assert(terminal.popup_open(), "The toggle did not open the shell")
+  terminal.toggle()
+  vim.wait(180, function() return false end, 10)
+  assert(not terminal.popup_open() and vim.api.nvim_get_current_win() == editor, "The toggle did not return to the editor")
 
   assert(#errors == 0, table.concat(errors, "\n"))
-  assert(require("workspace.terminal").is_visible(), "Main layout did not dock the shell")
+  -- The task pane, the Rust keys, and the debugger belong to workstations.
+  assert(not pcall(require, "workspace.task"), "The task pane leaked into the server editor")
+  assert(not pcall(require, "dap"), "The debugger leaked into the server editor")
+  assert(vim.fn.maparg(" rr", "n") == "" and vim.fn.maparg(" to", "n") == "", "Run keys leaked into the server editor")
   assert(vim.v.errmsg == "", vim.v.errmsg)
 end
 

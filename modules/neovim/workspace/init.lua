@@ -2,6 +2,7 @@ local M = {}
 local states = {}
 local review_origin = {}
 local applying = false
+local hooks = {}
 
 local function normal_window(win)
   if not vim.api.nvim_win_is_valid(win) then return false end
@@ -22,7 +23,7 @@ function M.state()
     local root = vim.fs.root(dir, ".git") or dir
     root = vim.fs.normalize(vim.fn.fnamemodify(root, ":p")):gsub("/$", "")
     if root == "" then root = "/" end
-    states[tab] = { root = root, terminal = false, sizes = {},
+    states[tab] = { root = root, output = false, sizes = {},
       main = vim.api.nvim_get_current_win(), tab = tab }
     vim.cmd.tcd(vim.fn.fnameescape(root))
   end
@@ -48,13 +49,17 @@ function M.main()
   return vim.api.nvim_get_current_win()
 end
 
-function M.terminal_height()
+function M.pane_height()
   return math.max(3, math.min(M.state().sizes.bottom or math.min(16, math.floor(vim.o.lines * 0.25)), vim.o.lines - 14))
 end
 
 function M.geometry()
-  return { height = M.terminal_height(), tools = vim.o.lines >= 20 }
+  return { height = M.pane_height(), tools = vim.o.lines >= 20 }
 end
+
+-- Panes docked around the editor register here. apply() calls each with the
+-- tab's state and geometry, so it shows or hides its own windows.
+function M.on_apply(hook) hooks[#hooks + 1] = hook end
 
 -- The main window's file, when it lives inside the project. Revealing anything
 -- else would make the tree ask to change its root.
@@ -82,16 +87,11 @@ function M.apply()
     local state, geometry = M.state(), M.geometry()
     local focused = vim.api.nvim_get_current_win()
     local was_insert = vim.api.nvim_get_mode().mode:sub(1, 1) == "i"
-    local term = require("workspace.terminal")
-    if state.terminal and geometry.tools then term.show() else term.hide() end
-    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-      local ft = vim.bo[vim.api.nvim_win_get_buf(win)].filetype
-      if ft == "workspace_terminal" and state.sizes.bottom then vim.w[win].edgy_height = state.sizes.bottom end
-    end
+    for _, hook in ipairs(hooks) do hook(state, geometry) end
     if vim.api.nvim_win_is_valid(focused) then vim.api.nvim_set_current_win(focused)
     else vim.api.nvim_set_current_win(M.main()) end
-    -- ToggleTerm restores its input mode on a scheduled callback. Opening a
-    -- background shell must not put the editor into Insert mode.
+    -- A terminal restores its input mode on a scheduled callback. Showing a
+    -- pane in the background must not put the editor into Insert mode.
     vim.schedule(function()
       if not was_insert and normal_window(vim.api.nvim_get_current_win()) then vim.cmd.stopinsert() end
     end)
@@ -154,8 +154,8 @@ end
 
 function M.history() M.review(true) end
 
--- Two layouts. main is the editor, with the terminal output docked below when
--- Space to or a Cargo task has shown it. review is Diffview in its own tab;
+-- Two layouts. main is the editor, with whatever panes have registered through
+-- on_apply docked around it. review is Diffview in its own tab;
 -- main closes it and returns to the editor untouched.
 function M.layout(name)
   if name == "review" then M.review(); return end

@@ -14,17 +14,34 @@ let
   # Neovim keeps these on its own PATH, outside home.packages.
   hasEditorTool =
     home: prefix:
-    lib.any (pkg: lib.hasPrefix prefix pkg.name) home.config.programs.nixvim.extraPackages;
+    lib.any (pkg: lib.hasPrefix prefix pkg.name) (
+      home.config.programs.nixvim.extraPackages ++ home.config.programs.nixvim.extraPackagesAfter
+    );
   developmentEditorTools = [
     "rust-analyzer"
     "rustc"
     "cargo"
     "clippy"
     "rustfmt"
+    "nodejs"
+    "typescript"
+    "vtsls"
     "go-"
     "gopls"
     "nixd"
   ];
+  rustTools = [
+    "rust-analyzer"
+    "rustc"
+    "cargo"
+    "clippy"
+    "rustfmt"
+  ];
+  # A project's own toolchain must win over the editor's, so the editor's sits
+  # after the inherited PATH.
+  editorToolLeads =
+    home: prefix:
+    lib.any (pkg: lib.hasPrefix prefix pkg.name) home.config.programs.nixvim.extraPackages;
   desktopFiles = [
     "hypr/hyprland.lua"
     "kitty/kitty.conf"
@@ -35,12 +52,14 @@ let
   ];
   writesNoDesktopFiles =
     home: lib.all (path: !(builtins.hasAttr path home.config.xdg.configFile)) desktopFiles;
+  # `tools` are what the editor expects from the machine rather than carrying
+  # itself, such as the C linker a Rust build needs.
   neovimCheck =
-    name: home: script:
+    name: home: script: tools:
     let
       editor = home.config.programs.nixvim;
     in
-    pkgs.runCommand name { } ''
+    pkgs.runCommand name { nativeBuildInputs = tools; } ''
       export XDG_CONFIG_HOME="$TMPDIR/config"
       export XDG_CACHE_HOME="$TMPDIR/cache"
       export XDG_DATA_HOME="$TMPDIR/data"
@@ -97,10 +116,15 @@ in
       "tor"
     ];
     assert !(builtins.hasAttr ".proxychains/proxychains.conf" server.config.home.file);
-    assert lib.all (tool: !(hasEditorTool server tool)) developmentEditorTools;
+    assert lib.all (tool: !(hasEditorTool server tool)) (
+      developmentEditorTools ++ [ "vscode-lldb-adapter" ]
+    );
+    assert !server.config.programs.nixvim.plugins.rustaceanvim.enable;
+    assert !server.config.programs.nixvim.plugins.dap.enable;
+    assert !server.config.programs.nixvim.plugins.crates.enable;
     assert builtins.length server.config.programs.nixvim.plugins.treesitter.grammarPackages < 50;
     server.activationPackage;
-  server-neovim = neovimCheck "server-neovim-smoke-check" server ./neovim-server.lua;
+  server-neovim = neovimCheck "server-neovim-smoke-check" server ./neovim-server.lua [ ];
   # Every shell script, including the template without a shebang, plus Nix lints.
   lint =
     pkgs.runCommand "lint-check"
@@ -173,6 +197,12 @@ in
       assert hasPackage workstation "v2rayn";
       assert hasPackage workstation "proxychains-ng";
       assert lib.all (hasEditorTool workstation) developmentEditorTools;
+      assert lib.all (tool: !(editorToolLeads workstation tool)) rustTools;
+      # The nixpkgs debugger works on Linux only; macOS uses Apple's lldb-dap.
+      assert pkgs.stdenv.isLinux == hasEditorTool workstation "vscode-lldb-adapter";
+      assert editor.plugins.rustaceanvim.enable && editor.plugins.dap.enable;
+      # rustaceanvim starts rust-analyzer itself; a second client would double every diagnostic.
+      assert !editor.plugins.lsp.servers.rust_analyzer.enable;
       assert
         workstation.config.programs.nixvim.plugins.treesitter.grammarPackages
         == workstation.config.programs.nixvim.plugins.treesitter.package.passthru.allGrammars;
@@ -194,7 +224,7 @@ in
       workstation.activationPackage;
     neovim =
       assert builtins.length mappingKeys == builtins.length (lib.unique mappingKeys);
-      neovimCheck "neovim-smoke-check" workstation ./neovim.lua;
+      neovimCheck "neovim-smoke-check" workstation ./neovim.lua [ pkgs.stdenv.cc ];
   }
 )
 // lib.optionalAttrs (supports "nixos") {

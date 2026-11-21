@@ -37,13 +37,22 @@ python3 tests/test_switch.py SwitchTests.<test_name>
 python3 tests/test_bootstrap.py
 python3 tests/test_bin_scripts.py
 python3 tests/test_set_wallpaper.py
+python3 tests/test_rebuild.py           # Linux only, like test_setup_monitors.py
 ```
+
+Which checks exist depends on the system: `workstation` and `neovim` only where `pc` or `mac` is supported (not aarch64-linux), `nixos` and `nixos-module` only on x86_64-linux.
 
 ## Architecture
 
 **Layout.** `profiles/` composes `modules/`. `scripts/` holds the repo tooling that `just` runs. `modules/scripts/bin/` holds commands installed into `~/.local/bin`. `tests/` holds the flake checks (`tests/checks.nix`), the Python script tests, and the Neovim smoke tests.
 
 **Profiles are import trees.** `server` is `base.nix`. `pc`, `mac`, and `nixos` build on `workstation.nix`, which builds on `base.nix`. The module system loads a file once even when several layers import it. The layer rules are in `docs/rules.md`.
+
+**Identity.** `profiles/user.nix` is the only place the username, name, and email appear. Home Manager, the NixOS module, and the checks read it.
+
+**Installed scripts are discovered, not listed.** `modules/scripts` installs every non-hidden file in `modules/scripts/bin/` into `~/.local/bin` on every profile, the server included. Because the flake is read through `path:`, an untracked file there is installed and linted too. A new command needs an entry in `modules/scripts/README.md`, tests in `tests/test_bin_scripts.py` (external tools are mocked on `PATH`), and must pass shellcheck, which the `lint` check runs on anything with a `sh` or `bash` shebang.
+
+**Neovim is Nixvim.** `modules/neovim` is the editor every profile gets. `modules/neovim/development` adds the language servers, toolchains, the task pane and the Rust and TypeScript run/test/debug keys (`lang.lua` dispatches one set of keys to `rust.lua` or `ts.lua`), and all treesitter grammars, and only `workstation.nix` imports it. The base editor keeps only the shell popup (`workspace/terminal.lua`); panes docked around the editor register through `workspace.on_apply`. The `server` check asserts those tools are absent and that fewer than 50 grammars are installed, so language tooling added to the base editor fails it.
 
 **Flake outputs** (`flake.nix`):
 - `homeConfigurations.<profile>-<system>` for every pair in `profiles/default.nix`, such as `server-aarch64-linux` or `mac-aarch64-darwin`. The supported systems are whatever that table lists.

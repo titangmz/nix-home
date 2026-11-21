@@ -28,11 +28,6 @@ in
         };
         bottom = [
           {
-            ft = "workspace_terminal";
-            title = "Terminal · read only";
-            filter.__raw = "function(_, win) return vim.api.nvim_win_get_config(win).relative == '' end";
-          }
-          {
             ft = "trouble";
             title = "Diagnostics";
           }
