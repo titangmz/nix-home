@@ -23,6 +23,7 @@
     procs
     gping
     mtr
+    dig
     btop
     ctop
     sshuttle
