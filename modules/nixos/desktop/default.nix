@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   palette = import ../../theme { inherit lib; };
 in
@@ -32,6 +37,8 @@ in
           size = "standard";
         };
       };
+      # Keep GTK 4 apps on the same theme; 26.05 changed the default to none.
+      gtk4.theme = config.gtk.theme;
       iconTheme = {
         name = "Papirus-Dark";
         package = pkgs.catppuccin-papirus-folders.override {
@@ -59,11 +66,11 @@ in
     };
 
     # Provide Xfconf activation in this Hyprland session without an Xfce desktop.
-    home.packages = [ pkgs.xfce.xfconf ];
+    home.packages = [ pkgs.xfconf ];
     xdg.dataFile."dbus-1/services/org.xfce.Xfconf.service".text = ''
       [D-BUS Service]
       Name=org.xfce.Xfconf
-      Exec=${pkgs.xfce.xfconf}/lib/xfce4/xfconf/xfconfd
+      Exec=${pkgs.xfconf}/lib/xfce4/xfconf/xfconfd
       SystemdService=xfconfd.service
     '';
     systemd.user.services.xfconfd = {
@@ -71,7 +78,7 @@ in
       Service = {
         Type = "dbus";
         BusName = "org.xfce.Xfconf";
-        ExecStart = "${pkgs.xfce.xfconf}/lib/xfce4/xfconf/xfconfd";
+        ExecStart = "${pkgs.xfconf}/lib/xfce4/xfconf/xfconfd";
       };
     };
     # Start the service explicitly on first activation: the running D-Bus

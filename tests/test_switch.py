@@ -84,7 +84,7 @@ class SwitchTestCase(unittest.TestCase):
 
 class SwitchTests(SwitchTestCase):
     def test_named_profile_on_each_platform_and_directory(self):
-        for system in ["x86_64-linux", "aarch64-linux", "aarch64-darwin", "x86_64-darwin"]:
+        for system in ["x86_64-linux", "aarch64-linux", "aarch64-darwin"]:
             for cwd in [self.root, self.repo]:
                 with self.subTest(system=system, cwd=cwd):
                     self.log.unlink(missing_ok=True)

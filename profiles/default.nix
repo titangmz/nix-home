@@ -7,10 +7,8 @@ let
     "x86_64-linux"
     "aarch64-linux"
   ];
-  darwin = [
-    "aarch64-darwin"
-    "x86_64-darwin"
-  ];
+  # Apple Silicon only: nixvim 26.05 dropped Intel Macs, and nixpkgs drops them after 26.05.
+  darwin = [ "aarch64-darwin" ];
 in
 {
   server = linux ++ darwin;

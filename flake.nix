@@ -2,10 +2,10 @@
   description = "Home Manager profiles for Linux and macOS machines and a NixOS desktop";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    home-manager.url = "github:nix-community/home-manager/release-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nixvim.url = "github:nix-community/nixvim/nixos-25.11";
+    nixvim.url = "github:nix-community/nixvim/nixos-26.05";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -31,6 +31,8 @@
           modules = [
             profile
             nixvim.homeModules.nixvim
+            # Nixvim follows our nixpkgs; saying so explicitly silences its pin-mismatch warning.
+            { programs.nixvim.nixpkgs.source = nixpkgs; }
           ];
         };
     in

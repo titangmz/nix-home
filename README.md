@@ -4,9 +4,9 @@ Personal Home Manager configuration for servers, workstations, and one NixOS Hyp
 
 | Profile | For | Systems |
 | --- | --- | --- |
-| `server` | headless machines, Raspberry Pi included: shell, CLI tools, Git, tmux, Neovim | Linux and macOS, x86_64 and aarch64 |
+| `server` | headless machines, Raspberry Pi included: shell, CLI tools, Git, tmux, Neovim | x86_64 and aarch64 Linux, Apple Silicon macOS |
 | `pc` | Linux workstations | x86_64-linux |
-| `mac` | macOS workstations | aarch64-darwin, x86_64-darwin |
+| `mac` | macOS workstations | aarch64-darwin |
 | `nixos` | the NixOS Hyprland desktop | x86_64-linux |
 
 `profiles/default.nix` lists the profiles, and `profiles/user.nix` holds the username, name, and email that every profile and the NixOS module use.
