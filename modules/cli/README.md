@@ -1,6 +1,6 @@
 # CLI
 
-General command-line packages, including `curl`, `vim`, `wget`, `mtr`, `dig`, `jq`, `yq-go` (`yq`), `just`, `hyperfine`, and `watchexec`. The Eza theme is `eza-theme.yml`.
+General command-line packages, including `curl`, `vim`, `wget`, `mtr`, `dig`, `unzip`, `jq`, `yq-go` (`yq`), `just`, `hyperfine`, and `watchexec`. The Eza theme is `eza-theme.yml`.
 
 `pass` uses Home Manager's GPG configuration and agent in every profile. The agent uses `pinentry-curses` for passphrase prompts in local terminals and over SSH; Bash and Zsh integration set `GPG_TTY` to the current terminal. Home Manager manages `~/.gnupg/gpg-agent.conf`; imported keys and the password store remain local data.
 

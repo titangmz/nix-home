@@ -24,6 +24,7 @@
     gping
     mtr
     dig
+    unzip
     btop
     ctop
     sshuttle

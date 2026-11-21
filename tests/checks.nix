@@ -91,6 +91,7 @@ in
       i: lib.hasInfix "bind -n M-${toString i} " server.config.programs.tmux.extraConfig
     ) (lib.range 1 9);
     assert hasPackage server "mtr";
+    assert hasPackage server "unzip";
     assert server.config.programs.gpg.enable;
     assert server.config.services.gpg-agent.enable;
     assert server.config.services.gpg-agent.pinentry.package == pkgs.pinentry-curses;
