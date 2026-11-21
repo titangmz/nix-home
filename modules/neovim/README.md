@@ -34,6 +34,8 @@ Selected text, the current row in pickers and completion, and the file tree's cu
 
 ## Layouts
 
+The project root is the directory Neovim was started in, whether or not it is a Git repository; the tree, search, and terminals all work from it. Only a file opened from outside that directory brings its own root: its repository, or its folder when it has none.
+
 There are two. `Space l1` is the main layout: the editor, with the task output docked below on workstations once a task or `Space to` shows it. `Space l2` opens the Git review (Diffview) in its own tab; `Space l1` closes it and returns to the editor with its splits and unsaved edits intact.
 
 ## File tree

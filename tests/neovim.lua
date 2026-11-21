@@ -75,8 +75,12 @@ local function check()
   git({ "add", "." })
   git({ "-c", "user.name=Smoke", "-c", "user.email=smoke@example.test", "-c", "commit.gpgsign=false",
     "commit", "--quiet", "-m", "Fixture" })
+  -- Everything after this starts somewhere else, so the fixture is a foreign project.
+  local start = vim.fn.tempname() .. " start directory"
+  vim.fn.mkdir(start, "p")
+  vim.cmd.cd(vim.fn.fnameescape(start))
   vim.cmd.edit(vim.fn.fnameescape(root .. "/src/main.rs"))
-  -- A new tab establishes a fresh, stable project root.
+  -- A new tab on a file from outside establishes that file's project root.
   vim.cmd.tabnew(vim.fn.fnameescape(root .. "/src/main.rs"))
   assert(workspace.root() == root, "Wrong project root: " .. workspace.root())
   vim.cmd.vsplit(vim.fn.fnameescape(root .. "/README.md"))
@@ -574,6 +578,14 @@ local function check()
   workspace.layout("review")
   assert(vim.api.nvim_get_current_tabpage() == tab, "Non-Git review created a tab")
   assert(vim.v.errmsg == "", vim.v.errmsg)
+
+  -- Started inside a repository's folder, the root is that folder, with or
+  -- without a file from it, never the repository above.
+  vim.cmd.cd(vim.fn.fnameescape(root .. "/src"))
+  vim.cmd.tabnew()
+  assert(workspace.root() == root .. "/src", "An empty editor left its start directory: " .. workspace.root())
+  vim.cmd.tabnew(vim.fn.fnameescape(root .. "/src/main.rs"))
+  assert(workspace.root() == root .. "/src", "A file below the start directory moved the root: " .. workspace.root())
 end
 
 local ok, err = xpcall(check, debug.traceback)

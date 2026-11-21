@@ -18,11 +18,18 @@ function M.state()
     tab = review_origin[tab]
   end
   if not states[tab] then
+    local function clean(path)
+      path = vim.fs.normalize(vim.fn.fnamemodify(path, ":p")):gsub("/$", "")
+      return path == "" and "/" or path
+    end
+    -- The directory Neovim was started in is the root, repository or not. Only
+    -- a file from outside it brings its own: its repository, else its folder.
+    local root = clean(vim.fn.getcwd())
     local name = vim.api.nvim_buf_get_name(0)
-    local dir = name ~= "" and (vim.fn.isdirectory(name) == 1 and name or vim.fs.dirname(name)) or vim.fn.getcwd()
-    local root = vim.fs.root(dir, ".git") or dir
-    root = vim.fs.normalize(vim.fn.fnamemodify(root, ":p")):gsub("/$", "")
-    if root == "" then root = "/" end
+    if name ~= "" and not vim.startswith(clean(name) .. "/", root == "/" and "/" or root .. "/") then
+      local dir = vim.fn.isdirectory(name) == 1 and name or vim.fs.dirname(name)
+      root = clean(vim.fs.root(dir, ".git") or dir)
+    end
     states[tab] = { root = root, output = false, sizes = {},
       main = vim.api.nvim_get_current_win(), tab = tab }
     vim.cmd.tcd(vim.fn.fnameescape(root))
