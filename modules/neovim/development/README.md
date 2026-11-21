@@ -54,6 +54,8 @@ The project decides the tools. Its lockfile names the package manager (Bun, pnpm
 
 ## Debugging
 
+> **Temporarily off.** nixpkgs 26.05 fetches nvim-dap from codeberg.org, which the binary cache does not cover and this network blocks. Set `debugger = true` in `default.nix` (and restore the TODOs in `tests/checks.nix` and `tests/neovim.lua`) once codeberg is reachable. Until then the `Space d` keys are gone and `Space rd` only warns.
+
 `Space rd` starts what is under the cursor under the debugger: in Rust it builds the binary or test first, in TypeScript it launches the current file with Node, or the project's `tsx`. The panel with scopes, watches, breakpoints, threads, and the REPL opens with the session.
 
 | Key | Action |

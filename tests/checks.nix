@@ -204,7 +204,9 @@ in
       assert lib.all (tool: !(editorToolLeads workstation tool)) rustTools;
       # The nixpkgs debugger works on Linux only; macOS uses Apple's lldb-dap.
       assert pkgs.stdenv.isLinux == hasEditorTool workstation "vscode-lldb-adapter";
-      assert editor.plugins.rustaceanvim.enable && editor.plugins.dap.enable;
+      # TODO: also assert editor.plugins.dap.enable once the debugger is back (see
+      # `debugger` in modules/neovim/development).
+      assert editor.plugins.rustaceanvim.enable;
       # rustaceanvim starts rust-analyzer itself; a second client would double every diagnostic.
       assert !editor.plugins.lsp.servers.rust_analyzer.enable;
       assert

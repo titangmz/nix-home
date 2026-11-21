@@ -109,12 +109,9 @@
           ]
         );
         nixvimInjections = true;
+        highlight.enable = true;
+        indent.enable = true;
         folding.enable = true;
-        settings = {
-          indent.enable = true;
-          highlight.enable = true;
-          auto_install = false;
-        };
       };
       hmts.enable = true;
       conform-nvim = {

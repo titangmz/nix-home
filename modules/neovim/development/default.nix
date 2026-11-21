@@ -17,6 +17,9 @@ let
     };
   };
   lua = code: "<cmd>lua ${code}<CR>";
+  # TODO: back to true once codeberg.org is reachable. 26.05 fetches nvim-dap from
+  # there, the binary cache lacks it, and this network blocks the site.
+  debugger = false;
 in
 {
   programs.nixvim = {
@@ -101,7 +104,7 @@ in
     plugins.crates.enable = true;
 
     plugins.dap = {
-      enable = true;
+      enable = debugger;
       signs = {
         dapBreakpoint.text = "●";
         dapBreakpointCondition.text = "◆";
@@ -119,7 +122,7 @@ in
     };
     # Scopes, watches, breakpoints, and the REPL; opens and closes with a session.
     plugins.dap-view = {
-      enable = true;
+      enable = debugger;
       settings.auto_toggle = true;
     };
 
@@ -144,11 +147,11 @@ in
         __unkeyed-1 = "<leader>r";
         group = "Run";
       }
-      {
-        __unkeyed-1 = "<leader>d";
-        group = "Debug";
-      }
-    ];
+    ]
+    ++ lib.optional debugger {
+      __unkeyed-1 = "<leader>d";
+      group = "Debug";
+    };
 
     keymaps = [
       (map "<leader>rr" (lua "require('workspace.lang').run()") "Run at cursor")
@@ -163,6 +166,12 @@ in
       (map "<leader>re" (lua "require('workspace.rust').expand_macro()") "Expand macro")
       (map "<leader>rE" (lua "require('workspace.rust').explain_error()") "Explain error")
       (map "<leader>to" (lua "require('workspace.task').toggle()") "Toggle task output")
+      (map "<leader>uh"
+        (lua "vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })")
+        "Toggle inlay hints"
+      )
+    ]
+    ++ lib.optionals debugger [
       (map "<leader>db" (lua "require('dap').toggle_breakpoint()") "Toggle breakpoint")
       (map "<leader>dc" (lua "require('dap').continue()") "Continue")
       (map "<leader>do" (lua "require('dap').step_over()") "Step over")
@@ -170,10 +179,6 @@ in
       (map "<leader>dO" (lua "require('dap').step_out()") "Step out")
       (map "<leader>dx" (lua "require('dap').terminate()") "End the session")
       (map "<leader>du" "<cmd>DapViewToggle<CR>" "Toggle debugger panel")
-      (map "<leader>uh"
-        (lua "vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })")
-        "Toggle inlay hints"
-      )
     ];
   };
 }

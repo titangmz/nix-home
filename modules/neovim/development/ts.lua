@@ -232,8 +232,12 @@ function M.debug()
   if not file or not file:match("%.[cm]?[jt]sx?$") then
     vim.notify("Open a TypeScript or JavaScript file first", vim.log.levels.WARN); return false
   end
+  local ok, dap = pcall(require, "dap")
+  if not ok then
+    vim.notify("The debugger is turned off in this build", vim.log.levels.WARN); return false
+  end
   local root = M.root() or vim.fs.dirname(file)
-  require("dap").run({ type = "pwa-node", request = "launch", name = "Debug " .. vim.fs.basename(file),
+  dap.run({ type = "pwa-node", request = "launch", name = "Debug " .. vim.fs.basename(file),
     program = file, cwd = root, runtimeExecutable = tool(root, "tsx") or "node", sourceMaps = true,
     skipFiles = { "<node_internals>/**", "**/node_modules/**" } })
   return true

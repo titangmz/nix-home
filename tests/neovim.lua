@@ -2,6 +2,8 @@
 local function settle()
   vim.wait(180, function() return false end, 10)
 end
+-- TODO: add back DapContinue, DapViewToggle, <leader>db, <leader>dc, and <leader>du once
+-- the debugger is back (see `debugger` in modules/neovim/development).
 local function check()
   io.stderr:write("neovim: startup\n")
   assert(vim.v.errmsg == "", vim.v.errmsg)
@@ -13,12 +15,12 @@ local function check()
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "DapContinue", "DapViewToggle", "ZkNew", "ZkNotes", "ZkBacklinks", "RenderMarkdown" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "ZkNew", "ZkNotes", "ZkBacklinks", "RenderMarkdown" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
     "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "<leader>rt", "<leader>rT", "<leader>rc",
-    "<leader>rl", "<leader>rs", "<leader>rx", "<leader>ri", "<leader>rd", "<leader>db", "<leader>dc", "<leader>du",
+    "<leader>rl", "<leader>rs", "<leader>rx", "<leader>ri", "<leader>rd",
     "<leader>uh", "<C-/>", "<C-_>", "-", "<leader>-",
     "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf", "<leader>np", "<leader>na", "<leader>nx", "<leader>nX", "<leader>nc", "<leader>um" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
@@ -58,7 +60,10 @@ local function check()
     assert(bg(group) == 0x525677, "Selection colour not applied: " .. group)
   end
   assert(not vim.diagnostic.config().virtual_text)
-  assert(require("nvim-treesitter.configs").get_module("highlight").enable)
+  local highlighted = vim.api.nvim_create_buf(false, true)
+  vim.bo[highlighted].filetype = "lua"
+  assert(vim.treesitter.highlighter.active[highlighted], "Tree-sitter highlighting did not start")
+  vim.api.nvim_buf_delete(highlighted, { force = true })
 
   local root = vim.fn.tempname() .. " project with spaces"
   io.stderr:write("neovim: project fixture\n")
