@@ -37,6 +37,16 @@ local function check()
   assert(vim.tbl_isempty(mapping("<leader>ts")))
   -- Action prefixes must not delay longer mappings in the same namespace.
   assert(not vim.tbl_isempty(mapping("<C-/>", "i")), "The shell toggle is missing in Insert mode")
+  -- blink maps its keys per buffer on InsertEnter, once its startup check is done.
+  settle()
+  vim.cmd("enew")
+  vim.api.nvim_feedkeys(vim.keycode("i<Esc>"), "x", false)
+  for key, action in pairs({ ["<Tab>"] = "Select And Accept", ["<C-e>"] = "Select And Accept",
+    ["<C-y>"] = "Select And Accept", ["<S-Tab>"] = "Snippet Backward" }) do
+    local desc = vim.fn.maparg(key, "i", false, true).desc or ""
+    assert(desc:find(action, 1, true), "Completion key " .. key .. " is " .. desc)
+  end
+  vim.cmd("bwipeout!")
   for _, prefix in ipairs({ "f", "g", "l", "t", "c", "b", "w", "r", "d", "x", "n", "u" }) do
     assert(vim.tbl_isempty(mapping("<leader>" .. prefix)), "Executable prefix: " .. prefix)
   end
@@ -222,7 +232,9 @@ local function check()
   vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "x", false)
   settle()
   assert(not workspace.tree_window(), "Esc did not close the popup")
-  assert(#vim.api.nvim_tabpage_list_wins(0) == splits, "The tree left a window behind")
+  -- The popup closes at once; its leftover windows can take a few event loops longer.
+  assert(vim.wait(2000, function() return #vim.api.nvim_tabpage_list_wins(0) == splits end, 10),
+    "The tree left a window behind")
   vim.o.columns = 200
   workspace.apply()
   settle()

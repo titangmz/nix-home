@@ -60,6 +60,16 @@
             "select_and_accept"
             "fallback"
           ];
+          # Tab accepts, then walks snippet fields, then indents as usual.
+          "<Tab>" = [
+            "select_and_accept"
+            "snippet_forward"
+            "fallback"
+          ];
+          "<S-Tab>" = [
+            "snippet_backward"
+            "fallback"
+          ];
         };
       };
       indent-o-matic.enable = true;

@@ -6,7 +6,7 @@ Nixvim configuration for editing, navigation, UI, Git, languages, and the worksp
 
 `pcall(require, "local")` loads an optional `lua/local.lua` from the Neovim config when that file exists.
 
-Blink completion uses Insert-mode Ctrl-e to accept and Ctrl-q to dismiss.
+Blink completion accepts with Insert-mode `Tab` (or Ctrl-e, or Ctrl-y) and dismisses with Ctrl-q. With no menu open, `Tab` and `Shift-Tab` move between snippet fields, and otherwise `Tab` indents.
 
 ## Terminal
 
