@@ -11,6 +11,8 @@
     go
     gopls
     fnm
+    nodejs
+    pnpm
   ];
 
   programs.pyenv = {

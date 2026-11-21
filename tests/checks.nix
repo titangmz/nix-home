@@ -107,6 +107,8 @@ in
       "go"
       "gopls"
       "fnm"
+      "nodejs"
+      "pnpm"
       "profanity"
       "v2rayn"
       "proxychains-ng"
@@ -188,6 +190,8 @@ in
       assert hasPackage workstation "zk";
       assert hasPackage workstation "go";
       assert hasPackage workstation "gopls";
+      assert hasPackage workstation "nodejs";
+      assert hasPackage workstation "pnpm";
       assert workstation.config.programs.nixvim.plugins.zk.enable;
       assert
         workstation.config.home.sessionVariables.ZK_NOTEBOOK_DIR
