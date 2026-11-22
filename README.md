@@ -9,7 +9,7 @@ Personal Home Manager configuration for servers, workstations, and one NixOS Hyp
 | `mac` | macOS workstations | aarch64-darwin |
 | `nixos` | the NixOS Hyprland desktop | x86_64-linux |
 
-`profiles/default.nix` lists the profiles, and `profiles/user.nix` holds the username, name, and email that every profile and the NixOS module use.
+`profiles/default.nix` lists the profiles. The username, name, and email that every profile and the NixOS module use come from `profiles/user.default.nix`.
 
 ## Setup
 
@@ -26,6 +26,20 @@ just switch
 ```
 
 Any profile except `nixos` works on any supported OS, NixOS included.
+
+## Using it as someone else
+
+Leave `profiles/user.default.nix` alone. Your identity goes in `profiles/user.local.nix`, which git ignores, so pulls never conflict with it:
+
+```nix
+{
+  username = "sam";
+  name = "Sam Example";
+  email = "sam@example.com";
+}
+```
+
+`./bootstrap.sh` writes this file for you from your login name and your global Git name and email, asking for whichever is missing. Create or edit it by hand any time, then run `just switch`. Fields you leave out keep the default.
 
 ## NixOS desktop
 

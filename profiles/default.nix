@@ -1,7 +1,7 @@
 # Profiles a machine can switch to, and the systems each one supports.
 # The flake builds `<profile>-<system>` from this table, and scripts/switch.sh reads it.
 # Other files in this directory are layers that profiles import, plus user.nix,
-# the identity they share.
+# the identity they share (user.default.nix, overridden by an ignored user.local.nix).
 let
   linux = [
     "x86_64-linux"

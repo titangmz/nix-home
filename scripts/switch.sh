@@ -61,18 +61,20 @@ fi
 
 command -v nix >/dev/null 2>&1 || fail 'Nix is required. Run ./bootstrap.sh PROFILE first.'
 
-# Print the platform of the installed Nix, then the profiles that support it.
-# Home configuration evaluation itself stays pure.
+# Print the platform of the installed Nix, the configured username, then the
+# profiles that support the platform. Home configuration evaluation itself stays pure.
 # shellcheck disable=SC2016 # The single-quoted text is a Nix expression.
 detected=$(NIX_HOME_PROFILES="$REPO_DIR/profiles/default.nix" nix eval --impure --raw --expr '
   let
     system = builtins.currentSystem;
-    profiles = import (/. + builtins.getEnv "NIX_HOME_PROFILES");
+    profilesFile = /. + builtins.getEnv "NIX_HOME_PROFILES";
+    profiles = import profilesFile;
+    user = import (dirOf profilesFile + "/user.nix");
     here = builtins.filter (name: builtins.elem system profiles.${name}) (builtins.attrNames profiles);
   in
-  builtins.concatStringsSep " " ([ system ] ++ here)
+  builtins.concatStringsSep " " ([ system user.username ] ++ here)
 ')
-read -r SYSTEM AVAILABLE <<<"$detected"
+read -r SYSTEM USERNAME AVAILABLE <<<"$detected"
 
 [[ -n "$AVAILABLE" ]] || fail "No profile supports $SYSTEM."
 if [[ -z "$PROFILE" ]]; then
@@ -81,6 +83,14 @@ No profile selected. Profiles for $SYSTEM: $AVAILABLE"
 fi
 if [[ " $AVAILABLE " != *" $PROFILE "* ]]; then
   fail "Profile $PROFILE is not available on $SYSTEM. Profiles for $SYSTEM: $AVAILABLE"
+fi
+
+# Someone else's checkout needs its own identity before anything is built.
+current_user=$(id -un)
+if [[ "$USERNAME" != "$current_user" ]]; then
+  fail "This checkout is configured for user $USERNAME, but you are $current_user.
+Put your own values in $REPO_DIR/profiles/user.local.nix (./bootstrap.sh PROFILE writes it for you):
+{ username = \"$current_user\"; name = \"Your Name\"; email = \"you@example.com\"; }"
 fi
 
 if [[ "$PROFILE" == nixos ]]; then

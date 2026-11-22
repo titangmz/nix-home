@@ -14,8 +14,14 @@ SCRIPT = Path(os.environ.get("BOOTSTRAP_SCRIPT", Path(__file__).resolve().parent
 BASH = shutil.which("bash")
 PINNED_HASH = re.search(r"^NIX_INSTALLER_SHA256=(\w+)$", SCRIPT.read_text(), re.M).group(1)
 PINNED_VERSION = re.search(r"^NIX_VERSION=([\d.]+)$", SCRIPT.read_text(), re.M).group(1)
-TOOLS = ["bash", "sh", "cat", "chmod", "cp", "cut", "dirname", "grep", "awk", "install",
+TOOLS = ["bash", "sh", "cat", "chmod", "cp", "cut", "dirname", "grep", "awk", "id", "install",
          "mkdir", "mktemp", "mv", "rm", "touch", "uname"]
+CURRENT_USER = subprocess.run(["id", "-un"], text=True, capture_output=True, check=True).stdout.strip()
+# The only question bootstrap asks Nix is the tracked username.
+NIX = (
+    "printf 'nix %s\\n' \"$*\" >> \"$BOOTSTRAP_TEST_NIX_LOG\"\n"
+    "[[ $1 != eval ]] || printf '%s' \"$BOOTSTRAP_TEST_USERNAME\"\n"
+)
 ON_LINUX = sys.platform.startswith("linux")
 
 
@@ -38,11 +44,15 @@ class BootstrapTestCase(unittest.TestCase):
         executable(self.repo / "scripts/switch.sh",
                    "printf '%s\\n' \"switch.sh $*\" >> \"$BOOTSTRAP_TEST_LOG\"\n"
                    "exit \"${BOOTSTRAP_TEST_SWITCH_EXIT:-0}\"\n")
-        self.env = dict(os.environ, XDG_CONFIG_HOME=str(self.config_home), BOOTSTRAP_TEST_LOG=str(self.log))
+        self.nix_log = self.root / "nix-calls"
+        self.local_identity = self.repo / "profiles/user.local.nix"
+        self.env = dict(os.environ, XDG_CONFIG_HOME=str(self.config_home), BOOTSTRAP_TEST_LOG=str(self.log),
+                        BOOTSTRAP_TEST_NIX_LOG=str(self.nix_log), BOOTSTRAP_TEST_USERNAME=CURRENT_USER)
 
     def invoke(self, *args):
         return subprocess.run([BASH, str(self.repo / "bootstrap.sh"), *args],
-                              cwd=self.root, env=self.env, text=True, capture_output=True)
+                              cwd=self.root, env=self.env, text=True, capture_output=True,
+                              stdin=subprocess.DEVNULL)
 
     def calls(self):
         return self.log.read_text().splitlines() if self.log.exists() else []
@@ -59,7 +69,7 @@ class BootstrapHomeTests(BootstrapTestCase):
                 (self.bin / tool).symlink_to(found)
         self.nix_bin = self.root / "nix-bin"
         self.nix_bin.mkdir()
-        executable(self.nix_bin / "nix", "exit 0\n")
+        executable(self.nix_bin / "nix", NIX)
         self.nix_profile = self.root / "nix-daemon.sh"
         self.tmp = self.root / "tmp"
         self.tmp.mkdir()
@@ -140,6 +150,54 @@ class BootstrapHomeTests(BootstrapTestCase):
         result = self.invoke("server")
         self.assertEqual(result.returncode, 31)
 
+    def as_another_user(self, name="Sam \\ \"Quoted\" ${x}", email="sam@example.com"):
+        (self.repo / "profiles").mkdir()
+        self.env["BOOTSTRAP_TEST_USERNAME"] = "someone-else"
+        if name is not None:
+            executable(self.bin / "git",
+                       'case "$*" in\n'
+                       f"  *user.name) printf '%s\\n' '{name}' ;;\n"
+                       f"  *user.email) printf '%s\\n' '{email}' ;;\n"
+                       "esac\n")
+
+    def test_the_owner_gets_no_local_identity(self):
+        (self.repo / "profiles").mkdir()
+        result = self.invoke("server")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.local_identity.exists())
+        self.assertEqual(self.nix_log.read_text().splitlines(),
+                         [f"nix eval --raw --file {self.repo}/profiles/user.default.nix username"])
+
+    def test_another_user_gets_a_local_identity_from_git(self):
+        self.as_another_user()
+        result = self.invoke("server")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.local_identity.read_text().splitlines()[1:], [
+            "{",
+            f'  username = "{CURRENT_USER}";',
+            '  name = "Sam \\\\ \\"Quoted\\" \\${x}";',
+            '  email = "sam@example.com";',
+            "}",
+        ])
+        self.assertEqual(self.calls(), ["switch.sh server"])
+
+    def test_existing_local_identity_is_kept(self):
+        self.as_another_user()
+        self.local_identity.write_text("keep me\n")
+        result = self.invoke("server")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.local_identity.read_text(), "keep me\n")
+        self.assertFalse(self.nix_log.exists())
+
+    def test_unknown_name_and_email_stop_before_the_switch(self):
+        self.as_another_user(name=None)
+        result = self.invoke("server")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(f"configured for user someone-else, but you are {CURRENT_USER}", result.stderr)
+        self.assertIn(str(self.local_identity), result.stderr)
+        self.assertFalse(self.local_identity.exists())
+        self.assertEqual(self.calls(), [])
+
     def test_bad_arguments_are_rejected(self):
         for args in [(), ("server", "pc"), ("Server",), ("../server",)]:
             with self.subTest(args=args):
@@ -177,7 +235,7 @@ class BootstrapNixosTests(BootstrapTestCase):
         (self.config_dir / "configuration.nix").write_text(self.original)
         nix_bin = self.root / "nix-bin"
         nix_bin.mkdir()
-        executable(nix_bin / "nix", "exit 0\n")
+        executable(nix_bin / "nix", NIX)
         self.env.update(PATH=f"{nix_bin}:{os.environ['PATH']}", NIX_HOME_BOOTSTRAP_CONFIG_DIR=str(self.config_dir),
                         NIX_HOME_NO_SUDO="1", NIX_HOME_TEST_NIXOS="1")
 

@@ -48,7 +48,7 @@ Which checks exist depends on the system: `workstation` and `neovim` only where 
 
 **Profiles are import trees.** `server` is `base.nix`. `pc`, `mac`, and `nixos` build on `workstation.nix`, which builds on `base.nix`. The module system loads a file once even when several layers import it. The layer rules are in `docs/rules.md`.
 
-**Identity.** `profiles/user.nix` is the only place the username, name, and email appear. Home Manager, the NixOS module, and the checks read it.
+**Identity.** Home Manager, the NixOS module, and the checks import `profiles/user.nix`, which merges a gitignored `profiles/user.local.nix` over the tracked `profiles/user.default.nix`. The default file is the only place the username, name, and email appear. `bootstrap.sh` writes the local file when the login name differs from the default, and `scripts/switch.sh` refuses to run when the resolved username is not the current user.
 
 **Installed scripts are discovered, not listed.** `modules/scripts` installs every non-hidden file in `modules/scripts/bin/` into `~/.local/bin` on every profile, the server included. Because the flake is read through `path:`, an untracked file there is installed and linted too. A new command needs an entry in `modules/scripts/README.md`, tests in `tests/test_bin_scripts.py` (external tools are mocked on `PATH`), and must pass shellcheck, which the `lint` check runs on anything with a `sh` or `bash` shebang.
 

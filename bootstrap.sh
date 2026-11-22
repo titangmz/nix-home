@@ -85,6 +85,50 @@ enable_flakes() {
   fi
 }
 
+# Quote a value as a Nix string.
+nix_string() {
+  local value=$1
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  value=${value//\$/\\\$}
+  printf '"%s"' "$value"
+}
+
+# On someone else's checkout, write the ignored identity override once, so the
+# tracked default stays untouched and pulls stay clean.
+ensure_identity() {
+  local local_file="$REPO_DIR/profiles/user.local.nix"
+  [[ ! -e "$local_file" ]] || return 0
+  local current tracked name="" email=""
+  current=$(id -un)
+  tracked=$(nix eval --raw --file "$REPO_DIR/profiles/user.default.nix" username)
+  [[ "$current" != "$tracked" ]] || return 0
+
+  if command -v git >/dev/null 2>&1; then
+    name=$(git config --global --get user.name || true)
+    email=$(git config --global --get user.email || true)
+  fi
+  if [[ -t 0 ]]; then
+    [[ -n "$name" ]] || read -r -p 'Your name for Git commits: ' name
+    [[ -n "$email" ]] || read -r -p 'Your email for Git commits: ' email
+  fi
+  if [[ -z "$name" || -z "$email" ]]; then
+    fail "This checkout is configured for user $tracked, but you are $current.
+Create $local_file with your own values, then run bootstrap.sh again:
+{ username = \"$current\"; name = \"Your Name\"; email = \"you@example.com\"; }"
+  fi
+
+  {
+    printf '# The identity for this checkout. It overrides user.default.nix and git ignores it.\n'
+    printf '{\n'
+    printf '  username = %s;\n' "$(nix_string "$current")"
+    printf '  name = %s;\n' "$(nix_string "$name")"
+    printf '  email = %s;\n' "$(nix_string "$email")"
+    printf '}\n'
+  } > "$local_file"
+  printf 'Wrote %s for %s (%s <%s>).\n' "$local_file" "$current" "$name" "$email"
+}
+
 # The nixos profile also needs /etc/nixos to import the system module.
 wire_nixos() {
   local config_dir=${NIX_HOME_BOOTSTRAP_CONFIG_DIR:-/etc/nixos}
@@ -157,6 +201,7 @@ fi
 
 ensure_nix
 enable_flakes
+ensure_identity
 if [[ "$PROFILE" == nixos ]]; then
   wire_nixos
 fi

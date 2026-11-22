@@ -15,6 +15,8 @@ SCRIPT = Path(os.environ.get("SWITCH_SCRIPT", Path(__file__).resolve().parents[1
 BASH = shutil.which("bash")
 BACKUP = ["-b", "nix-home-backup"]
 STALE_BUS = "unix:path=/stale/session/bus"
+# The script compares the configured username with this.
+CURRENT_USER = subprocess.run(["id", "-un"], text=True, capture_output=True, check=True).stdout.strip()
 
 # Every mock appends {tool, args, dbus} to the shared log, then exits with
 # SWITCH_TEST_<TOOL>_EXIT, or SWITCH_TEST_<TOOL>_<FIRST ARG>_EXIT when set.
@@ -26,7 +28,8 @@ with open(os.environ['SWITCH_TEST_LOG'], 'a') as log:
                           'dbus': os.environ.get('DBUS_SESSION_BUS_ADDRESS'),
                           'profiles': os.environ.get('NIX_HOME_PROFILES')}}) + '\\n')
 if tool == 'nix' and sys.argv[1] == 'eval':
-    print(' '.join([os.environ['SWITCH_TEST_SYSTEM'], os.environ['SWITCH_TEST_PROFILES']]).strip(), end='')
+    print(' '.join([os.environ['SWITCH_TEST_SYSTEM'], os.environ['SWITCH_TEST_USERNAME'],
+                    os.environ['SWITCH_TEST_PROFILES']]).strip(), end='')
 key = f"SWITCH_TEST_{{tool.upper()}}_{{sys.argv[1].upper()}}_EXIT"
 sys.exit(int(os.environ.get(key, os.environ.get(f"SWITCH_TEST_{{tool.upper()}}_EXIT", '0'))))
 """
@@ -53,6 +56,7 @@ class SwitchTestCase(unittest.TestCase):
             XDG_CONFIG_HOME=str(self.config_home),
             SWITCH_TEST_LOG=str(self.log),
             SWITCH_TEST_SYSTEM="x86_64-linux",
+            SWITCH_TEST_USERNAME=CURRENT_USER,
             SWITCH_TEST_PROFILES="nixos pc server",
         )
         self.env.pop("NIX_HOME_TEST_NIXOS", None)
@@ -138,6 +142,19 @@ class SwitchTests(SwitchTestCase):
                       result.stderr)
         self.assertEqual(len(self.calls()), 1)
         self.assertFalse(self.saved.exists())
+
+    def test_another_users_identity_is_refused_before_anything_runs(self):
+        self.env["SWITCH_TEST_USERNAME"] = "someone-else"
+        for args in [("server",), ("server", "--dry-run")]:
+            with self.subTest(args=args):
+                self.log.unlink(missing_ok=True)
+                result = self.invoke(*args)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(f"configured for user someone-else, but you are {CURRENT_USER}", result.stderr)
+                self.assertIn(str(self.repo / "profiles/user.local.nix"), result.stderr)
+                self.assertIn(f'username = "{CURRENT_USER}";', result.stderr)
+                self.assertEqual([call["args"][0] for call in self.calls()], ["eval"])
+                self.assertFalse(self.saved.exists())
 
     def test_malformed_profile_does_not_run_nix(self):
         for profile in ["Server", "../server", "server pc"]:
