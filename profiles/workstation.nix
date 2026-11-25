@@ -2,6 +2,7 @@
 {
   imports = [
     ./base.nix
+    ../modules/ghostty
     ../modules/cli/extras
     ../modules/neovim/development
     ../modules/development

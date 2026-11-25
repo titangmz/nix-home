@@ -75,6 +75,10 @@ in
   server =
     assert !server.config.gtk.enable;
     assert writesNoDesktopFiles server;
+    assert !(hasPackage server "ghostty");
+    assert !(builtins.hasAttr "ghostty/config" server.config.xdg.configFile);
+    assert
+      !(builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" server.config.home.file);
     assert !(hasPackage server "hyprshot");
     assert !(hasPackage server "zk");
     assert !(hasPackage server "nb");
@@ -191,6 +195,11 @@ in
     workstation = homeFor workstationName;
     editor = workstation.config.programs.nixvim;
     mappingKeys = map (mapping: "${mapping.mode}:${mapping.key}") editor.keymaps;
+    ghosttySettings =
+      if pkgs.stdenv.isDarwin then
+        workstation.config.home.file."Library/Application Support/com.mitchellh.ghostty/config".text
+      else
+        workstation.config.xdg.configFile."ghostty/config".text;
   in
   {
     # pc on Linux, mac on macOS: both are the workstation layer plus at most one module.
@@ -233,11 +242,13 @@ in
       assert
         pkgs.stdenv.isDarwin
         == builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" workstation.config.home.file;
-      assert
-        pkgs.stdenv.isDarwin
-        ->
-          lib.hasInfix "macos-option-as-alt = left"
-            workstation.config.home.file."Library/Application Support/com.mitchellh.ghostty/config".text;
+      assert pkgs.stdenv.isLinux == builtins.hasAttr "ghostty/config" workstation.config.xdg.configFile;
+      assert !(hasPackage workstation "ghostty");
+      assert lib.hasInfix "background-opacity = 0.75" ghosttySettings;
+      assert lib.hasInfix "selection-background = #525677" ghosttySettings;
+      assert lib.hasInfix "selection-foreground = #cdd6f4" ghosttySettings;
+      assert pkgs.stdenv.isDarwin == lib.hasInfix "macos-option-as-alt = left" ghosttySettings;
+      assert pkgs.stdenv.isDarwin == lib.hasInfix "background-blur = 40" ghosttySettings;
       # macOS apps must be copied, never linked into /nix/store, or opening one
       # lets macOS protect the store path and garbage collection fails on it.
       assert pkgs.stdenv.isDarwin -> workstation.config.targets.darwin.copyApps.enable;
@@ -286,6 +297,8 @@ in
     assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
     assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
     assert builtins.hasAttr "kitty/kitty.conf" desktop.config.xdg.configFile;
+    assert builtins.hasAttr "ghostty/config" desktop.config.xdg.configFile;
+    assert !(hasPackage desktop "ghostty");
     assert lib.hasInfix "background_opacity 0.6" desktop.config.xdg.configFile."kitty/kitty.conf".text;
     assert lib.hasInfix "no_hardware_cursors = true" (
       builtins.readFile ../modules/nixos/desktop/hyprland/hyprland.lua
