@@ -16,52 +16,84 @@
     border: none;
     border-radius: 0;
     min-height: 0;
+    box-shadow: none;
+    text-shadow: none;
 }
 
 window#waybar {
     background: alpha(@base, @opacity@);
     color: @text;
-    border: 2px solid alpha(@border, 0.67);
-    border-radius: 12px;
+    border: 1px solid @border;
+    border-radius: 14px;
 }
 
-window#waybar > box {
-    border-radius: 12px;
+.modules-left,
+.modules-right {
+    padding: 0 5px;
 }
 
+#custom-launcher,
 #workspaces,
 #window,
-#mpris,
 #clock,
+#mpris,
+#cpu,
 #language,
 #pulseaudio,
 #network,
+#battery,
 #privacy,
-#tray {
-    background: transparent;
-    color: @text;
-    padding: 0 10px;
-    margin: 0;
+#tray,
+#idle_inhibitor,
+#custom-session {
+    margin: 5px 1px;
+    padding: 0 9px;
+    border-radius: 9px;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+#custom-launcher {
+    background: @accent;
+    color: @crust;
+    font-family: "JetBrainsMono Nerd Font Mono";
+    font-size: 22px;
+    min-width: 32px;
+    padding: 0;
+    margin-right: 7px;
+}
+
+#custom-launcher:hover {
+    background: @text;
 }
 
 #workspaces {
-    padding: 3px 6px;
+    padding: 0 2px;
+    background: @surface;
 }
 
 #workspaces button {
-    min-width: 22px;
-    padding: 0 6px;
-    margin: 0 1px;
-    border-radius: 8px;
+    min-width: 26px;
+    padding: 0 3px;
+    margin: 3px 2px;
+    border-radius: 6px;
+    color: @text;
     background: transparent;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+#workspaces button.empty {
     color: @muted;
-    box-shadow: none;
-    text-shadow: none;
+}
+
+#workspaces button:hover {
+    background: @border;
+    color: @text;
 }
 
 #workspaces button.active {
-    background: linear-gradient(135deg, @accent, @blue);
+    background: @accent;
     color: @crust;
+    font-weight: bold;
 }
 
 #workspaces button.urgent {
@@ -69,12 +101,43 @@ window#waybar > box {
     color: @crust;
 }
 
-#workspaces button:hover {
+#window {
+    color: @muted;
+    margin-left: 6px;
+}
+
+window#waybar.empty #window {
+    padding: 0;
+    margin: 0;
+}
+
+#clock {
     background: @surface;
+    padding: 0 14px;
+}
+
+#clock:hover,
+#mpris:hover,
+#cpu:hover,
+#language:hover,
+#pulseaudio:hover,
+#network:hover,
+#idle_inhibitor:hover,
+#custom-session:hover {
+    background: @border;
     color: @text;
 }
 
-#window {
+#mpris {
+    color: @green;
+    margin-right: 5px;
+}
+
+#cpu,
+#language,
+#mpris.paused,
+#pulseaudio.muted,
+#idle_inhibitor {
     color: @muted;
 }
 
@@ -82,27 +145,66 @@ window#waybar > box {
     color: @blue;
 }
 
+#battery.charging,
+#battery.plugged,
+#idle_inhibitor.activated {
+    color: @green;
+}
+
+#idle_inhibitor.activated {
+    background: @surface;
+}
+
+#battery.warning,
+#network.disconnected,
 #privacy-item.screenshare {
     color: @yellow;
 }
 
+#battery.critical:not(.charging):not(.plugged),
 #privacy-item.audio-in {
     color: @red;
 }
 
-#pulseaudio.muted,
-#network.disconnected,
-#mpris.paused {
-    color: @muted;
+#custom-session {
+    color: @accent;
+    font-size: 16px;
+    border-left: 1px solid @border;
+    border-radius: 0 9px 9px 0;
+    padding-left: 13px;
+    margin-left: 5px;
 }
 
-tooltip {
-    background: @crust;
+/* GTK menus and tooltips share the bar's visual language. */
+tooltip,
+menu {
+    background: @base;
     border: 1px solid @border;
     border-radius: 12px;
+    color: @text;
 }
 
 tooltip label {
     color: @text;
-    padding: 7px 9px;
+    padding: 10px 12px;
+}
+
+menu {
+    padding: 6px;
+}
+
+menuitem {
+    padding: 9px 16px;
+    border-radius: 7px;
+}
+
+menuitem:hover {
+    background: @surface;
+    color: @accent;
+}
+
+separator {
+    background: @border;
+    min-height: 1px;
+    margin: 5px 8px;
 }

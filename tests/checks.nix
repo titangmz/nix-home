@@ -255,9 +255,16 @@ in
   nixos =
     let
       desktop = homeFor "nixos";
+      bar = builtins.fromJSON (
+        builtins.unsafeDiscardStringContext desktop.config.xdg.configFile."waybar/config.jsonc".text
+      );
     in
     assert builtins.hasAttr "rofi/config.rasi" desktop.config.xdg.configFile;
     assert hasPackage desktop "hyprshot";
+    assert hasPackage desktop "pavucontrol";
+    assert bar."hyprland/workspaces"."on-click" == "activate";
+    assert bar.pulseaudio."on-click" == lib.getExe pkgs.pavucontrol;
+    assert bar."custom/session".menu == "on-click";
     assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";
     assert desktop.config.gtk.cursorTheme.name == "Bibata-Modern-Classic";
     assert builtins.hasAttr "kitty/kitty.conf" desktop.config.xdg.configFile;

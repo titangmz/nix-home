@@ -1,0 +1,38 @@
+--- a/src/modules/hyprland/workspace.cpp
++++ b/src/modules/hyprland/workspace.cpp
+@@ -67,24 +67,31 @@
+ }
+ 
+ bool Workspace::handleClicked(GdkEventButton* bt) const {
++  // Hyprland 0.55 uses Lua expressions for dispatch IPC. Escape every byte
++  // so named workspaces remain data, including quotes and non-ASCII names.
++  const auto luaString = [](const std::string& value) {
++    std::string result = "\"";
++    for (unsigned char c : value) result += fmt::format("\\{:03}", c);
++    return result + "\"";
++  };
+   if (bt->type == GDK_BUTTON_PRESS) {
+     try {
+       if (id() > 0) {  // normal
+         if (m_workspaceManager.moveToMonitor()) {
+           m_ipc.getSocket1Reply("dispatch focusworkspaceoncurrentmonitor " + std::to_string(id()));
+         } else {
+-          m_ipc.getSocket1Reply("dispatch workspace " + std::to_string(id()));
++          m_ipc.getSocket1Reply("dispatch hl.dsp.focus({ workspace = " + std::to_string(id()) + " })");
+         }
+       } else if (!isSpecial()) {  // named (this includes persistent)
+         if (m_workspaceManager.moveToMonitor()) {
+           m_ipc.getSocket1Reply("dispatch focusworkspaceoncurrentmonitor name:" + name());
+         } else {
+-          m_ipc.getSocket1Reply("dispatch workspace name:" + name());
++          m_ipc.getSocket1Reply("dispatch hl.dsp.focus({ workspace = " + luaString("name:" + name()) + " })");
+         }
+       } else if (id() != -99) {  // named special
+-        m_ipc.getSocket1Reply("dispatch togglespecialworkspace " + name());
++        m_ipc.getSocket1Reply("dispatch hl.dsp.workspace.toggle_special(" + luaString(name()) + ")");
+       } else {  // special
+-        m_ipc.getSocket1Reply("dispatch togglespecialworkspace");
++        m_ipc.getSocket1Reply("dispatch hl.dsp.workspace.toggle_special()");
+       }
+       return true;
+     } catch (const std::exception& e) {
