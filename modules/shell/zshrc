@@ -5,7 +5,8 @@ fi
 
 # SSH
 ssh() {
-    if [[ "$TERM" == "xterm-kitty" ]] && (( $+commands[kitten] )); then
+    # TERM survives SSH; only a local Kitty window can run its SSH kitten.
+    if [[ "$TERM" == "xterm-kitty" && -n "$KITTY_WINDOW_ID" && -z "$SSH_CONNECTION" && -z "$SSH_TTY" ]] && (( $+commands[kitten] )); then
         command kitten ssh "$@"
     else
         command ssh "$@"

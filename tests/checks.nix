@@ -128,6 +128,18 @@ in
     assert builtins.length server.config.programs.nixvim.plugins.treesitter.grammarPackages < 50;
     server.activationPackage;
   server-neovim = neovimCheck "server-neovim-smoke-check" server ./neovim-server.lua [ ];
+  shell =
+    pkgs.runCommand "shell-check"
+      {
+        nativeBuildInputs = [
+          pkgs.python3
+          pkgs.zsh
+        ];
+      }
+      ''
+        SHELL_ZSHRC=${../modules/shell/zshrc} python ${./test_shell.py}
+        touch "$out"
+      '';
   # Every shell script, including the template without a shebang, plus Nix lints.
   lint =
     pkgs.runCommand "lint-check"
