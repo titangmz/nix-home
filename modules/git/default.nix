@@ -32,9 +32,9 @@ in
           unstagedChangesColor = [ (hex "red") ];
           defaultFgColor = [ (hex "text") ];
           searchingActiveBorderColor = [ (hex "yellow") ];
-        };
-        authorColors = {
-          "*" = hex "lavender";
+          authorColors = {
+            "*" = hex "lavender";
+          };
         };
       };
     };
