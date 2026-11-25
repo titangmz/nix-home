@@ -20,7 +20,7 @@ let
     # background, dark enough that the text colour stays readable on it.
     selection = "525677";
   };
-  # Shared glass opacity for Kitty, window title bars, and Waybar surfaces.
+  # Shared glass opacity for Kitty, Ghostty on Linux, window title bars, and Waybar surfaces.
   opacity = "0.6";
   opacityHex =
     let
@@ -33,6 +33,9 @@ let
     passes = 3;
   };
   ghostty = {
+    linuxBlur = true;
+    # macOS keeps its own opacity and blur radius; Linux uses the shared
+    # opacity above and lets the compositor choose the blur strength.
     opacity = "0.75";
     blurRadius = 40;
   };

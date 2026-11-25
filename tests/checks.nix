@@ -244,11 +244,14 @@ in
         == builtins.hasAttr "Library/Application Support/com.mitchellh.ghostty/config" workstation.config.home.file;
       assert pkgs.stdenv.isLinux == builtins.hasAttr "ghostty/config" workstation.config.xdg.configFile;
       assert !(hasPackage workstation "ghostty");
-      assert lib.hasInfix "background-opacity = 0.75" ghosttySettings;
+      assert lib.hasInfix (
+        if pkgs.stdenv.isLinux then "background-opacity = 0.6" else "background-opacity = 0.75"
+      ) ghosttySettings;
       assert lib.hasInfix "selection-background = #525677" ghosttySettings;
       assert lib.hasInfix "selection-foreground = #cdd6f4" ghosttySettings;
       assert pkgs.stdenv.isDarwin == lib.hasInfix "macos-option-as-alt = left" ghosttySettings;
       assert pkgs.stdenv.isDarwin == lib.hasInfix "background-blur = 40" ghosttySettings;
+      assert pkgs.stdenv.isLinux == lib.hasInfix "background-blur = true" ghosttySettings;
       # macOS apps must be copied, never linked into /nix/store, or opening one
       # lets macOS protect the store path and garbage collection fails on it.
       assert pkgs.stdenv.isDarwin -> workstation.config.targets.darwin.copyApps.enable;
