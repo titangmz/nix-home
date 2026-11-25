@@ -6,7 +6,7 @@
     ../modules/neovim/development
     ../modules/development
     ../modules/chat
-    ../modules/zk
+    ../modules/nb
     ../modules/v2rayn
     ../modules/proxychains
   ];

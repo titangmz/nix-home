@@ -65,10 +65,6 @@ let
       export XDG_DATA_HOME="$TMPDIR/data"
       export XDG_STATE_HOME="$TMPDIR/state"
       mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
-      # Editor plugins that read their own config, such as zk, get the generated one.
-      if [ -d ${home.config.home-files}/.config/zk ]; then
-        ln -s ${home.config.home-files}/.config/zk "$XDG_CONFIG_HOME/zk"
-      fi
       ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${script}"
       touch "$out"
     '';
@@ -81,7 +77,7 @@ in
     assert writesNoDesktopFiles server;
     assert !(hasPackage server "hyprshot");
     assert !(hasPackage server "zk");
-    assert !server.config.programs.nixvim.plugins.zk.enable;
+    assert !(hasPackage server "nb");
     assert lib.hasInfix ".local/bin" server.config.programs.zsh.envExtra;
     assert lib.hasInfix "command kitten ssh" server.config.programs.zsh.initContent;
     assert server.config.programs.nixvim.enable;
@@ -203,7 +199,8 @@ in
       assert workstation.config.xfconf.settings == { };
       assert writesNoDesktopFiles workstation;
       assert !(hasPackage workstation "hyprshot");
-      assert hasPackage workstation "zk";
+      assert !(hasPackage workstation "zk");
+      assert hasPackage workstation "nb";
       assert hasPackage workstation "go";
       assert hasPackage workstation "gopls";
       assert hasPackage workstation "nodejs";
@@ -213,10 +210,7 @@ in
       ) workstation.config.home.packages;
       assert hasEditorTool workstation "nodejs-26";
       assert hasPackage workstation "pnpm";
-      assert workstation.config.programs.nixvim.plugins.zk.enable;
-      assert
-        workstation.config.home.sessionVariables.ZK_NOTEBOOK_DIR
-        == "${workstation.config.home.homeDirectory}/notes";
+      assert !workstation.config.programs.nixvim.plugins.zk.enable;
       assert !(builtins.hasAttr "xfconfd" workstation.config.systemd.user.services);
       assert !(builtins.hasAttr "desktop-wallpaper" workstation.config.systemd.user.services);
       assert hasPackage workstation "v2rayn";
@@ -252,6 +246,23 @@ in
     neovim =
       assert builtins.length mappingKeys == builtins.length (lib.unique mappingKeys);
       neovimCheck "neovim-smoke-check" workstation ./neovim.lua [ pkgs.stdenv.cc ];
+    nb =
+      let
+        package = builtins.head (
+          builtins.filter (p: (p.pname or "") == "nb") workstation.config.home.packages
+        );
+      in
+      pkgs.runCommand "nb-editor-check"
+        {
+          nativeBuildInputs = [
+            pkgs.python3
+            pkgs.git
+          ];
+        }
+        ''
+          NB_BIN=${lib.getExe package} NB_TEMPLATES=${../modules/nb/templates} python ${./test_nb.py}
+          touch "$out"
+        '';
   }
 )
 // lib.optionalAttrs (supports "nixos") {

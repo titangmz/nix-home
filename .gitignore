@@ -1,7 +1,5 @@
 .DS_Store
 result
 result-*
-# A stray `zk init` here would make the repo a notebook.
-.zk/
 # This checkout's identity; overrides profiles/user.default.nix.
 profiles/user.local.nix

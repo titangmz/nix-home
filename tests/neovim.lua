@@ -15,14 +15,14 @@ local function check()
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "ZkNew", "ZkNotes", "ZkBacklinks", "RenderMarkdown" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "RenderMarkdown" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
     "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "<leader>rt", "<leader>rT", "<leader>rc",
     "<leader>rl", "<leader>rs", "<leader>rx", "<leader>ri", "<leader>rd",
     "<leader>uh", "<C-/>", "<C-_>", "-", "<leader>-",
-    "<leader><space>", "<C-s>", "<leader>nn", "<leader>nd", "<leader>nf", "<leader>np", "<leader>na", "<leader>nx", "<leader>nX", "<leader>nc", "<leader>um" }) do
+    "<leader><space>", "<C-s>", "<leader>um" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
   end
   assert(mapping("<leader><space>").rhs:find("toggle_tree", 1, true), "Space Space is not the file tree")
@@ -539,42 +539,6 @@ local function check()
   vim.cmd("RenderMarkdown toggle")
   assert(vim.wait(3000, function() return decorations() == 0 end, 20), "Space um did not switch rendering off")
   vim.cmd("RenderMarkdown toggle")
-  vim.cmd("bwipeout!")
-
-  -- Today's journal through the zk language server, from the shared template.
-  io.stderr:write("neovim: zk journal\n")
-  local notebook = vim.fn.tempname() .. " notes"
-  vim.fn.mkdir(notebook .. "/.zk", "p")
-  vim.fn.mkdir(notebook .. "/journal", "p")
-  vim.env.ZK_NOTEBOOK_DIR = notebook
-  local entry = notebook .. "/journal/" .. os.date("%Y-%m-%d") .. ".md"
-  require("notes").today()
-  assert(vim.wait(15000, function() return vim.api.nvim_buf_get_name(0) == entry end, 50),
-    "Space nd did not open today's journal: " .. vim.api.nvim_buf_get_name(0))
-  local journal = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
-  assert(journal:find("## Focus", 1, true) and journal:find("tags: [journal]", 1, true), "Journal ignored daily.md:\n" .. journal)
-  require("notes").today()
-  vim.wait(1000, function() return false end, 50)
-  assert(vim.api.nvim_buf_get_name(0) == entry, "A second Space nd did not reopen the entry")
-  assert(#vim.fn.readdir(notebook .. "/journal") == 1, "A second Space nd created another entry")
-  -- The todo list is one file from todo.md, and the checkbox toggle cycles.
-  local notes = require("notes")
-  notes.todo()
-  assert(vim.wait(15000, function() return vim.api.nvim_buf_get_name(0) == notebook .. "/todo.md" end, 50),
-    "Space nx did not open todo.md: " .. vim.api.nvim_buf_get_name(0))
-  assert(table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n"):find("## Someday", 1, true), "Todo ignored todo.md")
-  vim.cmd.enew()
-  for _, case in ipairs({ { "buy milk", "- [ ] buy milk" }, { "- [ ] buy milk", "- [x] buy milk" },
-    { "- [x] buy milk", "- [ ] buy milk" }, { "  * call Sam", "  * [ ] call Sam" } }) do
-    vim.api.nvim_set_current_line(case[1])
-    notes.toggle_task()
-    assert(vim.api.nvim_get_current_line() == case[2], case[1] .. " -> " .. vim.api.nvim_get_current_line())
-  end
-  for _, case in ipairs({ { "- [ ] call Sam", true }, { "  * [ ] nested", true }, { "- [ ] ", false },
-    { "- [x] done", false } }) do
-    local found = vim.fn.system({ "rg", "--quiet", notes.task_pattern }, case[1] .. "\n")
-    assert((vim.v.shell_error == 0) == case[2], "Task pattern wrong for: " .. case[1])
-  end
   vim.cmd("bwipeout!")
 
   -- Re-editing any Markdown buffer runs the stock ftplugin's undo, whose
