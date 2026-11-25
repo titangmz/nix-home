@@ -17,6 +17,7 @@
     jq
     yq-go
     just
+    gum
     hyperfine
     watchexec
     tldr

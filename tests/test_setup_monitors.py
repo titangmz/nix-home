@@ -1,6 +1,7 @@
 """Check creation of the machine-local Hyprland monitor layout."""
 
 import os
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -39,7 +40,88 @@ class SetupMonitorsTests(unittest.TestCase):
             os.environ,
             NIX_HOME_MONITORS_FILE=str(self.destination),
             PATH=f"{self.bin}:{os.environ['PATH']}",
+            MONITOR_LAYOUT_RUNTIME=os.environ.get("MONITOR_LAYOUT_RUNTIME", str(Path(__file__).resolve().parents[1] / "modules/nixos/desktop/hyprland/monitor-layout.lua")),
         )
+
+    def wizard(self, responses):
+        replies = Path(self.temp.name) / "replies"
+        replies.write_text("\n".join(responses) + "\n")
+        self.env["GUM_RESPONSES"] = str(replies)
+        gum = self.bin / "gum"
+        gum.write_text('''#!/bin/sh
+if [ "$1" = style ]; then exit 0; fi
+answer=$(head -n 1 "$GUM_RESPONSES")
+tail -n +2 "$GUM_RESPONSES" > "$GUM_RESPONSES.next"
+mv "$GUM_RESPONSES.next" "$GUM_RESPONSES"
+[ "$answer" != __CANCEL__ ] || exit 130
+printf '%s\\n' "$answer"
+''')
+        gum.chmod(0o755)
+        return self.invoke("--interactive")
+
+    def saved_settings(self):
+        line = next(line for line in self.destination.read_text().splitlines() if line.startswith("-- settings-json: "))
+        return json.loads(line.removeprefix("-- settings-json: "))
+
+    def test_wizard_separates_position_main_and_workspace(self):
+        left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
+        result = self.wizard([left, right, right, "1", "2", "Save for next login"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        saved = self.saved_settings()
+        self.assertEqual(saved["main"], "desc:Dell Inc. U2723QE")
+        self.assertEqual([(m["connector"], m["workspace"]) for m in saved["monitors"]], [("eDP-1", 2), ("DP-2", 1)])
+        self.assertIn("dofile(", self.destination.read_text())
+        self.assertIn("1920x1080@239.76Hz", self.destination.read_text())
+
+    def test_wizard_rejects_duplicates_and_invalid_workspace_numbers(self):
+        left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
+        result = self.wizard([left, right, right, "0", "1", "1", "-1", "2", "Save for next login"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("already assigned", result.stderr)
+        self.assertIn("whole number", result.stderr)
+        self.assertEqual([m["workspace"] for m in self.saved_settings()["monitors"]], [2, 1])
+
+    def test_wizard_cancel_leaves_existing_file_unchanged(self):
+        self.destination.parent.mkdir(parents=True)
+        self.destination.write_text("original\n")
+        left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
+        result = self.wizard([left, right, right, "1", "2", "Cancel"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.destination.read_text(), "original\n")
+        result = self.wizard(["__CANCEL__"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.destination.read_text(), "original\n")
+
+    def test_wizard_retains_disconnected_profiles_and_is_idempotent(self):
+        self.destination.parent.mkdir(parents=True)
+        saved = {"version": 1, "main": "desc:Offline", "monitors": [
+            {"id": "desc:Offline", "connector": "HDMI-A-1", "description": "Offline", "workspace": 4, "mode": "preferred", "label": "Offline"}
+        ]}
+        self.destination.write_text("-- settings-json: " + json.dumps(saved) + "\n")
+        left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
+        replies = [left, right, right, "1", "2", "Save for next login"]
+        result = self.wizard(replies)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.saved_settings()["monitors"][0], saved["monitors"][0])
+        original = self.destination.read_bytes()
+        repeated = self.wizard(replies)
+        self.assertEqual(repeated.returncode, 0, repeated.stderr)
+        self.assertEqual(self.destination.read_bytes(), original)
+
+    def test_wizard_reloads_only_after_save_and_apply(self):
+        hyprctl = self.bin / "hyprctl"
+        original = hyprctl.read_text()
+        log = Path(self.temp.name) / "reload-log"
+        self.env["RELOAD_LOG"] = str(log)
+        hyprctl.write_text(original.replace("#!/bin/sh\n", '#!/bin/sh\nif [ "$1" = reload ]; then printf "reload\\n" >> "$RELOAD_LOG"; exit 0; fi\n', 1))
+        left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
+        result = self.wizard([left, right, right, "1", "2", "Save and apply"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(log.read_text(), "reload\n")
+
+    def test_interactive_rejects_other_modes(self):
+        self.assertEqual(self.invoke("--interactive", "--list").returncode, 2)
+        self.assertEqual(self.invoke("--interactive", "DP-2").returncode, 2)
 
     def invoke(self, *args):
         return subprocess.run(

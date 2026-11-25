@@ -17,7 +17,7 @@ Exactly one layer or profile imports each module. Put a module in the lowest lay
 
 Hyprland behavior lives in `modules/nixos/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch`, then `just reload`.
 
-Software cursors are the shared default. Monitor names stay out of git. `just setup-monitors` orders the live outputs left to right. `just setup-monitors --list` prints each output name with its description and position. Pass names only when that order is wrong. `--force` replaces an existing layout.
+Software cursors are the shared default. Monitor names stay out of git. In a terminal, `just setup-monitors` opens the Gum wizard for screen order, main screen, and default workspaces. `--list` prints output names and positions. Explicit names (left to right) and `--force` retain the noninteractive layout writer. The wizard's settings and hotplug behavior are documented in `modules/nixos/desktop/hyprland/README.md`.
 
 Optional local files are loaded when they exist and are not managed:
 

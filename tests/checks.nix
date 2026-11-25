@@ -92,6 +92,7 @@ in
     ) (lib.range 1 9);
     assert hasPackage server "mtr";
     assert hasPackage server "unzip";
+    assert hasPackage server "gum";
     assert server.config.programs.gpg.enable;
     assert server.config.services.gpg-agent.enable;
     assert server.config.services.gpg-agent.pinentry.package == pkgs.pinentry-curses;
@@ -167,7 +168,8 @@ in
       # These scripts drive NixOS and Hyprland, which run only on Linux.
       linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
         REBUILD_SCRIPT=${../scripts/rebuild.sh} python ${./test_rebuild.py}
-        SETUP_MONITORS_SCRIPT=${../scripts/setup-monitors.sh} python ${./test_setup_monitors.py}
+        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland/monitor-layout.lua} SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
+        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland/monitor-layout.lua} lua ${./monitor-layout.lua}
       '';
     in
     pkgs.runCommand "switch-script-check"
@@ -176,6 +178,7 @@ in
           pkgs.python3
           pkgs.bash
           pkgs.jq
+          pkgs.lua
         ];
       }
       ''
@@ -263,6 +266,10 @@ in
     assert hasPackage desktop "hyprshot";
     assert hasPackage desktop "pavucontrol";
     assert bar."hyprland/workspaces"."on-click" == "activate";
+    assert !bar."hyprland/workspaces"."all-outputs";
+    assert !(bar."hyprland/workspaces" ? persistent-workspaces);
+    assert lib.hasInfix "\"m-1\"" bar."hyprland/workspaces"."on-scroll-up";
+    assert lib.hasInfix "\"m+1\"" bar."hyprland/workspaces"."on-scroll-down";
     assert bar.pulseaudio."on-click" == lib.getExe pkgs.pavucontrol;
     assert bar."custom/session".menu == "on-click";
     assert desktop.config.home.pointerCursor.name == "Bibata-Modern-Classic";

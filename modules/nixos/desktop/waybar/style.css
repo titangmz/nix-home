@@ -90,6 +90,12 @@ window#waybar {
     color: @text;
 }
 
+#workspaces button.visible {
+    background: @border;
+    color: @text;
+    font-weight: bold;
+}
+
 #workspaces button.active {
     background: @accent;
     color: @crust;

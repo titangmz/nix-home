@@ -6,10 +6,20 @@ The compact floating bar uses the shared glass opacity, a thin border, and round
 
 Each monitor shows its own workspaces and window title. Media appears when a player is available; microphone and screen-share indicators appear only while in use. Battery status appears only on machines with a battery. Ethernet is labeled Wired; the address, connection speed, and Wi-Fi signal are in the network tooltip.
 
+Workspace tabs show only real workspaces assigned to that bar's output. There
+are no duplicated placeholder tabs or fixed workspace ranges per monitor. New
+workspaces appear on their owning screen; moved workspaces follow their new
+output. Hyprland's workspace events and Waybar's output handling keep this in
+sync when monitors connect or disconnect, including when all workspaces end up
+on a single screen. Workspace numbers stay the same as the keyboard shortcuts.
+The workspace visible on each screen has a subtle filled tab; the workspace
+with keyboard focus uses the accent color. Scrolling stays on the hovered
+screen's existing workspaces.
+
 | Control | Action |
 | --- | --- |
 | Nix launcher | Click for applications; right-click to run a command |
-| Workspaces | Click a number to switch; scroll to cycle existing workspaces |
+| Workspaces | Click a number to switch; scroll to cycle this screen's existing workspaces |
 | Clock | Click for the full date; hover for the calendar; scroll to browse months; right-click to toggle month/year |
 | Media | Click to play/pause; middle-click for previous; right-click for next (Waybar controls the displayed player) |
 | CPU | Open `btop` in Kitty |

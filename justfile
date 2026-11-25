@@ -40,7 +40,7 @@ reload:
 wallpaper:
     systemctl --user restart desktop-wallpaper.service
 
-# Create a machine-local monitor layout. Names are optional.
+# Configure screen order, main screen, and default workspaces with Gum.
 setup-monitors *args:
     ./scripts/setup-monitors.sh "$@"
 

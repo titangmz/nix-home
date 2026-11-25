@@ -3,33 +3,41 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<'EOF'
-Usage: setup-monitors.sh [--list | --force] [LEFT_OUTPUT RIGHT_OUTPUT ...]
+Usage: setup-monitors.sh [--interactive | --list | --force] [LEFT_OUTPUT RIGHT_OUTPUT ...]
 
 Write a machine-local Hyprland monitor layout. With no output names, connected
 outputs are ordered from left to right using their current positions. Pass names
 only when that order is wrong. --list prints each output name with its mode,
 position, and description, and does not write a layout. A repeat that would
 write the same file succeeds and leaves it in place. --force replaces an
-existing layout.
+existing layout. In a terminal, no arguments opens the Gum wizard for order,
+main screen, and default workspace numbers. --interactive opens it explicitly.
 EOF
 }
 
 force=false
 list=false
+interactive=false
 outputs=()
 while (($#)); do
   case "$1" in
     --force) force=true; shift ;;
     --list) list=true; shift ;;
+    --interactive) interactive=true; shift ;;
     -h|--help) usage; exit 0 ;;
     -*) usage; exit 2 ;;
     *) outputs+=("$1"); shift ;;
   esac
 done
 
-if [[ "$list" == true && ( "$force" == true || ${#outputs[@]} -gt 0 ) ]]; then
+if [[ "$list" == true && ( "$interactive" == true || "$force" == true || ${#outputs[@]} -gt 0 ) ]] ||
+   [[ "$interactive" == true && ( "$force" == true || ${#outputs[@]} -gt 0 ) ]]; then
   usage
   exit 2
+fi
+
+if [[ "$list" == false && "$force" == false && ${#outputs[@]} == 0 && -t 0 && -t 1 ]]; then
+  interactive=true
 fi
 
 for output in "${outputs[@]+"${outputs[@]}"}"; do
@@ -116,6 +124,14 @@ best_mode_for() {
     tail -n 1 |
     cut -d ' ' -f 3
 }
+
+if [[ "$interactive" == true ]]; then
+  # The wizard is separate from the existing noninteractive layout writer.
+  # shellcheck source=scripts/setup-monitors-wizard.sh
+  source "$(dirname -- "${BASH_SOURCE[0]}")/setup-monitors-wizard.sh"
+  setup_monitor_wizard
+  exit 0
+fi
 
 declare -a modes=()
 for output in "${outputs[@]}"; do
