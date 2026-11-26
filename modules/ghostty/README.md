@@ -13,8 +13,9 @@ macOS also gets the theme's blur radius. The left Option key acts as Alt, so
 tmux's Alt+1 to Alt+9 window keys work; the right Option key still types special
 characters.
 
-The macOS defaults for Option+Left/Right word movement are unbound so Ghostty
-passes those keys through as Alt+arrows for tmux pane navigation. Apply changes
+On macOS, Option+Left/Right explicitly send the standard Alt+arrow sequences
+(`ESC [ 1 ; 3 D` / `ESC [ 1 ; 3 C`) for tmux pane navigation, overriding
+Ghostty's default word movement bindings. Apply changes
 with `just switch`, then reload Ghostty's configuration with Cmd+Shift+comma.
 
 Linux uses the same 60% background opacity (40% transparency) as Kitty and
