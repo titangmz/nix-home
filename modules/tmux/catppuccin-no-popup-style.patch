@@ -1,0 +1,16 @@
+diff --git a/catppuccin_tmux.conf b/catppuccin_tmux.conf
+--- a/catppuccin_tmux.conf
++++ b/catppuccin_tmux.conf
+@@ -122,12 +122,6 @@
+   set -ug @_ctp_p_text
+ %endif
+ 
+-# popups
+-%if "#{>=:#{version},3.4}"
+-  set -gF popup-style "bg=#{@thm_bg},fg=#{@thm_fg}"
+-  set -gF popup-border-style "fg=#{@thm_surface_1}"
+-%endif
+-
+ %if "#{==:#{@catppuccin_window_status_style},basic}"
+ 
+   set -gq @catppuccin_window_left_separator " "

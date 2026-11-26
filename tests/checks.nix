@@ -129,6 +129,22 @@ in
     assert builtins.length server.config.programs.nixvim.plugins.treesitter.grammarPackages < 50;
     server.activationPackage;
   server-neovim = neovimCheck "server-neovim-smoke-check" server ./neovim-server.lua [ ];
+  tmux =
+    pkgs.runCommand "tmux-border-check"
+      {
+        nativeBuildInputs = [
+          pkgs.python3
+          server.config.programs.tmux.package
+        ];
+        TEST_TMUX = lib.getExe server.config.programs.tmux.package;
+        TMUX_CONFIG = pkgs.writeText "tmux-test.conf" server.config.xdg.configFile."tmux/tmux.conf".text;
+      }
+      ''
+        export HOME="$TMPDIR/home"
+        mkdir -p "$HOME"
+        python ${./test_tmux.py}
+        touch "$out"
+      '';
   shell =
     pkgs.runCommand "shell-check"
       {

@@ -6,6 +6,8 @@ Profiles nest by import, so server stays a subset of every workstation profile. 
 
 Validate with `nix fmt` and `just check`.
 
+Use Conventional Commits for all commit messages. Follow [the conventional-commits skill](.agents/skills/conventional-commits/SKILL.md) when writing or reviewing them.
+
 ## Commands
 
 ```bash

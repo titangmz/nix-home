@@ -28,6 +28,7 @@ Optional local files are loaded when they exist and are not managed:
 - `~/.config/hypr/local.lua`
 
 Leave the tmux module unchanged unless the change is specifically about tmux.
+Whenever tmux controls change, update `modules/tmux/README.md` in the same change. Keep it as the reference for our tmux controls.
 
 The root holds only entry points and config: `bootstrap.sh`, the flake, the justfile, and the docs. Repo tooling goes in `scripts/`, commands installed into `~/.local/bin` go in `modules/scripts/bin/`, and tests go in `tests/`.
 
