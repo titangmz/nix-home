@@ -4,6 +4,7 @@
     ./base.nix
     ../modules/ghostty
     ../modules/cli/extras
+    ../modules/serie
     ../modules/neovim/development
     ../modules/development
     ../modules/chat

@@ -2,9 +2,11 @@
 
 Read [docs/rules.md](docs/rules.md) before changing configuration. Module details belong in the README next to that module.
 
-Profiles nest by import, so server stays a subset of every workstation profile by default. Intentional profile-specific exceptions are allowed; document the reason and check the intended differences. Keep colors, opacity, and blur in `modules/theme`.
+Profiles nest by import, so server stays a subset of every workstation profile by default. Intentional profile-specific exceptions are allowed; document the reason. Keep colors, opacity, and blur in `modules/theme`.
 
 Validate with `nix fmt` and `just check`.
+
+Keep tests focused on behavior, integration failures, and meaningful regressions. Do not add package presence/absence inventories, literal color or setting assertions, or source-string checks that merely repeat configuration. Routine package additions need evaluation/build validation, not bespoke tests.
 
 Use Conventional Commits for all commit messages. Follow [the conventional-commits skill](.agents/skills/conventional-commits/SKILL.md) when writing or reviewing them.
 
@@ -54,7 +56,7 @@ Which checks exist depends on the system: `workstation` and `neovim` only where 
 
 **Installed scripts are discovered, not listed.** `modules/scripts` installs every non-hidden file in `modules/scripts/bin/` into `~/.local/bin` on every profile, the server included. Because the flake is read through `path:`, an untracked file there is installed and linted too. A new command needs an entry in `modules/scripts/README.md`, tests in `tests/test_bin_scripts.py` (external tools are mocked on `PATH`), and must pass shellcheck, which the `lint` check runs on anything with a `sh` or `bash` shebang.
 
-**Neovim is Nixvim.** `modules/neovim` is the editor every profile gets. `modules/neovim/development` adds the language servers, toolchains, the task pane and the Rust and TypeScript run/test/debug keys (`lang.lua` dispatches one set of keys to `rust.lua` or `ts.lua`), and all treesitter grammars, and only `workstation.nix` imports it. The base editor keeps only the shell popup (`workspace/terminal.lua`); panes docked around the editor register through `workspace.on_apply`. The `server` check asserts those tools are absent and that fewer than 50 grammars are installed, so language tooling added to the base editor fails it.
+**Neovim is Nixvim.** `modules/neovim` is the editor every profile gets. `modules/neovim/development` adds the language servers, toolchains, the task pane and the Rust and TypeScript run/test/debug keys (`lang.lua` dispatches one set of keys to `rust.lua` or `ts.lua`), and all treesitter grammars, and only `workstation.nix` imports it. The base editor keeps only the shell popup (`workspace/terminal.lua`); panes docked around the editor register through `workspace.on_apply`. The `server-neovim` smoke check exercises the base workspace without the development modules.
 
 **Flake outputs** (`flake.nix`):
 - `homeConfigurations.<profile>-<system>` for every pair in `profiles/default.nix`, such as `server-aarch64-linux` or `mac-aarch64-darwin`. The supported systems are whatever that table lists.
@@ -67,4 +69,4 @@ Which checks exist depends on the system: `workstation` and `neovim` only where 
 
 **Hyprland is not in the store.** Activation symlinks `~/.config/hypr/hyprland.lua` to the checkout's `modules/nixos/desktop/hyprland/hyprland.lua`, using the path that `scripts/switch.sh` writes to `~/.config/nix-home/root`. Lua edits need only `just reload`. `~/.config/hypr/style.lua` is generated from the theme, so theme changes need `just switch` then `just reload`.
 
-**Checks are assertions.** `tests/checks.nix` asserts concrete facts about the evaluated configs. Examples: the server must not contain workstation packages, workstations must not write desktop config files, Kitty opacity, nix-ld libraries, Docker group membership, and strings inside `hyprland.lua`. When you move or rename something these reference, update the assertion too. The `neovim` check runs `tests/neovim.lua` headless against the workstation editor and asserts no duplicate keymaps. `server-neovim` runs `tests/neovim-server.lua` against the editor without the development tooling. `lint` runs shellcheck on every shell script and statix and deadnix on the Nix files; statix reads `tests/statix.toml`. A Mac can only build its own system's checks, so `just check` first evaluates every system's checks without building; that runs every assertion for Linux, the Pi, and the NixOS desktop. The NixOS and Hyprland script tests run only on Linux.
+**Checks validate builds and behavior.** `tests/checks.nix` builds profile activation packages and runs script, shell, tmux rendering, note-editor, and Neovim smoke tests. Keep focused integration checks for toolchain precedence, duplicate language servers and keymaps, macOS app copying, and NixOS wiring. Do not duplicate package lists or literal configuration values in assertions. The `neovim` check runs `tests/neovim.lua` headless against the workstation editor; `server-neovim` runs `tests/neovim-server.lua` against the base editor. `lint` runs shellcheck on shell scripts and statix and deadnix on Nix files; statix reads `tests/statix.toml`. A Mac can only build its own system's checks, so `just check` first evaluates every system's checks without building, then builds local checks. The NixOS and Hyprland script tests run only on Linux.

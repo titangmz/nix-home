@@ -13,7 +13,7 @@ Prefer the lowest shared layer whose consumers all need the module. The usual la
 
 Preserve the server subset by default, but allow intentional differences when the user's requested behavior needs them. For example, a headless service needed only on servers belongs in the server profile; installing it on every workstation just to maintain a subset would be incorrect. Use existing task context to resolve these choices. Ask only when the intended target profiles remain materially ambiguous.
 
-For an exception, document why the profiles differ in the module's README and add assertions for the intended presence and absence. Keep shared functionality in shared layers; split common configuration from specialized additions when that makes ownership clearer.
+For an exception, document why the profiles differ in the module's README. Keep shared functionality in shared layers; split common configuration from specialized additions when that makes ownership clearer.
 
 Distinguish Home Manager configuration from NixOS system configuration before choosing a location. Follow the existing `modules/nixos/desktop` and `modules/nixos/system` boundary, and keep machine identity and hardware outside reusable modules.
 
@@ -29,9 +29,9 @@ Write the module's README with its purpose, target profiles, configuration behav
 
 ## Verify the result
 
-Extend `tests/checks.nix` with concrete assertions for the new behavior and relevant profile exclusions, following the existing system guards. When an intentional exception changes an existing assertion, replace it with an assertion of the new contract rather than simply removing coverage.
+Routine package additions need evaluation and build validation, not package presence/absence assertions. Do not grow inventories of installed or excluded packages, or add literal setting, color, or source-string checks that merely repeat configuration.
 
-Add behavioral tests when the module introduces executable behavior that configuration assertions cannot verify. Use the existing script or editor test harness where appropriate.
+Add focused tests for executable behavior, interactions, or meaningful regressions when needed. Use the existing script or editor test harness where appropriate; keep checks about outcomes rather than implementation details.
 
 Run `nix fmt` and `just check`. Use `path:` flake URLs for targeted evaluation or builds so new and uncommitted module files are included. Distinguish cross-system evaluation from checks actually built on the current machine when reporting validation.
 
