@@ -5,9 +5,10 @@ terminal. The workstation layer installs the nixpkgs package for pc, mac, and
 nixos; the server profile does not include it.
 
 After `just switch`, run `serie` inside a Git repository, or `serie -C <path>`
-to open another repository. Press `?` for keybindings. This module uses Serie's
-default configuration.
+to open another repository. Press `?` for keybindings.
 
-Graph rendering requires a terminal with a supported image protocol. Upstream
-supports tmux only with the Kitty Unicode placeholder protocol; use
-`serie -p kitty-unicode` in a compatible terminal when running inside tmux.
+Graph rendering defaults to the Kitty Unicode placeholder protocol, supported
+by Ghostty and Kitty both directly and inside tmux. The tmux module enables
+passthrough for visible panes so the graph images reach the terminal.
+For another terminal, override the protocol with `serie -p auto`; tmux rendering
+still requires a terminal that supports Kitty Unicode placeholders.

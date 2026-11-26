@@ -2,6 +2,10 @@
 
 Ctrl-a prefix, `tmux-256color` panes, and the Nix-managed Catppuccin plugin.
 
+Terminal passthrough is enabled for visible panes, allowing applications such
+as Serie to send image commands to the outer terminal. Serie uses Kitty Unicode
+placeholders, which require Ghostty or Kitty even when running inside tmux.
+
 ## Controls
 
 Keep this reference current whenever tmux controls change. A prefix shortcut means press Ctrl+a, release it, then press the listed key. Letter keys are lowercase unless Shift is shown.
