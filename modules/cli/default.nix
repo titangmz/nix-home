@@ -19,6 +19,7 @@
     just
     gum
     hyperfine
+    watch
     watchexec
     tldr
     procs
