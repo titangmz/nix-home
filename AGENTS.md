@@ -2,7 +2,7 @@
 
 Read [docs/rules.md](docs/rules.md) before changing configuration. Module details belong in the README next to that module.
 
-Profiles nest by import, so server stays a subset of every workstation profile. Keep colors, opacity, and blur in `modules/theme`.
+Profiles nest by import, so server stays a subset of every workstation profile by default. Intentional profile-specific exceptions are allowed; document the reason and check the intended differences. Keep colors, opacity, and blur in `modules/theme`.
 
 Validate with `nix fmt` and `just check`.
 
