@@ -20,6 +20,9 @@ lib.mkMerge [
       # Left Option sends Alt, so tmux's Alt+number window keys work. Right
       # Option still types special characters.
       macos-option-as-alt = left
+      # Pass Option+Left/Right through as Alt+arrows for tmux pane navigation.
+      keybind = alt+arrow_left=unbind
+      keybind = alt+arrow_right=unbind
     '';
   })
 ]
