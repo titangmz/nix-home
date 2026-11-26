@@ -10,7 +10,11 @@ Keep this reference current whenever tmux controls change. A prefix shortcut mea
 | --- | --- |
 | Alt+1 through Alt+9 | Jump to that window, without the prefix. Numbers past the last window are ignored. |
 | Alt+z | Toggle the current pane's zoom to fill the tmux window; press again to restore the layout. No prefix needed. |
-| Alt+h / j / k / l | Focus the tmux pane to the left / down / up / right, without the prefix. Neovim splits use their own navigation. |
+| Alt+c | Create a window, without the prefix. |
+| Alt+q | Close the current window and all its panes immediately, without the prefix. |
+| Alt+v | Split vertically into left and right panes, without the prefix. |
+| Alt+h | Split horizontally into top and bottom panes, without the prefix. |
+| Alt+j / k / l | Focus the tmux pane down / up / right, without the prefix. Use Alt+Left to focus left. Neovim splits use their own navigation. |
 | Alt+arrow key | Focus the tmux pane in that direction, without the prefix. |
 | Prefix, z | Toggle pane zoom using tmux's standard shortcut. |
 | Prefix, c | Create a window. |
