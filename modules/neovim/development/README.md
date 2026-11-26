@@ -38,10 +38,10 @@ The project decides the tools. Its lockfile names the package manager (Bun, pnpm
 
 ## Debugging
 
-> **Temporarily off.** nixpkgs 26.05 fetches nvim-dap from codeberg.org, which the binary cache does not cover and this network blocks. Set `debugger = true` in `default.nix` (and revisit the debugger coverage in `tests/neovim.lua`) once codeberg is reachable. Until then the `Space d` keys are gone and `Space rd` only warns.
+nvim-dap is fetched from [GitHub](https://github.com/mfussenegger/nvim-dap) instead of the Codeberg source used by nixpkgs. The override retains nixpkgs’ pinned revision and content hash. A scoped plugin override makes dap-view use the same nvim-dap dependency, so it does not pull in the Codeberg source.
 
 `Space rd` starts what is under the cursor under the debugger: in Rust it builds the binary or test first, in TypeScript it launches the current file with Node, or the project's `tsx`. The panel with scopes, watches, breakpoints, threads, and the REPL opens with the session.
 
-The [debugging shortcut reference](../README.md#debugging-currently-disabled) lists the bindings that become available when enabled.
+The [debugging shortcut reference](../README.md#debugging) lists the bindings.
 
 TypeScript uses [js-debug](https://github.com/microsoft/vscode-js-debug) on every system. For Rust, Linux uses codelldb from nixpkgs. On macOS the nixpkgs debuggers lose the program after starting it, so the editor runs Apple's `lldb-dap` through `xcrun`; debugging there needs the Xcode Command Line Tools (`xcode-select --install`). The program's output appears in the panel's REPL.

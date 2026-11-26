@@ -17,9 +17,21 @@ let
     };
   };
   lua = code: "<cmd>lua ${code}<CR>";
-  # TODO: back to true once codeberg.org is reachable. 26.05 fetches nvim-dap from
-  # there, the binary cache lacks it, and this network blocks the site.
-  debugger = false;
+  # Use GitHub for the same revision and content pinned by nixpkgs. Override the
+  # scope so dap-view's dependency also uses this source instead of Codeberg.
+  debugPlugins = pkgs.vimPlugins.extend (
+    _final: prev: {
+      nvim-dap = prev.nvim-dap.overrideAttrs (old: {
+        src = pkgs.fetchFromGitHub {
+          owner = "mfussenegger";
+          repo = "nvim-dap";
+          inherit (old.src) rev;
+          hash = old.src.outputHash;
+        };
+      });
+    }
+  );
+  debugger = true;
 in
 {
   programs.nixvim = {
@@ -105,6 +117,7 @@ in
 
     plugins.dap = {
       enable = debugger;
+      package = debugPlugins.nvim-dap;
       signs = {
         dapBreakpoint.text = "●";
         dapBreakpointCondition.text = "◆";
@@ -123,6 +136,7 @@ in
     # Scopes, watches, breakpoints, and the REPL; opens and closes with a session.
     plugins.dap-view = {
       enable = debugger;
+      package = debugPlugins.nvim-dap-view;
       settings.auto_toggle = true;
     };
 

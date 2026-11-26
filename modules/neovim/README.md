@@ -106,7 +106,7 @@ These shortcuts are available on `pc`, `mac`, and `nixos`. Starting a task saves
 | `Space rT` | Test the whole workspace | Run every test |
 | `Space rc` | Clippy on the workspace and every target | `tsc --noEmit`, then ESLint when configured |
 | `Space rs` | — | Pick a `package.json` script |
-| `Space rd` | Currently warns: debugging is disabled | Currently warns: debugging is disabled |
+| `Space rd` | Debug the binary or test at cursor | Debug the current file |
 
 | Shortcut | Action |
 | --- | --- |
@@ -117,18 +117,18 @@ These shortcuts are available on `pc`, `mac`, and `nixos`. Starting a task saves
 | `Space uh` | Toggle inlay hints when supported by the attached language server |
 | `]q` / `[q` | Next / previous quickfix entry (standard Neovim keys, useful after a failed task) |
 
-### Debugging (currently disabled)
+### Debugging
 
-`debugger = false` in `development/default.nix` disables the debugger plugins and all `Space d` bindings. `Space rd` remains mapped but only warns. These controls apply when debugging is enabled again:
+Debugging uses nvim-dap with the dap-view panel. The panel opens with a session.
 
-| Shortcut | Action when enabled |
+| Shortcut | Action |
 | --- | --- |
 | `Space rd` | Debug at cursor |
 | `Space db` / `Space dc` | Toggle breakpoint / continue |
 | `Space do` / `Space di` / `Space dO` | Step over / into / out |
 | `Space dx` / `Space du` | End session / toggle debugger panel |
 
-The [debugging notes](development/README.md#debugging) describe the dependency issue and platform requirements.
+The [debugging notes](development/README.md#debugging) describe the source override and platform requirements.
 
 ## Terminal
 
@@ -138,7 +138,7 @@ Terminals without the extended key protocol send `Ctrl-/` as `Ctrl-_`, so both a
 
 ## Screen
 
-Neovim draws nothing on its first row, so it never runs into a tmux status bar above it. Each editor window starts with a header row instead: blank when it is the only window, and naming its file in a pill once the window is split, the current one highlighted. Open buffers are listed as pills in the statusline at the bottom; `Tab` and `Shift-Tab` move between them.
+Neovim draws nothing on its first row, so it never runs into a tmux status bar above it. Each editor window starts with a header row instead: blank when it is the only window, and naming its file in a pill once the window is split, the current one highlighted. Open buffers are listed as pills in the statusline at the bottom; `Tab` and `Shift-Tab` move between them. Lualine uses the `catppuccin-nvim` theme supplied by Catppuccin, following the editor's selected flavour.
 
 ## Markdown
 

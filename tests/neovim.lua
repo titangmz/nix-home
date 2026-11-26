@@ -2,8 +2,6 @@
 local function settle()
   vim.wait(180, function() return false end, 10)
 end
--- TODO: add back DapContinue, DapViewToggle, <leader>db, <leader>dc, and <leader>du once
--- the debugger is back (see `debugger` in modules/neovim/development).
 local function check()
   io.stderr:write("neovim: startup\n")
   assert(vim.v.errmsg == "", vim.v.errmsg)
@@ -15,12 +13,14 @@ local function check()
     return vim.fn.maparg(key:gsub("<leader>", " "), mode or "n", false, true)
   end
   for _, command in ipairs({ "Telescope", "Neotree", "ToggleTerm", "DiffviewOpen",
-    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "RenderMarkdown" }) do
+    "Trouble", "WorkspaceLayout", "WorkspaceRestore", "Oil", "RenderMarkdown",
+    "DapContinue", "DapViewToggle" }) do
     assert(vim.fn.exists(":" .. command) == 2, "Missing command: " .. command)
   end
   for _, key in ipairs({ "<leader>ff", "<leader>fg", "<leader>l1", "<leader>l2",
     "<leader>tt", "<leader>to", "<leader>cf", "<leader>rr", "<leader>rt", "<leader>rT", "<leader>rc",
     "<leader>rl", "<leader>rs", "<leader>rx", "<leader>ri", "<leader>rd",
+    "<leader>db", "<leader>dc", "<leader>du",
     "<leader>uh", "<C-/>", "<C-_>", "-", "<leader>-",
     "<leader><space>", "<C-s>", "<leader>um" }) do
     assert(not vim.tbl_isempty(mapping(key)), "Missing mapping: " .. key)
