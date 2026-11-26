@@ -3,7 +3,7 @@ name: conventional-commits
 description: Write or review Conventional Commit messages when asked to commit changes or suggest a commit message.
 ---
 
-Read the repository's `AGENTS.md` and `docs/rules.md` before working.
+For commit-only tasks, use repository instructions already in context. Do not reread `AGENTS.md` or `docs/rules.md`, or check their freshness, unless the user requests it or the diff changes those instructions. Read missing instructions once.
 
 Inspect `git status` and the relevant diff before writing a message. For staged changes, base the message on `git diff --cached` and exclude unstaged changes from the description.
 
@@ -36,4 +36,4 @@ fix(scripts): preserve saved profile during dry runs
 docs: clarify bootstrap instructions
 ```
 
-Follow the repository's validation requirements before committing. Only create a commit when the user requests one.
+Follow the repository's validation requirements before committing. Reuse completed validation when it still covers the changes; rerun checks only for relevant new changes, failures, or unresolved concerns. Only create a commit when the user requests one.

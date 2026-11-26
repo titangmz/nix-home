@@ -27,6 +27,15 @@ just switch
 
 Any profile except `nixos` works on any supported OS, NixOS included.
 
+## Everyday controls
+
+The maintained guides to our shortcuts and customizations:
+
+| Guide | What's inside |
+| --- | --- |
+| **[tmux](modules/tmux/README.md)** | Sessions, windows, pane navigation, zoom, and appearance |
+| **[Neovim](modules/neovim/README.md)** | Editing, search, splits, Git, terminals, and workstation run/test workflows |
+
 ## Using it as someone else
 
 Leave `profiles/user.default.nix` alone. Your identity goes in `profiles/user.local.nix`, which git ignores, so pulls never conflict with it:
