@@ -30,7 +30,6 @@ in
         playerctl
         wireplumber
         pavucontrol
-        nerd-fonts.jetbrains-mono
       ]
       ++ [ waybar ];
     xdg.configFile = {

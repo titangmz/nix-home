@@ -11,6 +11,19 @@ firewall rules, users, and authorized keys remain in `/etc/nixos/machine.nix`.
 
 The socket is owned by the `docker` group. The module adds the user named in `profiles/user.nix` to that group. Log in again after switching so the session picks it up.
 
+## Fonts
+
+Desktop fonts go in `fonts.packages` in `default.nix`, never in Home Manager `home.packages` or `gtk.font.package`. NixOS builds the fontconfig cache with the system, so it always describes the files that are installed.
+
+Fonts in `~/.nix-profile/share/fonts` are cached in `~/.cache/fontconfig` instead. fontconfig keeps a cache until the directory's mtime changes, and every store path has the same mtime, so an update to a font package leaves the cache describing the old files. GTK then fails to load the faces it lists and draws every character as a box.
+
+If that happens anyway, rebuild the cache and restart the app:
+
+```bash
+fc-cache -rf
+pkill -f bazaar   # the process is named .bazaar-wrapped
+```
+
 ## Finding libraries for nix-ld
 
 nix-ld loads a dynamically linked ELF that was not built by Nix. The interpreter `/lib64/ld-linux-x86-64.so.2` is the nix-ld stub. It searches `NIX_LD_LIBRARY_PATH`, which is `/run/current-system/sw/share/nix-ld/lib`.

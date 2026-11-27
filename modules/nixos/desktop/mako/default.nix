@@ -12,7 +12,6 @@ in
     home.packages = with pkgs; [
       mako
       libnotify
-      nerd-fonts.jetbrains-mono
     ];
     xdg.configFile."mako/config".text = lib.replaceStrings [ "@HOME@" ] [ config.home.homeDirectory ] (
       palette.render (builtins.readFile ./config)

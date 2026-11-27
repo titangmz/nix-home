@@ -48,7 +48,8 @@ in
       font = {
         name = "Noto Sans";
         size = 10;
-        package = pkgs.noto-fonts;
+        # Installed by nixosModules.desktop (fonts.packages), not the home profile.
+        package = null;
       };
     };
 

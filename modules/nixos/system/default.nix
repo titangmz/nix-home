@@ -62,8 +62,12 @@ in
   # Audio
   security.rtkit.enable = true;
 
+  # Every desktop font lives here, never in Home Manager. NixOS builds the
+  # fontconfig cache with the system, so it always matches the installed files.
+  # See README.md, Fonts.
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
+    noto-fonts
   ];
 
   services.pipewire = {
