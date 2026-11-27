@@ -6,12 +6,13 @@ The compact floating bar uses the shared glass opacity, a thin border, and round
 
 Each monitor shows its own workspaces and window title. Media appears when a player is available; microphone and screen-share indicators appear only while in use. Battery status appears only on machines with a battery. Ethernet is labeled Wired; the address, connection speed, and Wi-Fi signal are in the network tooltip.
 
-Workspace tabs show only real workspaces assigned to that bar's output. There
-are no duplicated placeholder tabs or fixed workspace ranges per monitor. New
-workspaces appear on their owning screen; moved workspaces follow their new
-output. Hyprland's workspace events and Waybar's output handling keep this in
-sync when monitors connect or disconnect, including when all workspaces end up
-on a single screen. Workspace numbers stay the same as the keyboard shortcuts.
+Workspace tabs show only real workspaces assigned to that bar's output. Every
+screen has its own workspaces 1–10 (see `../hyprland/README.md`); tabs show
+that screen-local number, matching Super+1…0, through `format-icons` generated
+in `default.nix`. Moved workspaces follow their new output. Hyprland's workspace
+events and Waybar's output handling keep this in sync when monitors connect or
+disconnect. If a screen is unplugged, its workspaces wait on a remaining screen
+and can show the same number twice until it returns.
 The workspace visible on each screen has a subtle filled tab; the workspace
 with keyboard focus uses the accent color. Scrolling stays on the hovered
 screen's existing workspaces.
@@ -36,6 +37,6 @@ The module patches Waybar 0.15's normal and special workspace clicks to send Hyp
 Apply with `just switch`, then restart Waybar to load the new configuration:
 
 ```bash
-pkill -x waybar
+pkill waybar  # the process is named .waybar-wrapped, so -x would match nothing
 hyprctl dispatch 'hl.dsp.exec_cmd("waybar")'
 ```

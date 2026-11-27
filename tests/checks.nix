@@ -99,8 +99,8 @@ in
       # These scripts drive NixOS and Hyprland, which run only on Linux.
       linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
         REBUILD_SCRIPT=${../scripts/rebuild.sh} python ${./test_rebuild.py}
-        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland/monitor-layout.lua} SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
-        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland/monitor-layout.lua} lua ${./monitor-layout.lua}
+        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland}/monitor-layout.lua SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
+        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland}/monitor-layout.lua lua ${./monitor-layout.lua}
       '';
     in
     pkgs.runCommand "switch-script-check"

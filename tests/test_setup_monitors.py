@@ -63,29 +63,22 @@ printf '%s\\n' "$answer"
         line = next(line for line in self.destination.read_text().splitlines() if line.startswith("-- settings-json: "))
         return json.loads(line.removeprefix("-- settings-json: "))
 
-    def test_wizard_separates_position_main_and_workspace(self):
+    def test_wizard_saves_screen_order_and_main_screen(self):
         left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
-        result = self.wizard([left, right, right, "1", "2", "Save for next login"])
+        result = self.wizard([left, right, right, "Save for next login"])
         self.assertEqual(result.returncode, 0, result.stderr)
         saved = self.saved_settings()
         self.assertEqual(saved["main"], "desc:Dell Inc. U2723QE")
-        self.assertEqual([(m["connector"], m["workspace"]) for m in saved["monitors"]], [("eDP-1", 2), ("DP-2", 1)])
+        self.assertEqual([m["connector"] for m in saved["monitors"]], ["eDP-1", "DP-2"])
+        self.assertNotIn("workspace", self.destination.read_text())
         self.assertIn("dofile(", self.destination.read_text())
         self.assertIn("1920x1080@239.76Hz", self.destination.read_text())
-
-    def test_wizard_rejects_duplicates_and_invalid_workspace_numbers(self):
-        left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
-        result = self.wizard([left, right, right, "0", "1", "1", "-1", "2", "Save for next login"])
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("already assigned", result.stderr)
-        self.assertIn("whole number", result.stderr)
-        self.assertEqual([m["workspace"] for m in self.saved_settings()["monitors"]], [2, 1])
 
     def test_wizard_cancel_leaves_existing_file_unchanged(self):
         self.destination.parent.mkdir(parents=True)
         self.destination.write_text("original\n")
         left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
-        result = self.wizard([left, right, right, "1", "2", "Cancel"])
+        result = self.wizard([left, right, right, "Cancel"])
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.destination.read_text(), "original\n")
         result = self.wizard(["__CANCEL__"])
@@ -99,10 +92,12 @@ printf '%s\\n' "$answer"
         ]}
         self.destination.write_text("-- settings-json: " + json.dumps(saved) + "\n")
         left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
-        replies = [left, right, right, "1", "2", "Save for next login"]
+        replies = [left, right, right, "Save for next login"]
         result = self.wizard(replies)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.saved_settings()["monitors"][0], saved["monitors"][0])
+        retained = dict(saved["monitors"][0])
+        del retained["workspace"]  # older setups saved per-screen workspace defaults
+        self.assertEqual(self.saved_settings()["monitors"][0], retained)
         original = self.destination.read_bytes()
         repeated = self.wizard(replies)
         self.assertEqual(repeated.returncode, 0, repeated.stderr)
@@ -115,7 +110,7 @@ printf '%s\\n' "$answer"
         self.env["RELOAD_LOG"] = str(log)
         hyprctl.write_text(original.replace("#!/bin/sh\n", '#!/bin/sh\nif [ "$1" = reload ]; then printf "reload\\n" >> "$RELOAD_LOG"; exit 0; fi\n', 1))
         left, right = "eDP-1 · BOE 0x095F", "DP-2 · Dell Inc. U2723QE"
-        result = self.wizard([left, right, right, "1", "2", "Save and apply"])
+        result = self.wizard([left, right, right, "Save and apply"])
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(log.read_text(), "reload\n")
 

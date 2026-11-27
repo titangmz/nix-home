@@ -1,7 +1,12 @@
 -- Loaded by the machine-local file written by just setup-monitors.
 -- Keep topology decisions here so a saved setup also handles hotplug events.
+-- Every screen has its own workspaces (workspaces.lua); workspace numbers
+-- saved by older setups are ignored.
+local workspaces = require("workspaces")
+
 return function(settings)
-    local managed, seen, pending, initialized = {}, {}, false, false
+    local pending, initialized = false, false
+    workspaces.external = true
 
     local function apply(initial)
         local monitors = hl.get_monitors()
@@ -35,81 +40,19 @@ return function(settings)
             if not matched[monitor.name] then ordered[#ordered + 1] = { monitor = monitor } end
         end
 
-        local used, existing, previous, main = {}, {}, {}, ordered[1]
-        local focused = hl.get_active_workspace()
-        local focused_id = focused and focused.id
-        for _, workspace in ipairs(hl.get_workspaces()) do existing[workspace.id] = true end
-        for _, item in ipairs(ordered) do
-            local monitor, profile = item.monitor, item.profile
-            previous[monitor.name] = monitor.active_workspace and monitor.active_workspace.id
-            if profile then
-                item.workspace = profile.workspace
-                used[item.workspace] = true
-                if profile.id == settings.main then main = item end
-            end
-        end
-        for _, item in ipairs(ordered) do
-            if #ordered == 1 then
-                item.workspace = 1
-            elseif not item.workspace then
-                local current = previous[item.monitor.name]
-                if current and current > 0 and not used[current] then
-                    item.workspace = current
-                else
-                    local number = 1
-                    while used[number] or existing[number] do number = number + 1 end
-                    item.workspace = number
-                end
-                used[item.workspace] = true
-            end
-        end
-
-        -- Retire old defaults onto a connected screen. Hyprland merges rules
-        -- and ignores an empty monitor string, so clearing with "" would leave
-        -- stale bindings to disconnected screens. Current defaults override
-        -- these fallback bindings immediately below.
-        for number in pairs(managed) do
-            hl.workspace_rule({ workspace = tostring(number), monitor = main.monitor.name,
-                default = false, persistent = false })
-        end
-        managed = {}
+        local main, names = ordered[1], {}
         for index, item in ipairs(ordered) do
+            if item.profile and item.profile.id == settings.main then main = item end
+            names[index] = item.monitor.name
             hl.monitor({
                 output = item.monitor.name,
                 mode = item.profile and item.profile.mode or "preferred",
                 position = index == 1 and "0x0" or "auto-right",
                 scale = "auto",
             })
-            hl.workspace_rule({ workspace = tostring(item.workspace), monitor = item.monitor.name,
-                default = true, persistent = true })
-            managed[item.workspace] = true
         end
-        -- Moving a workspace carries its windows with it; never rename a
-        -- workspace or move individual windows between numbered workspaces.
-        for _, item in ipairs(ordered) do
-            local workspace = hl.get_workspace(tostring(item.workspace))
-            if workspace and workspace.monitor and workspace.monitor.name ~= item.monitor.name then
-                hl.dispatch(hl.dsp.workspace.move({ workspace = item.workspace, monitor = item.monitor.name }))
-            end
-            hl.dispatch(hl.dsp.focus({ monitor = item.monitor.name }))
-            hl.dispatch(hl.dsp.focus({ workspace = item.workspace }))
-        end
-        if not initial then
-            for _, item in ipairs(ordered) do
-                local id = seen[item.monitor.name] and previous[item.monitor.name]
-                local workspace = id and hl.get_workspace(tostring(id))
-                if workspace and workspace.monitor and workspace.monitor.name == item.monitor.name then
-                    hl.dispatch(hl.dsp.focus({ workspace = id }))
-                end
-            end
-        end
-        if not initial and focused_id and hl.get_workspace(tostring(focused_id)) then
-            hl.dispatch(hl.dsp.focus({ workspace = focused_id }))
-        else
-            hl.dispatch(hl.dsp.focus({ workspace = main.workspace }))
-        end
-        seen = {}
-        for _, item in ipairs(ordered) do seen[item.monitor.name] = true end
+        -- Screens own workspace blocks in this left-to-right order.
+        workspaces.arrange({ order = names, main = main.monitor.name, initial = initial })
         initialized = true
     end
 

@@ -20,7 +20,8 @@
     "on-click-right": "@rofi@ -show run"
   },
   "hyprland/workspaces": {
-    "format": "{name}",
+    "format": "{icon}",
+    "format-icons": "@workspaceLabels@",
     "on-click": "activate",
     "on-scroll-up": "@hyprctl@ dispatch 'hl.dsp.focus({ workspace = \"m-1\" })'",
     "on-scroll-down": "@hyprctl@ dispatch 'hl.dsp.focus({ workspace = \"m+1\" })'",

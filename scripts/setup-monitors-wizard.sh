@@ -54,35 +54,15 @@ setup_monitor_wizard() {
   main_label=$(gum choose --header 'Which is your main screen? (Startup focus)' --selected "$main_label" --select-if-one -- "${choices[@]}") || return 0
   main_id=$(jq -r --arg label "$main_label" '.[] | select(.label == $label) | .id' <<< "$ordered")
 
-  local chosen='[]' id label suggested workspace used best_mode
-  # Ask for the main screen first so a fresh setup naturally starts at 1.
-  mapfile -t choices < <(jq -c --arg main "$main_id" 'sort_by(.id != $main) | .[]' <<< "$ordered")
+  local chosen='[]' label best_mode
+  mapfile -t choices < <(jq -c '.[]' <<< "$ordered")
   for record in "${choices[@]}"; do
-    id=$(jq -r .id <<< "$record")
     label=$(jq -r .label <<< "$record")
-    used=$(jq -cn --argjson old "$saved" --argjson active "$active" --argjson chosen "$chosen" '
-      [$old.monitors[] | select(.id as $id | ($active | map(.id) | index($id)) == null) | .workspace]
-      + [$chosen[].workspace]')
-    suggested=$(jq -rn --arg id "$id" --argjson old "$saved" --argjson used "$used" '
-      ([$old.monitors[] | select(.id == $id)][0].workspace // 1) as $previous
-      | if ($used | index($previous)) == null then $previous
-        else first(range(1;10000) | select(. as $n | ($used | index($n)) == null)) end')
-    while true; do
-      workspace=$(gum input --header "Default workspace for $label" --prompt 'Workspace > ' --value "$suggested" --char-limit 4) || return 0
-      if [[ ! "$workspace" =~ ^[1-9][0-9]{0,3}$ ]]; then
-        printf 'Choose a whole number from 1 to 9999.\n' >&2
-      elif jq -e --argjson n "$workspace" 'index($n) != null' >/dev/null <<< "$used"; then
-        printf 'Workspace %s is already assigned (possibly to a saved disconnected screen).\n' "$workspace" >&2
-      else
-        break
-      fi
-    done
     best_mode=$(best_mode_for "$(jq -r .connector <<< "$record")")
     [[ -n "$best_mode" ]] || { printf 'No usable mode for %s\n' "$label" >&2; return 1; }
-    record=$(jq -c --argjson workspace "$workspace" --arg mode "$best_mode" '. + {workspace:$workspace, mode:$mode}' <<< "$record")
+    record=$(jq -c --arg mode "$best_mode" '. + {mode:$mode}' <<< "$record")
     chosen=$(jq -c --argjson record "$record" '. + [$record]' <<< "$chosen")
   done
-  chosen=$(jq -cn --argjson order "$ordered" --argjson chosen "$chosen" '$order | map(.id as $id | $chosen[] | select(.id == $id))')
 
   local settings summary action
   # Keep disconnected screens in their previous slots; reorder connected ones.
@@ -91,15 +71,15 @@ setup_monitor_wizard() {
       if ($chosen | map(.id) | index($m.id)) != null
       then .monitors += [.pending[0]] | .pending = .pending[1:]
       else .monitors += [$m] end)
-    | {version:1, main:$main, monitors:(.monitors + .pending)}')
+    | {version:1, main:$main, monitors:(.monitors + .pending | map(del(.workspace)))}')
   summary=$(jq -r --arg main "$main_id" '
-    ["LEFT → RIGHT  DEFAULT  SCREEN", ""] +
-    (to_entries | map("\(.key + 1)            \(.value.workspace)        " +
+    ["LEFT → RIGHT  SCREEN", ""] +
+    (to_entries | map("\(.key + 1)             " +
       .value.connector + (if .value.id == $main then " [Main]" else "" end) +
-      "\n                      " + (.value.description[0:36]) +
+      "\n              " + (.value.description[0:36]) +
       (if (.value.description | length) > 36 then "…" else "" end))) | .[]' <<< "$chosen")
   gum style --border rounded --padding '1 2' 'Monitor setup' "$summary" '' \
-    'One screen: workspace 1. Open windows are preserved.' \
+    'Every screen has its own workspaces 1–10. Open windows are preserved.' \
     'Disconnected screens are remembered. Ctrl-C cancels without saving.'
   action=$(gum choose --header 'Use this setup?' -- 'Save and apply' 'Save for next login' 'Cancel') || return 0
   [[ "$action" != Cancel ]] || return 0
@@ -110,10 +90,10 @@ setup_monitor_wizard() {
   temporary=$(mktemp "$destination_dir/.local_monitors.lua.XXXXXX")
   trap 'rm -f "$temporary"' EXIT
   {
-    printf '%s\n' '-- Machine-local monitor layout and workspace defaults. Re-run just setup-monitors to edit.'
+    printf '%s\n' '-- Machine-local monitor layout. Re-run just setup-monitors to edit.'
     printf '%s\n' "-- settings-json: $settings"
     printf 'local settings = { main = %s, monitors = {\n' "$(jq -r '.main | @json' <<< "$settings")"
-    jq -r '.monitors[] | "    { id = \(.id | @json), connector = \(.connector | @json), description = \(.description | @json), mode = \(.mode | @json), workspace = \(.workspace) },"' <<< "$settings"
+    jq -r '.monitors[] | "    { id = \(.id | @json), connector = \(.connector | @json), description = \(.description | @json), mode = \(.mode | @json) },"' <<< "$settings"
     printf '} }\n'
     printf 'dofile(%s)(settings)\n' "$(jq -rn --arg path "$runtime_file" '$path | @json')"
   } > "$temporary"

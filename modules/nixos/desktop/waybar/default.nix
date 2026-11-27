@@ -18,9 +18,21 @@ let
     systemctl = "${pkgs.systemd}/bin/systemctl";
     sessionMenu = "${./session-menu.ui}";
   };
-  renderConfig = lib.replaceStrings (map (name: "@${name}@") (builtins.attrNames commands)) (
+  # Hyprland gives each screen a block of ten workspaces (see
+  # ../hyprland/workspaces.lua); tabs show the screen-local number.
+  workspaceLabels = builtins.toJSON (
+    builtins.listToAttrs (
+      builtins.genList (index: {
+        name = toString (index + 1);
+        value = toString (lib.mod index 10 + 1);
+      }) 90
+    )
+  );
+  renderCommands = lib.replaceStrings (map (name: "@${name}@") (builtins.attrNames commands)) (
     builtins.attrValues commands
   );
+  renderConfig =
+    text: renderCommands (lib.replaceStrings [ ''"@workspaceLabels@"'' ] [ workspaceLabels ] text);
 in
 {
   config = lib.mkIf pkgs.stdenv.isLinux {

@@ -10,37 +10,52 @@ Hyprshot is installed only for the NixOS profile. Print selects a region, Super+
 
 Software cursors are enabled here. Optional `~/.config/hypr/local.lua` can add machine binds.
 
+## Per-screen workspaces
+
+Every screen has its own workspaces 1–10. Super+1…0 switches the focused
+screen to its own workspace with that number, and Super+Shift+1…0 moves the
+active window there. Focus never jumps to another screen. Super+scroll cycles
+the focused screen's existing workspaces. Waybar shows the same local numbers.
+
+`workspaces.lua` implements this. Internally, screens own blocks of
+Hyprland's global workspace ids by left-to-right slot: the first screen has
+1–10, the second 11–20, and so on. Each screen's first workspace is persistent
+and is where it starts. After a hotplug, every workspace returns to the screen
+that owns its block, carrying its windows. A workspace whose screen is
+disconnected stays on a remaining screen, reachable from Waybar, until that
+screen returns. If a key targets a workspace that is still on another screen,
+the workspace is pulled to the focused one. `hyprland.lua` loads the helper from
+the checkout path in `~/.config/nix-home/root`, so `just reload` picks up edits.
+
+## Monitor setup
+
 `just setup-monitors` opens a Gum wizard in a terminal. Choose connected screens
-from left to right, choose your main screen, then give each a unique default
-workspace number. The main screen is asked first and starts at workspace 1 for
-a fresh setup. The preview offers **Save and apply**, **Save for next login**,
-and **Cancel**. Cancel or Ctrl-C leaves the existing file unchanged. Applying
-reloads the monitor configuration, shows each screen's default workspace, and
-focuses the main screen. Existing workspaces keep their numbers; moving a
-default workspace to its configured screen carries its open windows with it.
+from left to right, then choose your main screen, which gets focus at startup.
+Left-to-right order decides which block of workspaces each screen owns. The
+preview offers **Save and apply**, **Save for next login**, and **Cancel**.
+Cancel or Ctrl-C leaves the existing file unchanged. Applying reloads the
+monitor configuration and focuses the main screen. Open windows are preserved.
 
 The wizard writes only `~/.config/hypr/local_monitors.lua`, outside Git. Its
 settings comment allows later runs to prefill your choices and remember
-disconnected screens. Workspace numbers saved for disconnected screens remain
-reserved to avoid conflicting defaults when those screens return. Monitor
-descriptions identify screens across connector changes when unique; identical
-screens without distinct descriptions fall back to connector names.
+disconnected screens. Workspace numbers saved by older versions of the wizard
+are ignored and dropped on the next save. Monitor descriptions identify screens
+across connector changes when unique; identical screens without distinct
+descriptions fall back to connector names.
 
 The generated file loads this checkout's `monitor-layout.lua`. That helper
 handles monitor add/remove events without polling. It restores connected
-screens in their saved relative order, releases bindings to disconnected
-screens, and uses workspace 1 when only one screen is connected. Reconnecting
-restores the saved default workspaces without overwriting the saved settings.
-Unknown screens keep an existing non-conflicting workspace, or get a free
-number. Hotplug preserves the user's current workspace where possible. Modes
-use the highest available refresh rate at maximum resolution when configured;
-unknown screens use their preferred mode. Re-run the wizard after moving the
-checkout or changing available display modes.
+screens in their saved relative order and places unknown screens after them,
+then hands that order to `workspaces.lua`. Without the wizard, physical
+position decides the order. Hotplug preserves the user's current workspace
+where possible. Modes use the highest available refresh rate at maximum
+resolution when configured; unknown screens use their preferred mode. Re-run
+the wizard after moving the checkout or changing available display modes.
 
 `just setup-monitors --interactive` explicitly opens the wizard, including from
 a command runner. `--list` prints output names, modes, positions, and
 descriptions. For automation, explicit output names still write a layout in
-left-to-right order without setting workspace defaults; `--force` replaces an
+left-to-right order; `--force` replaces an
 existing file. With no terminal and no names, the original writer uses the
 current left-to-right order. Reload those layouts with `hyprctl reload`.
 

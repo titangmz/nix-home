@@ -4,6 +4,12 @@
 local config_home = os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")
 package.path = config_home .. "/hypr/?.lua;" .. package.path
 
+-- Helper modules stay in the checkout, like this file, so reloads pick up edits.
+local root_file = assert(io.open(config_home .. "/nix-home/root"), "Missing nix-home root; run just switch")
+local root = root_file:read("l")
+root_file:close()
+package.path = package.path .. ";" .. root .. "/modules/nixos/desktop/hyprland/?.lua"
+
 local function load_optional(name)
     package.loaded[name] = nil
     local ok, err = pcall(require, name)
@@ -14,6 +20,9 @@ end
 
 package.loaded["style"] = nil
 local style = require("style")
+package.loaded["workspaces"] = nil
+local workspaces = require("workspaces")
+workspaces.setup()
 
 local function rgb(name)
     return "rgb(" .. style.colors[name] .. ")"
@@ -182,14 +191,15 @@ hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 
 for i = 1, 10 do
     local key = i % 10
-    hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+    -- Workspace numbers are local to the focused screen; see workspaces.lua.
+    hl.bind(mainMod .. " + " .. key,         function() workspaces.focus(i) end)
+    hl.bind(mainMod .. " + SHIFT + " .. key, function() workspaces.move_window(i) end)
 end
 
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "m+1" }))
+hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "m-1" }))
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 

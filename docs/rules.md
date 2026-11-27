@@ -19,7 +19,7 @@ The server being a subset of every workstation is the default, not an absolute r
 
 Hyprland behavior lives in `modules/nixos/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch`, then `just reload`.
 
-Software cursors are the shared default. Monitor names stay out of git. In a terminal, `just setup-monitors` opens the Gum wizard for screen order, main screen, and default workspaces. `--list` prints output names and positions. Explicit names (left to right) and `--force` retain the noninteractive layout writer. The wizard's settings and hotplug behavior are documented in `modules/nixos/desktop/hyprland/README.md`.
+Software cursors are the shared default. Monitor names stay out of git. In a terminal, `just setup-monitors` opens the Gum wizard for screen order and main screen. Every screen has its own workspaces 1–10 (`modules/nixos/desktop/hyprland/workspaces.lua`). `--list` prints output names and positions. Explicit names (left to right) and `--force` retain the noninteractive layout writer. The wizard's settings and hotplug behavior are documented in `modules/nixos/desktop/hyprland/README.md`.
 
 Optional local files are loaded when they exist and are not managed:
 
