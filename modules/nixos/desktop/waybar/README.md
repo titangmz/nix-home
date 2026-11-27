@@ -2,9 +2,9 @@
 
 Bar configuration and CSS. Colors, opacity, and blur come from `modules/theme`. Hyprland starts Waybar; there is no separate service.
 
-The compact floating bar uses the shared glass opacity, a thin border, and rounded controls. The launcher and active workspace use the theme accent; hover backgrounds reveal clickable controls. Window and media titles are bounded so they leave room for the centered clock and system controls.
+The bar itself is transparent: left, center, and right modules float as three glass islands using the shared opacity and a thin border. The launcher and the focused workspace use the accent-to-blue gradient that Hyprland uses for the active window border. Each status module has a colored icon from the theme, and every clickable control highlights on hover. CPU and memory turn yellow and then red under load. A critical battery, an urgent workspace, and the privacy indicators pulse. Window and media titles are bounded so they leave room for the centered clock and system controls.
 
-Each monitor shows its own workspaces and window title. Media appears when a player is available; microphone and screen-share indicators appear only while in use. Battery status appears only on machines with a battery. Ethernet is labeled Wired; the address, connection speed, and Wi-Fi signal are in the network tooltip.
+Each monitor shows its own workspaces and window title. Workspace tabs show an icon for each open app (`window-rewrite` in `config.jsonc`; unknown apps get a generic window icon), and the window title shows the focused app's icon. Media appears when a player is available; microphone and screen-share indicators appear only while in use. Battery status appears only on machines with a battery. Ethernet is labeled Wired; the address, connection speed, and Wi-Fi signal are in the network tooltip.
 
 Workspace tabs show only real workspaces assigned to that bar's output. Every
 screen has its own workspaces 1–10 (see `../hyprland/README.md`); tabs show
@@ -23,7 +23,7 @@ screen's existing workspaces.
 | Workspaces | Click a number to switch; scroll to cycle this screen's existing workspaces |
 | Clock | Click for the full date; hover for the calendar; scroll to browse months; right-click to toggle month/year |
 | Media | Click to play/pause; middle-click for previous; right-click for next (Waybar controls the displayed player) |
-| CPU | Open `btop` in Kitty |
+| CPU, memory | Open `btop` in Kitty; the memory tooltip shows used and swap |
 | Keyboard layout | Click to cycle layouts on all keyboards |
 | Volume | Click for Pavucontrol's mixer and device selection; right-click to mute; scroll for volume, capped at 100% |
 | Network | Click for interface addresses; right-click for routes; both open read-only diagnostics in Kitty |

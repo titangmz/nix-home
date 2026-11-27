@@ -8,9 +8,27 @@
   "spacing": 0,
   "fixed-center": true,
   "reload_style_on_change": true,
-  "modules-left": ["custom/launcher", "hyprland/workspaces", "hyprland/window"],
-  "modules-center": ["clock"],
-  "modules-right": ["mpris", "cpu", "hyprland/language", "pulseaudio", "network", "battery", "privacy", "tray", "idle_inhibitor", "custom/session"],
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces",
+    "hyprland/window"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "mpris",
+    "cpu",
+    "memory",
+    "hyprland/language",
+    "pulseaudio",
+    "network",
+    "battery",
+    "privacy",
+    "tray",
+    "idle_inhibitor",
+    "custom/session"
+  ],
   "custom/launcher": {
     "format": "󱄅",
     "align": 0.5,
@@ -20,29 +38,50 @@
     "on-click-right": "@rofi@ -show run"
   },
   "hyprland/workspaces": {
-    "format": "{icon}",
+    "format": "<b>{icon}</b>{windows}",
     "format-icons": "@workspaceLabels@",
     "on-click": "activate",
     "on-scroll-up": "@hyprctl@ dispatch 'hl.dsp.focus({ workspace = \"m-1\" })'",
     "on-scroll-down": "@hyprctl@ dispatch 'hl.dsp.focus({ workspace = \"m+1\" })'",
     "all-outputs": false,
     "move-to-monitor": false,
-    "sort-by": "number"
+    "sort-by": "number",
+    "format-window-separator": " ",
+    "window-rewrite-default": " ",
+    "window-rewrite": {
+      "class<kitty>": " ",
+      "class<com.mitchellh.ghostty>": " ",
+      "class<google-chrome>": " ",
+      "class<firefox>": " ",
+      "class<thunar>": " ",
+      "class<.*Bazaar>": " ",
+      "class<v2rayN>": " ",
+      "class<org.pulseaudio.pavucontrol>": " ",
+      "class<system-monitor>": " ",
+      "class<network-info>": " ",
+      "class<.*[Tt]elegram.*>": " ",
+      "class<.*[Ss]potify.*>": " ",
+      "class<code|Code|codium>": " "
+    }
   },
   "hyprland/window": {
     "format": "{}",
     "separate-outputs": true,
-    "max-length": 24,
-    "tooltip": false
+    "max-length": 40,
+    "tooltip": false,
+    "icon": true,
+    "icon-size": 16
   },
   "clock": {
-    "format": "{0:%a %d %b}  ·  <b>{0:%H:%M}</b>",
-    "format-alt": "{0:%A, %d %B %Y}  ·  <b>{0:%H:%M}</b>",
+    "format": "<span color='#@accent@'></span>  {0:%a %d %b}  <b>{0:%H:%M}</b>",
+    "format-alt": "<span color='#@accent@'></span>  {0:%A, %d %B %Y}  <b>{0:%H:%M}</b>",
     "tooltip-format": "<big>{:%B %Y}</big>\n\n<tt>{calendar}</tt>\n\n<small>Click: full date · scroll: browse months\nRight-click: month / year</small>",
     "calendar": {
       "mode": "month",
       "on-scroll": 1,
-      "format": {"today": "<span color='#@accent@'><b><u>{}</u></b></span>"}
+      "format": {
+        "today": "<span color='#@accent@'><b><u>{}</u></b></span>"
+      }
     },
     "actions": {
       "on-click-right": "mode",
@@ -52,30 +91,47 @@
   },
   "mpris": {
     "format": "{status_icon}  {dynamic}",
-    "dynamic-order": ["title", "artist"],
+    "dynamic-order": [
+      "title",
+      "artist"
+    ],
     "dynamic-len": 18,
     "title-len": 18,
     "max-length": 22,
-    "status-icons": {"playing": "󰐊", "paused": "󰏤"},
+    "status-icons": {
+      "playing": "<span color='#@green@'>󰐊</span>",
+      "paused": "<span color='#@muted@'>󰏤</span>"
+    },
     "tooltip-format": "{title}\n{artist}\n\nClick: play / pause\nMiddle-click: previous · right-click: next"
   },
   "cpu": {
     "interval": 3,
-    "format": "󰻠  {usage}%",
+    "format": "<span color='#@blue@'>󰻠</span>  {usage}%",
     "tooltip-format": "CPU {usage}% · load {load}\nClick to open the system monitor",
-    "on-click": "@kitty@ --class system-monitor -e @btop@"
+    "on-click": "@kitty@ --class system-monitor -e @btop@",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    }
   },
   "hyprland/language": {
-    "format": "{}",
+    "format": "<span color='#@yellow@'></span>  {}",
     "format-en": "EN",
     "format-fa": "FA",
     "on-click": "@hyprctl@ switchxkblayout all next",
     "tooltip-format": "Keyboard: {}\nClick to switch layout"
   },
   "pulseaudio": {
-    "format": "{icon}  {volume}%",
-    "format-muted": "󰝟  Muted",
-    "format-icons": {"headphone": "󰋋", "default": ["󰕿", "󰖀", "󰕾"]},
+    "format": "<span color='#@lavender@'>{icon}</span>  {volume}%",
+    "format-muted": "<span color='#@red@'>󰝟</span>  Muted",
+    "format-icons": {
+      "headphone": "󰋋",
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ]
+    },
     "scroll-step": 2,
     "max-volume": 100,
     "on-click": "@pavucontrol@",
@@ -84,11 +140,17 @@
   },
   "network": {
     "interval": 5,
-    "format-wifi": "{icon}  {essid}",
-    "format-ethernet": "󰈀  Wired",
-    "format-linked": "󰈀  No address",
-    "format-disconnected": "󰤭  Offline",
-    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format-wifi": "<span color='#@blue@'>{icon}</span>  {essid}",
+    "format-ethernet": "<span color='#@blue@'>󰈀</span>  Wired",
+    "format-linked": "<span color='#@yellow@'>󰈀</span>  No address",
+    "format-disconnected": "<span color='#@red@'>󰤭</span>  Offline",
+    "format-icons": [
+      "󰤯",
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
     "max-length": 16,
     "tooltip-format": "{ifname} · {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}\n\nClick: addresses · right-click: routes",
     "tooltip-format-wifi": "{essid} · signal {signalStrength}%\n{ifname} · {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}\n\nClick: addresses · right-click: routes",
@@ -98,22 +160,44 @@
   },
   "battery": {
     "interval": 30,
-    "states": {"warning": 25, "critical": 10},
+    "states": {
+      "warning": 25,
+      "critical": 10
+    },
     "format": "{icon}  {capacity}%",
     "format-charging": "󰂄  {capacity}%",
     "format-plugged": "󰚥  {capacity}%",
-    "format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰁹"],
+    "format-icons": [
+      "󰁺",
+      "󰁼",
+      "󰁾",
+      "󰂀",
+      "󰁹"
+    ],
     "tooltip-format": "{capacity}% · {timeTo} · {power:.1f} W"
   },
   "privacy": {
     "icon-spacing": 6,
     "icon-size": 14,
-    "modules": [{"type": "screenshare"}, {"type": "audio-in"}]
+    "modules": [
+      {
+        "type": "screenshare"
+      },
+      {
+        "type": "audio-in"
+      }
+    ]
   },
-  "tray": {"icon-size": 16, "spacing": 8},
+  "tray": {
+    "icon-size": 16,
+    "spacing": 8
+  },
   "idle_inhibitor": {
     "format": "{icon}",
-    "format-icons": {"activated": "󰅶", "deactivated": "󰾪"},
+    "format-icons": {
+      "activated": "󰅶",
+      "deactivated": "󰾪"
+    },
     "tooltip-format-activated": "Keep awake is on\nClick to allow automatic idle / lock again",
     "tooltip-format-deactivated": "Keep awake is off\nClick to prevent idle while presenting or watching"
   },
@@ -129,5 +213,15 @@
       "reboot": "@systemctl@ reboot",
       "shutdown": "@systemctl@ poweroff"
     }
+  },
+  "memory": {
+    "interval": 5,
+    "format": "<span color='#@sapphire@'></span>  {percentage}%",
+    "states": {
+      "warning": 75,
+      "critical": 90
+    },
+    "tooltip-format": "Memory {used:0.1f} / {total:0.1f} GiB\nSwap {swapUsed:0.1f} / {swapTotal:0.1f} GiB\nClick to open the system monitor",
+    "on-click": "@kitty@ --class system-monitor -e @btop@"
   }
 }

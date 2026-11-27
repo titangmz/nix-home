@@ -1,10 +1,13 @@
 @define-color base #@base@;
 @define-color surface #@surface@;
 @define-color border #@border@;
+@define-color selection #@selection@;
 @define-color text #@text@;
 @define-color muted #@muted@;
 @define-color accent #@accent@;
+@define-color lavender #@lavender@;
 @define-color blue #@blue@;
+@define-color sapphire #@sapphire@;
 @define-color green #@green@;
 @define-color yellow #@yellow@;
 @define-color red #@red@;
@@ -12,7 +15,8 @@
 
 * {
     font-family: "JetBrainsMono Nerd Font";
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
     border: none;
     border-radius: 0;
     min-height: 0;
@@ -20,24 +24,29 @@
     text-shadow: none;
 }
 
+/* The bar itself is invisible: three glass islands float over the wallpaper. */
 window#waybar {
-    background: alpha(@base, @opacity@);
+    background: transparent;
     color: @text;
-    border: 1px solid @border;
-    border-radius: 14px;
 }
 
 .modules-left,
+.modules-center,
 .modules-right {
-    padding: 0 5px;
+    background: alpha(@base, @opacity@);
+    border: 1px solid @border;
+    border-radius: 16px;
+    padding: 0 4px;
 }
 
+/* Shared shape for every control, so hover always reveals what is clickable. */
 #custom-launcher,
 #workspaces,
 #window,
 #clock,
 #mpris,
 #cpu,
+#memory,
 #language,
 #pulseaudio,
 #network,
@@ -46,70 +55,79 @@ window#waybar {
 #tray,
 #idle_inhibitor,
 #custom-session {
-    margin: 5px 1px;
-    padding: 0 9px;
-    border-radius: 9px;
-    transition: background-color 160ms ease, color 160ms ease;
+    margin: 5px 2px;
+    padding: 0 10px;
+    border-radius: 11px;
+    transition: background-color 200ms ease, color 200ms ease, padding 200ms ease;
+}
+
+#clock:hover,
+#mpris:hover,
+#cpu:hover,
+#memory:hover,
+#language:hover,
+#pulseaudio:hover,
+#network:hover,
+#idle_inhibitor:hover {
+    background: @selection;
 }
 
 #custom-launcher {
-    background: @accent;
+    background-image: linear-gradient(135deg, @accent, @blue);
     color: @crust;
     font-family: "JetBrainsMono Nerd Font Mono";
-    font-size: 22px;
-    min-width: 32px;
+    font-size: 20px;
+    min-width: 34px;
     padding: 0;
-    margin-right: 7px;
+    margin: 5px 4px 5px 2px;
 }
 
 #custom-launcher:hover {
-    background: @text;
+    background-image: linear-gradient(135deg, @lavender, @sapphire);
 }
 
+/* Workspaces: each tab shows its screen-local number and the apps inside. */
 #workspaces {
-    padding: 0 2px;
-    background: @surface;
+    padding: 0;
+    background: transparent;
 }
 
 #workspaces button {
-    min-width: 26px;
-    padding: 0 3px;
-    margin: 3px 2px;
-    border-radius: 6px;
-    color: @text;
-    background: transparent;
-    transition: background-color 160ms ease, color 160ms ease;
-}
-
-#workspaces button.empty {
+    min-width: 28px;
+    padding: 0 9px;
+    margin: 0 2px;
+    border-radius: 9px;
     color: @muted;
+    background: @surface;
+    transition: background-color 200ms ease, color 200ms ease, padding 200ms ease;
 }
 
 #workspaces button:hover {
-    background: @border;
+    background: @selection;
     color: @text;
 }
 
 #workspaces button.visible {
-    background: @border;
     color: @text;
-    font-weight: bold;
+    background: @border;
 }
 
 #workspaces button.active {
-    background: @accent;
+    padding: 0 16px;
     color: @crust;
-    font-weight: bold;
+    background-image: linear-gradient(135deg, @accent, @blue);
 }
 
 #workspaces button.urgent {
-    background: @red;
     color: @crust;
+    background-image: none;
+    background: @red;
+    animation: pulse 1s ease-in-out infinite alternate;
 }
 
 #window {
-    color: @muted;
-    margin-left: 6px;
+    color: @text;
+    padding-left: 8px;
 }
 
 window#waybar.empty #window {
@@ -118,67 +136,96 @@ window#waybar.empty #window {
 }
 
 #clock {
-    background: @surface;
-    padding: 0 14px;
-}
-
-#clock:hover,
-#mpris:hover,
-#cpu:hover,
-#language:hover,
-#pulseaudio:hover,
-#network:hover,
-#idle_inhibitor:hover,
-#custom-session:hover {
-    background: @border;
-    color: @text;
+    font-weight: 600;
+    padding: 0 16px;
 }
 
 #mpris {
-    color: @green;
-    margin-right: 5px;
+    color: @text;
 }
 
-#cpu,
-#language,
-#mpris.paused,
-#pulseaudio.muted,
-#idle_inhibitor {
+#mpris.paused {
     color: @muted;
 }
 
-#network {
-    color: @blue;
+/* Live load states: calm by default, louder when the machine is busy. */
+#cpu.warning,
+#memory.warning,
+#battery.warning,
+#network.disconnected {
+    color: @yellow;
+}
+
+#cpu.critical,
+#memory.critical {
+    color: @red;
 }
 
 #battery.charging,
-#battery.plugged,
-#idle_inhibitor.activated {
+#battery.plugged {
     color: @green;
 }
 
-#idle_inhibitor.activated {
-    background: @surface;
+#battery.critical:not(.charging):not(.plugged) {
+    color: @red;
+    animation: pulse 0.8s ease-in-out infinite alternate;
 }
 
-#battery.warning,
-#network.disconnected,
+#pulseaudio.muted {
+    color: @muted;
+}
+
+#language {
+    font-weight: 700;
+}
+
 #privacy-item.screenshare {
     color: @yellow;
 }
 
-#battery.critical:not(.charging):not(.plugged),
 #privacy-item.audio-in {
     color: @red;
 }
 
+#privacy {
+    animation: pulse 1.2s ease-in-out infinite alternate;
+}
+
+#tray {
+    padding: 0 8px;
+}
+
+#tray > .needs-attention {
+    background: @red;
+    border-radius: 8px;
+}
+
+#idle_inhibitor {
+    color: @muted;
+}
+
+#idle_inhibitor.activated {
+    color: @crust;
+    background: @green;
+}
+
 #custom-session {
-    color: @accent;
-    font-size: 16px;
-    border-left: 1px solid @border;
-    border-radius: 0 9px 9px 0;
-    padding-left: 13px;
-    margin-left: 5px;
+    color: @red;
+    font-size: 15px;
+    min-width: 34px;
+    padding: 0;
+    margin-left: 4px;
+}
+
+#custom-session:hover {
+    color: @crust;
+    background: @red;
+}
+
+@keyframes pulse {
+    to {
+        opacity: 0.45;
+    }
 }
 
 /* GTK menus and tooltips share the bar's visual language. */
