@@ -47,6 +47,7 @@
         "actions": [
           { "label": "󰛳", "command": "@controlCenter@ network" },
           { "label": "󰕾", "command": "@controlCenter@ mixer" },
+          { "label": "󰅌", "command": "@controlCenter@ clipboard" },
           { "label": "󰄨", "command": "@controlCenter@ monitor" },
           { "label": "󰹑", "command": "@controlCenter@ screenshot" }
         ]

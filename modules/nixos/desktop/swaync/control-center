@@ -80,6 +80,7 @@ case "${1:-}" in
   dnd-state) swaync-client --get-dnd 2>/dev/null || echo false ;;
   network) close_panel; exec network-menu ;;
   mixer) close_panel; exec pavucontrol ;;
+  clipboard) close_panel; exec clipboard-history ;;
   monitor) close_panel; exec kitty --class system-monitor -e btop ;;
   screenshot)
     close_panel

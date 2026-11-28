@@ -32,7 +32,7 @@ window {
 }
 
 mainbox {
-    children: [ inputbar, listview ];
+    children: [ inputbar, message, listview ];
     spacing: 14px;
 }
 
@@ -56,11 +56,22 @@ entry {
 }
 
 listview {
+    border: 0;
     columns: 1;
     lines: 8;
     fixed-height: false;
     scrollbar: false;
     spacing: 5px;
+}
+
+/* Shown only when a menu passes -mesg, such as key hints. */
+message {
+    border: 0;
+    padding: 0 4px;
+}
+
+textbox {
+    text-color: @muted;
 }
 
 element {

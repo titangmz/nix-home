@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Rofi picker for the cliphist clipboard history. Enter copies the entry back
+# to the clipboard, Shift+Delete removes it, Alt+Delete clears the history.
+set -u
+
+while true; do
+  entries=$(cliphist list 2>/dev/null)
+  if [ -z "$entries" ]; then
+    notify-send -a Clipboard "Clipboard history is empty" 2>/dev/null || true
+    exit 0
+  fi
+
+  choice=$(printf '%s\n' "$entries" | rofi -dmenu -i -no-show-icons \
+    -display-columns 2 -display-column-separator '\t' \
+    -kb-delete-entry '' -kb-custom-1 'Shift+Delete' -kb-custom-2 'Alt+Delete' \
+    -p "󰅌" -mesg "Enter: copy · Shift+Del: remove · Alt+Del: clear all" \
+    -theme-str 'window { width: 40%; } listview { lines: 10; } entry { placeholder: "Clipboard history"; }')
+  status=$?
+
+  case "$status" in
+    0)
+      [ -n "$choice" ] && printf '%s\n' "$choice" | cliphist decode | wl-copy
+      exit 0
+      ;;
+    10)
+      # Remove the entry, then show the shorter list again.
+      [ -n "$choice" ] || exit 0
+      printf '%s\n' "$choice" | cliphist delete
+      ;;
+    11)
+      confirm=$(printf '%s\n' "Keep history" "Clear all history" | rofi -dmenu -i -no-show-icons \
+        -p "󰅌" -mesg "Clear the whole clipboard history?" \
+        -theme-str 'window { width: 24%; } listview { lines: 2; } inputbar { enabled: false; }')
+      if [ "$confirm" = "Clear all history" ]; then
+        cliphist wipe
+        wl-copy --clear
+        notify-send -a Clipboard "Clipboard history cleared" 2>/dev/null || true
+      fi
+      exit 0
+      ;;
+    *) exit 0 ;;
+  esac
+done

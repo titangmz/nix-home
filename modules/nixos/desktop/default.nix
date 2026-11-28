@@ -12,6 +12,7 @@ in
     ./waybar
     ./rofi
     ./swaync
+    ./clipboard
     ./hyprland
     ./hyprlock
     ./kitty

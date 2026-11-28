@@ -4,7 +4,7 @@ SwayNC is the desktop's notification daemon and its control center. Hyprland sta
 
 The control center is a glass panel under the left end of the bar. The Nix button in Waybar or Super+N opens and closes it; clicking outside or Escape closes it. It fills the screen's height, so it fits small screens. From top to bottom:
 
-- **Toolbar**: network menu, audio mixer (Pavucontrol), system monitor (btop), region screenshot, and on the right the power menu (lock, suspend, log out, restart, shut down).
+- **Toolbar**: network menu, audio mixer (Pavucontrol), clipboard history (`../clipboard/README.md`), system monitor (btop), region screenshot, and on the right the power menu (lock, suspend, log out, restart, shut down).
 - **Toggles**: VPN, Network, Keep awake, and Do not disturb. A toggle shows the accent gradient when on. States are read again each time the panel opens.
   - VPN on reconnects the VPN you used most recently; with no VPN set up it opens the network menu. Off disconnects every active VPN and WireGuard connection. Pick a specific VPN from the network menu.
   - Network switches NetworkManager networking on and off.

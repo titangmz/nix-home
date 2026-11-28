@@ -8,6 +8,8 @@ English (`us`) and Persian (`ir`) are the keyboard layouts. Super+Space switches
 
 Hyprshot is installed only for the NixOS profile. Print selects a region, Super+Print selects a window, and Shift+Print selects a monitor. Screenshots are saved to `~/Pictures/Screenshots` and copied to the clipboard, with a notification after capture. Hyprshot creates the directory when needed.
 
+Super+N opens the control center (`../swaync/README.md`). Super+Shift+V opens the clipboard history (`../clipboard/README.md`); Hyprland also starts its watchers. Super+V still toggles floating.
+
 Software cursors are enabled here. Optional `~/.config/hypr/local.lua` can add machine binds.
 
 ## Per-screen workspaces
