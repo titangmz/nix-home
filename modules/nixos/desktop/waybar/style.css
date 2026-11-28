@@ -44,16 +44,13 @@ window#waybar {
 #workspaces,
 #window,
 #clock,
-#mpris,
-#cpu,
-#memory,
 #language,
 #pulseaudio,
 #network,
+#custom-vpn,
 #battery,
 #privacy,
 #tray,
-#idle_inhibitor,
 #custom-session {
     margin: 5px 2px;
     padding: 0 10px;
@@ -62,13 +59,10 @@ window#waybar {
 }
 
 #clock:hover,
-#mpris:hover,
-#cpu:hover,
-#memory:hover,
 #language:hover,
 #pulseaudio:hover,
 #network:hover,
-#idle_inhibitor:hover {
+#custom-vpn:hover {
     background: @selection;
 }
 
@@ -140,25 +134,10 @@ window#waybar.empty #window {
     padding: 0 16px;
 }
 
-#mpris {
-    color: @text;
-}
-
-#mpris.paused {
-    color: @muted;
-}
-
 /* Live load states: calm by default, louder when the machine is busy. */
-#cpu.warning,
-#memory.warning,
 #battery.warning,
 #network.disconnected {
     color: @yellow;
-}
-
-#cpu.critical,
-#memory.critical {
-    color: @red;
 }
 
 #battery.charging,
@@ -169,6 +148,25 @@ window#waybar.empty #window {
 #battery.critical:not(.charging):not(.plugged) {
     color: @red;
     animation: pulse 0.8s ease-in-out infinite alternate;
+}
+
+/* VPN: green with the connection name when on, quiet when off. */
+#custom-vpn.connected {
+    color: @text;
+    background: alpha(@green, 0.14);
+}
+
+#custom-vpn.connected:hover {
+    background: alpha(@green, 0.26);
+}
+
+#custom-vpn.connecting {
+    color: @yellow;
+    animation: pulse 0.9s ease-in-out infinite alternate;
+}
+
+#custom-vpn.disconnected {
+    color: @muted;
 }
 
 #pulseaudio.muted {
@@ -198,15 +196,6 @@ window#waybar.empty #window {
 #tray > .needs-attention {
     background: @red;
     border-radius: 8px;
-}
-
-#idle_inhibitor {
-    color: @muted;
-}
-
-#idle_inhibitor.activated {
-    color: @crust;
-    background: @green;
 }
 
 #custom-session {

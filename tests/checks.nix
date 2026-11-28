@@ -101,6 +101,7 @@ in
         REBUILD_SCRIPT=${../scripts/rebuild.sh} python ${./test_rebuild.py}
         MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland}/monitor-layout.lua SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
         MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland}/monitor-layout.lua lua ${./monitor-layout.lua}
+        WAYBAR_MODULE=${../modules/nixos/desktop/waybar} CONTROL_CENTER_SCRIPT=${../modules/nixos/desktop/swaync/control-center} python ${./test_network_menu.py}
       '';
     in
     pkgs.runCommand "switch-script-check"

@@ -1,0 +1,301 @@
+/* SwayNC's own stylesheet lays everything out; this file restyles it from
+   modules/theme to match the Waybar glass islands. */
+@import url("file://@defaultStyle@");
+
+:root {
+  --cc-bg: rgba(@baseRgb@, @opacity@);
+  --noti-border-color: #@border@;
+  --noti-bg: @baseRgb@;
+  --noti-bg-alpha: 0.94;
+  --noti-bg-darker: #@crust@;
+  --noti-bg-hover: #@surface@;
+  --noti-bg-focus: rgba(@surfaceRgb@, 0.6);
+  --noti-close-bg: #@surface@;
+  --noti-close-bg-hover: #@border@;
+  --text-color: #@text@;
+  --text-color-disabled: #@muted@;
+  --bg-selected: #@accent@;
+  --border-radius: 16px;
+  --notification-icon-size: 40px;
+  --notification-group-icon-size: 28px;
+  --font-size-body: 13px;
+  --font-size-summary: 14px;
+  --notification-shadow: none;
+}
+
+* {
+  font-family: "Noto Sans", "JetBrainsMono Nerd Font";
+}
+
+/* The panel: one tall glass island under the bar's left end. */
+.control-center {
+  border: 1px solid #@border@;
+  padding: 6px;
+}
+
+.widget {
+  margin: 6px 8px;
+  padding: 0;
+}
+
+/* Toolbar: quick launchers on the left, the power menu on the right. */
+.widget-menubar > .menu-button-bar {
+  margin: 4px 0 2px;
+}
+
+.widget-menubar > .menu-button-bar button {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 16px;
+  min-width: 40px;
+  min-height: 36px;
+  margin: 0 3px 0 0;
+  padding: 0;
+  border: none;
+  border-radius: 11px;
+  background: #@surface@;
+  color: #@text@;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.widget-menubar > .menu-button-bar button:hover {
+  background: #@selection@;
+}
+
+.widget-menubar > .menu-button-bar > .end button {
+  margin: 0;
+  color: #@red@;
+}
+
+.widget-menubar > .menu-button-bar > .end button:hover {
+  background: #@red@;
+  color: #@crust@;
+}
+
+.widget-menubar > revealer * {
+  background: transparent;
+}
+
+.widget-menubar > revealer * button {
+  font-family: "Noto Sans", "JetBrainsMono Nerd Font";
+  font-size: 13px;
+  margin: 3px 0 0;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(@surfaceRgb@, 0.7);
+  color: #@text@;
+}
+
+.widget-menubar > revealer * button label {
+  margin: 0;
+}
+
+.widget-menubar > revealer * button:hover {
+  background: #@selection@;
+  color: #@accent@;
+}
+
+.widget-menubar > revealer * button:last-child {
+  margin-bottom: 4px;
+}
+
+/* Quick toggles: wide pills, lit with the accent gradient when on. */
+.widget-buttons-grid {
+  padding: 0;
+}
+
+.widget-buttons-grid flowboxchild {
+  padding: 3px;
+}
+
+.widget-buttons-grid flowboxchild > button {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 24px;
+  padding: 12px 14px;
+  border: 1px solid #@border@;
+  border-radius: 14px;
+  background: #@surface@;
+  color: #@text@;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.widget-buttons-grid flowboxchild > button:hover {
+  background: #@selection@;
+}
+
+.widget-buttons-grid flowboxchild > button.toggle:checked {
+  border-color: transparent;
+  background-image: linear-gradient(135deg, #@accent@, #@blue@);
+  color: #@crust@;
+}
+
+.widget-buttons-grid flowboxchild > button.toggle:checked:hover {
+  background-image: linear-gradient(135deg, #@lavender@, #@sapphire@);
+}
+
+/* Volume */
+.widget-volume {
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(@surfaceRgb@, 0.7);
+}
+
+.widget-volume > box > label {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 16px;
+  color: #@blue@;
+  margin-right: 6px;
+}
+
+.widget-volume button {
+  font-family: "JetBrainsMono Nerd Font";
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #@muted@;
+}
+
+.widget-volume button:hover {
+  background: #@selection@;
+  color: #@text@;
+}
+
+scale trough {
+  min-height: 6px;
+  border-radius: 99px;
+  background: #@border@;
+}
+
+scale highlight {
+  border-radius: 99px;
+  background-image: linear-gradient(90deg, #@accent@, #@blue@);
+}
+
+scale slider {
+  min-width: 16px;
+  min-height: 16px;
+  margin: -6px;
+  border-radius: 99px;
+  background: #@text@;
+  box-shadow: none;
+}
+
+/* Media */
+.widget-mpris .widget-mpris-player {
+  border-radius: 14px;
+  background: rgba(@surfaceRgb@, 0.7);
+}
+
+.widget-mpris .widget-mpris-player .mpris-overlay {
+  padding: 12px;
+}
+
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle {
+  color: #@muted@;
+  font-size: 12px;
+}
+
+.widget-mpris .widget-mpris-player .mpris-overlay button {
+  color: #@text@;
+  border-radius: 99px;
+}
+
+.widget-mpris .widget-mpris-player .mpris-overlay button:hover {
+  background: #@selection@;
+}
+
+/* Notifications header */
+.widget-title {
+  margin-top: 10px;
+}
+
+.widget-title > label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #@text@;
+}
+
+.widget-title > button {
+  font-size: 12px;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 99px;
+  background: #@surface@;
+  color: #@muted@;
+}
+
+.widget-title > button:hover {
+  background: #@red@;
+  color: #@crust@;
+}
+
+.control-center .control-center-list-placeholder {
+  color: #@muted@;
+}
+
+/* Notification cards, in the panel and as popups. */
+.notification-row:focus,
+.notification-group:focus {
+  background: transparent;
+}
+
+.notification-row:focus .notification-background .notification {
+  border-color: #@accent@;
+}
+
+/* Popups keep the same gap from the screen edge as the bar. */
+.floating-notifications .notification-row .notification-background {
+  padding: 4px 14px 4px 0;
+}
+
+.notification-row .notification-background .notification {
+  border: 1px solid #@border@;
+}
+
+.notification-row .notification-background .notification .notification-default-action {
+  padding: 8px 10px;
+}
+
+.notification-row .notification-background .notification.critical {
+  border-color: #@red@;
+  background: #@criticalBackground@;
+}
+
+.notification-row .notification-background .notification.low {
+  border-color: #@surface@;
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .summary {
+  font-weight: 700;
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .body {
+  color: #@muted@;
+}
+
+.notification-row .notification-background .notification .notification-default-action .notification-content .time {
+  color: #@muted@;
+}
+
+.control-center .control-center-list .notification {
+  background: rgba(@surfaceRgb@, 0.7);
+}
+
+.close-button {
+  color: #@muted@;
+}
+
+.close-button:hover {
+  color: #@crust@;
+  background: #@red@;
+}

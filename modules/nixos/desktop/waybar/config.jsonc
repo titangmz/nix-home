@@ -17,25 +17,22 @@
     "clock"
   ],
   "modules-right": [
-    "mpris",
-    "cpu",
-    "memory",
     "hyprland/language",
     "pulseaudio",
     "network",
+    "custom/vpn",
     "battery",
     "privacy",
     "tray",
-    "idle_inhibitor",
     "custom/session"
   ],
   "custom/launcher": {
     "format": "󱄅",
     "align": 0.5,
     "justify": "center",
-    "tooltip-format": "Applications\nClick to launch · right-click to run a command",
-    "on-click": "@rofi@ -show drun",
-    "on-click-right": "@rofi@ -show run"
+    "tooltip-format": "Control center\nClick to open · right-click for applications",
+    "on-click": "@swaync@ --toggle-panel --skip-wait",
+    "on-click-right": "@rofi@ -show drun"
   },
   "hyprland/workspaces": {
     "format": "<b>{icon}</b>{windows}",
@@ -67,7 +64,7 @@
   "hyprland/window": {
     "format": "{}",
     "separate-outputs": true,
-    "max-length": 40,
+    "max-length": 32,
     "tooltip": false,
     "icon": true,
     "icon-size": 16
@@ -89,31 +86,6 @@
       "on-scroll-down": "shift_down"
     }
   },
-  "mpris": {
-    "format": "{status_icon}  {dynamic}",
-    "dynamic-order": [
-      "title",
-      "artist"
-    ],
-    "dynamic-len": 18,
-    "title-len": 18,
-    "max-length": 22,
-    "status-icons": {
-      "playing": "<span color='#@green@'>󰐊</span>",
-      "paused": "<span color='#@muted@'>󰏤</span>"
-    },
-    "tooltip-format": "{title}\n{artist}\n\nClick: play / pause\nMiddle-click: previous · right-click: next"
-  },
-  "cpu": {
-    "interval": 3,
-    "format": "<span color='#@blue@'>󰻠</span>  {usage}%",
-    "tooltip-format": "CPU {usage}% · load {load}\nClick to open the system monitor",
-    "on-click": "@kitty@ --class system-monitor -e @btop@",
-    "states": {
-      "warning": 70,
-      "critical": 90
-    }
-  },
   "hyprland/language": {
     "format": "<span color='#@yellow@'></span>  {}",
     "format-en": "EN",
@@ -122,8 +94,8 @@
     "tooltip-format": "Keyboard: {}\nClick to switch layout"
   },
   "pulseaudio": {
-    "format": "<span color='#@lavender@'>{icon}</span>  {volume}%",
-    "format-muted": "<span color='#@red@'>󰝟</span>  Muted",
+    "format": "<span color='#@lavender@'>{icon}</span>",
+    "format-muted": "<span color='#@red@'>󰝟</span>",
     "format-icons": {
       "headphone": "󰋋",
       "default": [
@@ -136,12 +108,12 @@
     "max-volume": 100,
     "on-click": "@pavucontrol@",
     "on-click-right": "@wpctl@ set-mute @DEFAULT_AUDIO_SINK@ toggle",
-    "tooltip-format": "{desc}\nClick: audio mixer · right-click: mute\nScroll: volume"
+    "tooltip-format": "{desc} · {volume}%\nClick: audio mixer · right-click: mute\nScroll: volume"
   },
   "network": {
     "interval": 5,
-    "format-wifi": "<span color='#@blue@'>{icon}</span>  {essid}",
-    "format-ethernet": "<span color='#@blue@'>󰈀</span>  Wired",
+    "format-wifi": "<span color='#@blue@'>{icon}</span>",
+    "format-ethernet": "",
     "format-linked": "<span color='#@yellow@'>󰈀</span>  No address",
     "format-disconnected": "<span color='#@red@'>󰤭</span>  Offline",
     "format-icons": [
@@ -152,11 +124,19 @@
       "󰤨"
     ],
     "max-length": 16,
-    "tooltip-format": "{ifname} · {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}\n\nClick: addresses · right-click: routes",
-    "tooltip-format-wifi": "{essid} · signal {signalStrength}%\n{ifname} · {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}\n\nClick: addresses · right-click: routes",
-    "tooltip-format-disconnected": "No network connection\nClick: inspect network interfaces",
-    "on-click": "@kitty@ --hold --class network-info @ip@ -color -brief address",
+    "tooltip-format": "{ifname} · {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}\n\nClick: network menu · middle-click: addresses · right-click: routes",
+    "tooltip-format-wifi": "{essid} · signal {signalStrength}%\n{ifname} · {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}\n\nClick: network menu · middle-click: addresses · right-click: routes",
+    "tooltip-format-disconnected": "No network connection\nClick: network menu · middle-click: interfaces",
+    "on-click": "@networkMenu@",
+    "on-click-middle": "@kitty@ --hold --class network-info @ip@ -color -brief address",
     "on-click-right": "@kitty@ --hold --class network-info @ip@ -color route"
+  },
+  "custom/vpn": {
+    "exec": "@vpnStatus@ --watch",
+    "return-type": "json",
+    "restart-interval": 5,
+    "on-click": "@networkMenu@",
+    "max-length": 18
   },
   "battery": {
     "interval": 30,
@@ -192,15 +172,6 @@
     "icon-size": 16,
     "spacing": 8
   },
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "󰅶",
-      "deactivated": "󰾪"
-    },
-    "tooltip-format-activated": "Keep awake is on\nClick to allow automatic idle / lock again",
-    "tooltip-format-deactivated": "Keep awake is off\nClick to prevent idle while presenting or watching"
-  },
   "custom/session": {
     "format": "⏻",
     "tooltip-format": "Session\nLock · suspend · log out · restart · shut down",
@@ -213,15 +184,5 @@
       "reboot": "@systemctl@ reboot",
       "shutdown": "@systemctl@ poweroff"
     }
-  },
-  "memory": {
-    "interval": 5,
-    "format": "<span color='#@sapphire@'></span>  {percentage}%",
-    "states": {
-      "warning": 75,
-      "critical": 90
-    },
-    "tooltip-format": "Memory {used:0.1f} / {total:0.1f} GiB\nSwap {swapUsed:0.1f} / {swapTotal:0.1f} GiB\nClick to open the system monitor",
-    "on-click": "@kitty@ --class system-monitor -e @btop@"
   }
 }

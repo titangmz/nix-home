@@ -41,7 +41,7 @@ python3 tests/test_switch.py SwitchTests.<test_name>
 python3 tests/test_bootstrap.py
 python3 tests/test_bin_scripts.py
 python3 tests/test_set_wallpaper.py
-python3 tests/test_rebuild.py           # Linux only, like test_setup_monitors.py
+python3 tests/test_rebuild.py           # Linux only, like test_setup_monitors.py and test_network_menu.py
 ```
 
 Which checks exist depends on the system: `workstation` and `neovim` only where `pc` or `mac` is supported (not aarch64-linux), `nixos` and `nixos-module` only on x86_64-linux.
@@ -63,7 +63,7 @@ Which checks exist depends on the system: `workstation` and `neovim` only where 
 - `scripts/switch.sh [PROFILE]` saves the profile to `~/.config/nix-home/profile` and reuses it later. For `nixos` it runs `nixos-rebuild build`, then `sudo nixos-rebuild switch`, then Home Manager; other profiles touch only Home Manager. Every switch passes `-b nix-home-backup`. With neither an argument nor a saved profile it fails and lists the profiles for this system. Platform detection never picks a profile.
 - `nixosModules.desktop` is `modules/nixos/system`. This repo does not define `nixosConfigurations`. `bootstrap.sh nixos` moves the generated config to `/etc/nixos/machine.nix` and writes a wrapper `configuration.nix` that imports it plus the module by absolute checkout path. `scripts/rebuild.sh` runs `nixos-rebuild` against `/etc/nixos/configuration.nix`, so the system uses the machine's own nixpkgs pin, not the flake lock.
 
-**NixOS split.** `modules/nixos/system` is a NixOS module (session, services, system packages, Docker). `modules/nixos/desktop` is a Home Manager module (GTK, Kitty config, Hyprland, Waybar, Rofi, Mako, wallpaper). Users, hardware, hostname, networking, and `stateVersion` live only in `/etc/nixos/machine.nix`.
+**NixOS split.** `modules/nixos/system` is a NixOS module (session, services, system packages, Docker). `modules/nixos/desktop` is a Home Manager module (GTK, Kitty config, Hyprland, Waybar, the SwayNC control center and notifications, Rofi, wallpaper). Users, hardware, hostname, networking, and `stateVersion` live only in `/etc/nixos/machine.nix`.
 
 **Theme.** `modules/theme/default.nix` is a plain function `{ lib }: { ... }`, not a module. Consumers `import ../theme { inherit lib; }` and read colors, opacity, blur, or helpers like `render` and `styleLua`. All colors, window opacity, and blur go there and nowhere else.
 

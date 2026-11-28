@@ -11,7 +11,7 @@ in
   imports = [
     ./waybar
     ./rofi
-    ./mako
+    ./swaync
     ./hyprland
     ./hyprlock
     ./kitty

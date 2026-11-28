@@ -49,14 +49,27 @@ let
   # Neovim leaves its editor background clear so the terminal's glass shows
   # through, popups included.
   neovim.transparent = true;
-  tokens = colors // {
-    inherit opacity opacityHex;
-    blurSize = toString blur.size;
-    blurPasses = toString blur.passes;
-    lockBlurSize = toString lock.blurSize;
-    lockBlurPasses = toString lock.blurPasses;
-    lockBrightness = lock.brightness;
-  };
+  # "r, g, b" for CSS that builds rgba() from a variable, such as SwayNC's.
+  rgb =
+    hex:
+    lib.concatMapStringsSep ", "
+      (offset: toString (lib.fromHexString (builtins.substring offset 2 hex)))
+      [
+        0
+        2
+        4
+      ];
+  tokens =
+    colors
+    // lib.mapAttrs' (name: value: lib.nameValuePair "${name}Rgb" (rgb value)) colors
+    // {
+      inherit opacity opacityHex;
+      blurSize = toString blur.size;
+      blurPasses = toString blur.passes;
+      lockBlurSize = toString lock.blurSize;
+      lockBlurPasses = toString lock.blurPasses;
+      lockBrightness = lock.brightness;
+    };
 in
 {
   inherit

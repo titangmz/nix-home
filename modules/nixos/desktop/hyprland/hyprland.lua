@@ -181,6 +181,7 @@ hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exit())
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client --toggle-panel --skip-wait"))
 hl.bind(mainMod .. " + space", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 
@@ -220,6 +221,13 @@ hl.layer_rule({
     ignore_alpha = 0.5,
 })
 
+-- The control center panel is glass like the bar.
+hl.layer_rule({
+    match = { namespace = "swaync-control-center" },
+    blur = true,
+    ignore_alpha = 0.5,
+})
+
 hl.window_rule({
     name  = "suppress-maximize-events",
     match = { class = ".*" },
@@ -241,7 +249,10 @@ hl.window_rule({
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("waybar")
-    hl.exec_cmd("mako")
+    hl.exec_cmd("swaync")
+    -- No tray icon: Waybar's VPN control and network menu replace it. The
+    -- applet stays running to ask for VPN passwords and save them.
+    hl.exec_cmd("nm-applet")
     hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE && systemctl --user restart desktop-wallpaper.service")
 end)
 

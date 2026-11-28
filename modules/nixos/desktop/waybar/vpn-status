@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Waybar VPN indicator. Prints one JSON line for the current state; with
+# --watch it prints another after every NetworkManager change.
+set -u
+
+markup() {
+  local text=$1
+  text=${text//&/&amp;}
+  text=${text//</&lt;}
+  text=${text//>/&gt;}
+  text=${text//\\/\\\\}
+  text=${text//\"/\\\"}
+  printf '%s' "$text"
+}
+
+emit() {
+  printf '{"text": "%s", "tooltip": "%s", "class": "%s"}\n' "$1" "$2" "$3"
+}
+
+status() {
+  local type state name vpn="" vpnState=""
+  # NAME goes last and escaping is off, so names may contain colons.
+  while IFS=: read -r type state name; do
+    case "$type" in vpn | wireguard) ;; *) continue ;; esac
+    if [ "$state" = activated ]; then
+      vpn=$name
+      vpnState=connected
+      break
+    fi
+    if [ -z "$vpnState" ]; then
+      vpn=$name
+      vpnState=connecting
+    fi
+  done < <(nmcli -t -e no -f TYPE,STATE,NAME connection show --active 2>/dev/null)
+
+  case "$vpnState" in
+    connected)
+      emit "<span color='#@green@'>󰕥</span>  $(markup "$vpn")" \
+        "VPN connected: $(markup "$vpn")\nClick to open the network menu" connected
+      ;;
+    connecting)
+      emit "<span color='#@yellow@'>󰒙</span>  Connecting" \
+        "Connecting to $(markup "$vpn")…\nClick to open the network menu" connecting
+      ;;
+    *)
+      if [ "$(nmcli -t networking 2>/dev/null)" = disabled ]; then
+        emit "󰒙" "Networking is off\nClick to open the network menu" disconnected
+      else
+        emit "󰒙" "VPN off\nClick to connect" disconnected
+      fi
+      ;;
+  esac
+}
+
+status
+if [ "${1:-}" = --watch ]; then
+  nmcli monitor 2>/dev/null | while read -r _; do status; done
+fi

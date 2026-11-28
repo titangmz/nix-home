@@ -48,6 +48,16 @@ in
 
   services.flatpak.enable = true;
 
+  # OpenVPN through NetworkManager: the plugin handles .ovpn connections,
+  # nm-applet (started by Hyprland, shown in the Waybar tray) connects them
+  # and asks for VPN passwords, and nm-connection-editor imports them.
+  # NetworkManager itself is enabled in machine.nix.
+  networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
+
+  # nm-applet saves VPN passwords in the login keyring, unlocked at login.
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
+
   services.openssh.enable = true;
 
   # Docker stays on NixOS. The package includes the Compose plugin, so
@@ -92,6 +102,7 @@ in
     firefox
     hyprlock
     hypridle
+    networkmanagerapplet
     thunar
     imv
     bazaar

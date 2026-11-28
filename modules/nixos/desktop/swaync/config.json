@@ -1,0 +1,121 @@
+{
+  "ignore-gtk-theme": true,
+  "cssPriority": "user",
+  "layer": "overlay",
+  "control-center-layer": "top",
+  "layer-shell": true,
+  "layer-shell-cover-screen": true,
+  "positionX": "right",
+  "positionY": "top",
+  "control-center-positionX": "left",
+  "control-center-positionY": "top",
+  "control-center-margin-top": 8,
+  "control-center-margin-bottom": 14,
+  "control-center-margin-left": 14,
+  "control-center-margin-right": 0,
+  "control-center-width": 380,
+  "control-center-height": 640,
+  "fit-to-screen": true,
+  "notification-window-width": 380,
+  "notification-icon-size": 40,
+  "notification-body-image-height": 100,
+  "notification-body-image-width": 200,
+  "timeout": 6,
+  "timeout-low": 4,
+  "timeout-critical": 0,
+  "relative-timestamps": true,
+  "keyboard-shortcuts": true,
+  "notification-grouping": true,
+  "image-visibility": "when-available",
+  "transition-time": 200,
+  "hide-on-clear": false,
+  "hide-on-action": true,
+  "script-fail-notify": true,
+  "text-empty": "No notifications",
+  "widgets": [
+    "menubar",
+    "buttons-grid",
+    "volume",
+    "mpris",
+    "title",
+    "notifications"
+  ],
+  "widget-config": {
+    "menubar": {
+      "buttons#tools": {
+        "position": "left",
+        "actions": [
+          { "label": "󰛳", "command": "@controlCenter@ network" },
+          { "label": "󰕾", "command": "@controlCenter@ mixer" },
+          { "label": "󰄨", "command": "@controlCenter@ monitor" },
+          { "label": "󰹑", "command": "@controlCenter@ screenshot" }
+        ]
+      },
+      "menu#power": {
+        "label": "⏻",
+        "position": "right",
+        "animation-type": "slide_down",
+        "animation-duration": 200,
+        "actions": [
+          { "label": "󰌾   Lock", "command": "@controlCenter@ lock" },
+          { "label": "󰤄   Suspend", "command": "@controlCenter@ suspend" },
+          { "label": "󰍃   Log out", "command": "@controlCenter@ logout" },
+          { "label": "󰜉   Restart", "command": "@controlCenter@ reboot" },
+          { "label": "󰐥   Shut down", "command": "@controlCenter@ poweroff" }
+        ]
+      }
+    },
+    "buttons-grid": {
+      "buttons-per-row": 2,
+      "actions": [
+        {
+          "label": "󰕥   VPN",
+          "type": "toggle",
+          "command": "@controlCenter@ vpn",
+          "update-command": "@controlCenter@ vpn-state"
+        },
+        {
+          "label": "󰛳   Network",
+          "type": "toggle",
+          "command": "@controlCenter@ networking",
+          "update-command": "@controlCenter@ networking-state"
+        },
+        {
+          "label": "󰅶   Keep awake",
+          "type": "toggle",
+          "command": "@controlCenter@ awake",
+          "update-command": "@controlCenter@ awake-state"
+        },
+        {
+          "label": "󰂛   Do not disturb",
+          "type": "toggle",
+          "command": "@controlCenter@ dnd",
+          "update-command": "@controlCenter@ dnd-state"
+        }
+      ]
+    },
+    "volume": {
+      "label": "󰕾",
+      "show-per-app": true,
+      "show-per-app-icon": true,
+      "show-per-app-label": false,
+      "expand-button-label": "󰅀",
+      "collapse-button-label": "󰅃",
+      "empty-list-label": "Nothing is playing"
+    },
+    "mpris": {
+      "autohide": true,
+      "show-album-art": "when-available",
+      "loop-carousel": false,
+      "blacklist": []
+    },
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Clear"
+    },
+    "notifications": {
+      "vexpand": true
+    }
+  }
+}

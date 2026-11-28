@@ -10,12 +10,12 @@ Exactly one layer or profile imports each module. Put a module in the lowest lay
 
 The server being a subset of every workstation is the default, not an absolute requirement. A server-only module or other intentional profile-specific difference is allowed when the requested behavior calls for it. Put it in the appropriate profile and document the reason in the module's README. Shared functionality still belongs in the common layers.
 
-- `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds the user from `profiles/user.nix` to the `docker` group. The account itself stays in `machine.nix`.
+- `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, the NetworkManager OpenVPN plugin with nm-applet, GNOME Keyring, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds the user from `profiles/user.nix` to the `docker` group. The account itself stays in `machine.nix`.
 - Identity is read only through `profiles/user.nix`. The tracked values live in `profiles/user.default.nix`. Another person's values go in the gitignored `profiles/user.local.nix`, never in the default file.
-- `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, the hyprlock style, Waybar, Rofi, Mako, and wallpaper.
+- `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, the hyprlock style, Waybar, the SwayNC control center and notifications, Rofi, and wallpaper.
 - Users, hardware, hostname, networking, and `system.stateVersion` stay in `/etc/nixos/machine.nix`. This repo does not register machines.
 
-`modules/theme` is the only place for colors, window opacity, and blur. Shell, Waybar, Rofi, Mako, Kitty, GTK, Lazygit, Hyprland, and hyprlock read it.
+`modules/theme` is the only place for colors, window opacity, and blur. Shell, Waybar, SwayNC, Rofi, Kitty, GTK, Lazygit, Hyprland, and hyprlock read it.
 
 Hyprland behavior lives in `modules/nixos/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch`, then `just reload`.
 

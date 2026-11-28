@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# Actions behind the SwayNC control center's buttons.
+#
+# Toggles come in pairs: `NAME` applies SWAYNC_TOGGLE_STATE (true or false,
+# set by SwayNC when the button is clicked) and `NAME-state` prints the
+# current state, which SwayNC reads each time the panel opens.
+set -u
+
+notify() {
+  notify-send -a "Control center" "$@" 2>/dev/null || true
+}
+
+close_panel() {
+  swaync-client --close-panel >/dev/null 2>&1 || true
+}
+
+wanted() {
+  [ "${SWAYNC_TOGGLE_STATE:-}" = true ]
+}
+
+# NAME goes last and escaping is off, so names may contain colons.
+active_vpns() {
+  nmcli -t -e no -f UUID,TYPE,NAME connection show --active 2>/dev/null |
+    while IFS=: read -r uuid type name; do
+      case "$type" in vpn | wireguard) printf '%s:%s\n' "$uuid" "$name" ;; esac
+    done
+}
+
+# The VPN used most recently, so the toggle reconnects what you had before.
+recent_vpn() {
+  nmcli -t -e no -f TIMESTAMP,UUID,TYPE,NAME connection show 2>/dev/null |
+    while IFS=: read -r stamp uuid type name; do
+      case "$type" in vpn | wireguard) printf '%s:%s:%s\n' "$stamp" "$uuid" "$name" ;; esac
+    done | sort -t: -k1,1nr | head -n1 | cut -d: -f2-
+}
+
+vpn() {
+  local uuid name error
+  if wanted; then
+    IFS=: read -r uuid name < <(recent_vpn) || true
+    if [ -z "${uuid:-}" ]; then
+      close_panel
+      network-menu &
+      return
+    fi
+    notify -i network-vpn "Connecting to $name…"
+    if error=$(nmcli connection up uuid "$uuid" 2>&1 >/dev/null); then
+      notify -i network-vpn "Connected to $name"
+    else
+      notify -u critical -i network-error "Couldn't connect to $name" "${error##*$'\n'}"
+    fi
+  else
+    while IFS=: read -r uuid name; do
+      nmcli connection down uuid "$uuid" >/dev/null 2>&1 &&
+        notify -i network-vpn "Disconnected from $name"
+    done < <(active_vpns)
+  fi
+}
+
+case "${1:-}" in
+  vpn) vpn ;;
+  vpn-state) [ -n "$(active_vpns)" ] && echo true || echo false ;;
+  networking)
+    if wanted; then nmcli networking on; else nmcli networking off; fi
+    ;;
+  networking-state) [ "$(nmcli -t networking 2>/dev/null)" = enabled ] && echo true || echo false ;;
+  # Keep awake holds a logind idle inhibitor, which idle daemons honor.
+  awake)
+    if wanted; then
+      systemd-run --user --quiet --collect --unit=keep-awake \
+        systemd-inhibit --what=idle --who="Control center" --why="Keep awake" sleep infinity
+    else
+      systemctl --user stop keep-awake.service
+    fi
+    ;;
+  awake-state) systemctl --user is-active --quiet keep-awake.service && echo true || echo false ;;
+  dnd)
+    if wanted; then swaync-client --dnd-on; else swaync-client --dnd-off; fi >/dev/null
+    ;;
+  dnd-state) swaync-client --get-dnd 2>/dev/null || echo false ;;
+  network) close_panel; exec network-menu ;;
+  mixer) close_panel; exec pavucontrol ;;
+  monitor) close_panel; exec kitty --class system-monitor -e btop ;;
+  screenshot)
+    close_panel
+    # Let the panel slide away before the region picker freezes the screen.
+    sleep 0.4
+    exec hyprshot -m region -o "$HOME/Pictures/Screenshots"
+    ;;
+  lock) close_panel; exec hyprlock ;;
+  suspend) close_panel; exec systemctl suspend ;;
+  logout) exec hyprctl dispatch 'hl.dsp.exit()' ;;
+  reboot) exec systemctl reboot ;;
+  poweroff) exec systemctl poweroff ;;
+  *)
+    echo "usage: control-center ACTION" >&2
+    exit 2
+    ;;
+esac

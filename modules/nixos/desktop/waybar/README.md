@@ -2,9 +2,9 @@
 
 Bar configuration and CSS. Colors, opacity, and blur come from `modules/theme`. Hyprland starts Waybar; there is no separate service.
 
-The bar itself is transparent: left, center, and right modules float as three glass islands using the shared opacity and a thin border. The launcher and the focused workspace use the accent-to-blue gradient that Hyprland uses for the active window border. Each status module has a colored icon from the theme, and every clickable control highlights on hover. CPU and memory turn yellow and then red under load. A critical battery, an urgent workspace, and the privacy indicators pulse. Window and media titles are bounded so they leave room for the centered clock and system controls.
+The bar itself is transparent: left, center, and right modules float as three glass islands using the shared opacity and a thin border. The launcher and the focused workspace use the accent-to-blue gradient that Hyprland uses for the active window border. The bar stays minimal so it fits small screens: most controls live in the control center (`../swaync/README.md`), which the Nix button opens from the top left. Each status module has a colored icon from the theme, and every clickable control highlights on hover. A critical battery, an urgent workspace, and the privacy indicators pulse. The window title is bounded so it leaves room for the centered clock.
 
-Each monitor shows its own workspaces and window title. Workspace tabs show an icon for each open app (`window-rewrite` in `config.jsonc`; unknown apps get a generic window icon), and the window title shows the focused app's icon. Media appears when a player is available; microphone and screen-share indicators appear only while in use. Battery status appears only on machines with a battery. Ethernet is labeled Wired; the address, connection speed, and Wi-Fi signal are in the network tooltip.
+Each monitor shows its own workspaces and window title. Workspace tabs show an icon for each open app (`window-rewrite` in `config.jsonc`; unknown apps get a generic window icon), and the window title shows the focused app's icon. Volume is an icon; the level is in its tooltip. Microphone and screen-share indicators appear only while in use, and battery status only on machines with a battery. The network module stays hidden on a working wired connection and shows only the Wi-Fi signal icon, or a warning when there is no address or no connection; its tooltip has the address and connection speed. The tray shows only when an app puts an icon there.
 
 Workspace tabs show only real workspaces assigned to that bar's output. Every
 screen has its own workspaces 1–10 (see `../hyprland/README.md`); tabs show
@@ -19,16 +19,16 @@ screen's existing workspaces.
 
 | Control | Action |
 | --- | --- |
-| Nix launcher | Click for applications; right-click to run a command |
+| Nix button | Click to open or close the control center (also Super+N); right-click for applications |
 | Workspaces | Click a number to switch; scroll to cycle this screen's existing workspaces |
 | Clock | Click for the full date; hover for the calendar; scroll to browse months; right-click to toggle month/year |
-| Media | Click to play/pause; middle-click for previous; right-click for next (Waybar controls the displayed player) |
-| CPU, memory | Open `btop` in Kitty; the memory tooltip shows used and swap |
 | Keyboard layout | Click to cycle layouts on all keyboards |
 | Volume | Click for Pavucontrol's mixer and device selection; right-click to mute; scroll for volume, capped at 100% |
-| Network | Click for interface addresses; right-click for routes; both open read-only diagnostics in Kitty |
-| Keep awake | Toggle idle inhibition for presentations or videos; green means active |
+| Network | Click for the network menu; middle-click for interface addresses; right-click for routes (both read-only, in Kitty) |
+| VPN | Green with the VPN's name when connected, yellow while connecting, a grey shield when off. Click for the network menu |
 | Power | Open the session menu: lock, suspend, log out, restart, shut down |
+
+The network menu (`network-menu`, also installed in `~/.local/bin` for the control center) is a Rofi list of every VPN and WireGuard connection with its state, a networking on/off switch, and *Edit connections*, which opens `nm-connection-editor`. Selecting a VPN connects or disconnects it; a notification reports the result, including the error when a connection fails. `vpn-status` feeds the VPN indicator: it prints the state once, then again on every change that `nmcli monitor` reports, so the bar updates without polling. Both call `nmcli` from the session PATH so it matches the system's NetworkManager. `tests/test_network_menu.py` covers them with a fake `nmcli`.
 
 Commands in `config.jsonc` use placeholders resolved to Nix store executables by `default.nix`. The session menu is a GTK menu from `session-menu.ui`; clicking the power button opens that menu without performing an action.
 

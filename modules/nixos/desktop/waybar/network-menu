@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# Rofi network menu: connect or disconnect VPNs, switch networking on or off,
+# and open the connection editor. Results are reported through notifications.
+set -u
+
+markup() {
+  local text=$1
+  text=${text//&/&amp;}
+  text=${text//</&lt;}
+  text=${text//>/&gt;}
+  printf '%s' "$text"
+}
+
+notify() {
+  notify-send -a Network "$@" 2>/dev/null || true
+}
+
+rows=()
+actions=()
+add() {
+  rows+=("$1")
+  actions+=("$2")
+}
+
+hint() {
+  printf "<span color='#@muted@' size='small'>%s</span>" "$1"
+}
+
+vpns=0
+while IFS=: read -r uuid type state name; do
+  case "$type" in vpn | wireguard) ;; *) continue ;; esac
+  vpns=$((vpns + 1))
+  label=$(markup "$name")
+  case "$state" in
+    activated)
+      add "<span color='#@green@'>󰕥</span>  $label   $(hint 'Connected · select to disconnect')" "down:$uuid:$name"
+      ;;
+    activating)
+      add "<span color='#@yellow@'>󰒙</span>  $label   $(hint 'Connecting · select to cancel')" "down:$uuid:$name"
+      ;;
+    *)
+      add "<span color='#@muted@'>󰒙</span>  $label   $(hint 'Select to connect')" "up:$uuid:$name"
+      ;;
+  esac
+done < <(nmcli -t -e no -f UUID,TYPE,STATE,NAME connection show 2>/dev/null)
+
+if [ "$vpns" -eq 0 ]; then
+  add "<span color='#@muted@'>󰒙</span>  No VPN yet   $(hint 'Select to import a .ovpn file')" "edit"
+fi
+
+if [ "$(nmcli -t networking 2>/dev/null)" = disabled ]; then
+  add "<span color='#@red@'>󰤭</span>  Networking is off   $(hint 'Select to turn on')" "networking:on"
+else
+  add "<span color='#@blue@'>󰛳</span>  Networking is on   $(hint 'Select to turn off')" "networking:off"
+fi
+add "<span color='#@accent@'>󰒓</span>  Edit connections" "edit"
+
+choice=$(printf '%s\n' "${rows[@]}" | rofi -dmenu -i -markup-rows -format i -no-show-icons \
+  -p "󰛳" -theme-str 'window { width: 30%; } listview { lines: 6; } entry { placeholder: "Network"; }') || exit 0
+case "$choice" in '' | *[!0-9]*) exit 0 ;; esac
+[ "$choice" -lt "${#actions[@]}" ] || exit 0
+
+action=${actions[$choice]}
+case "$action" in
+  up:*)
+    rest=${action#up:}
+    uuid=${rest%%:*}
+    name=${rest#*:}
+    notify -i network-vpn "Connecting to $name…"
+    if error=$(nmcli connection up uuid "$uuid" 2>&1 >/dev/null); then
+      notify -i network-vpn "Connected to $name"
+    else
+      notify -u critical -i network-error "Couldn't connect to $name" "${error##*$'\n'}"
+    fi
+    ;;
+  down:*)
+    rest=${action#down:}
+    uuid=${rest%%:*}
+    name=${rest#*:}
+    if nmcli connection down uuid "$uuid" >/dev/null 2>&1; then
+      notify -i network-vpn "Disconnected from $name"
+    else
+      notify -u critical -i network-error "Couldn't disconnect from $name"
+    fi
+    ;;
+  networking:*)
+    state=${action#networking:}
+    if nmcli networking "$state" >/dev/null 2>&1; then
+      notify -i network-wired "Networking turned $state"
+    else
+      notify -u critical -i network-error "Couldn't turn networking $state"
+    fi
+    ;;
+  edit)
+    nm-connection-editor >/dev/null 2>&1 &
+    ;;
+esac
