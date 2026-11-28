@@ -1,12 +1,8 @@
 # Working rules
 
-Read [docs/rules.md](docs/rules.md) before changing configuration. Module details belong in the README next to that module.
-
-Profiles nest by import, so server stays a subset of every workstation profile by default. Intentional profile-specific exceptions are allowed; document the reason. Keep colors, opacity, and blur in `modules/theme`.
+Read [docs/rules.md](docs/rules.md) before changing configuration. It holds the rules for layers, ownership, docs, and tests; this file holds the commands and a map of the architecture. Module details belong in the README next to that module.
 
 Validate with `nix fmt` and `just check`.
-
-Keep tests focused on behavior, integration failures, and meaningful regressions. Do not add package presence/absence inventories, literal color or setting assertions, or source-string checks that merely repeat configuration. Routine package additions need evaluation/build validation, not bespoke tests.
 
 Use Conventional Commits for all commit messages. Follow [the conventional-commits skill](.agents/skills/conventional-commits/SKILL.md) when writing or reviewing them.
 
@@ -29,8 +25,9 @@ Always use the `path:` flake URL. It includes uncommitted and untracked files, w
 Run a single flake check:
 
 ```bash
-nix build "path:$PWD#checks.aarch64-darwin.server"      # or .server-neovim, .workstation, .neovim, .switch, .lint
+nix build "path:$PWD#checks.aarch64-darwin.server"      # or .server-neovim, .workstation, .neovim, .switch, .bin-scripts, .lint
 nix build "path:$PWD#checks.x86_64-linux.nixos-module"  # x86_64-linux only: also .nixos
+nix build "path:$PWD#checks.x86_64-linux.desktop-scripts"  # any Linux
 ```
 
 The shell-script tests are plain Python `unittest` files. Without env vars they target the scripts in this checkout, so they run directly:
@@ -40,11 +37,10 @@ python3 tests/test_switch.py
 python3 tests/test_switch.py SwitchTests.<test_name>
 python3 tests/test_bootstrap.py
 python3 tests/test_bin_scripts.py
-python3 tests/test_set_wallpaper.py
-python3 tests/test_rebuild.py           # Linux only, like test_setup_monitors.py, test_network_menu.py, and test_clipboard_history.py
+python3 tests/test_rebuild.py           # Linux only, like test_set_wallpaper.py, test_setup_monitors.py, test_network_menu.py, and test_clipboard_history.py
 ```
 
-Which checks exist depends on the system: `workstation` and `neovim` only where `pc` or `mac` is supported (not aarch64-linux), `nixos` and `nixos-module` only on x86_64-linux.
+Which checks exist depends on the system: `workstation`, `neovim`, and `nb` only where `pc` or `mac` is supported (not aarch64-linux), `desktop-scripts` only on Linux, `nixos` and `nixos-module` only on x86_64-linux.
 
 ## Architecture
 
@@ -63,10 +59,10 @@ Which checks exist depends on the system: `workstation` and `neovim` only where 
 - `scripts/switch.sh [PROFILE]` saves the profile to `~/.config/nix-home/profile` and reuses it later. For `nixos` it runs `nixos-rebuild build`, then `sudo nixos-rebuild switch`, then Home Manager; other profiles touch only Home Manager. Every switch passes `-b nix-home-backup`. With neither an argument nor a saved profile it fails and lists the profiles for this system. Platform detection never picks a profile.
 - `nixosModules.desktop` is `modules/nixos`. This repo does not define `nixosConfigurations`. `bootstrap.sh nixos` moves the generated config to `/etc/nixos/machine.nix` and writes a wrapper `configuration.nix` that imports it plus the module by absolute checkout path. `scripts/rebuild.sh` runs `nixos-rebuild` against `/etc/nixos/configuration.nix`, so the system uses the machine's own nixpkgs pin, not the flake lock.
 
-**NixOS split.** `modules/nixos` is a NixOS module (session, services, system packages, Docker). `modules/desktop` is a Home Manager module (GTK, Kitty config, Hyprland, Waybar, the SwayNC control center and notifications, clipboard history, Rofi, wallpaper). Users, hardware, hostname, networking, and `stateVersion` live only in `/etc/nixos/machine.nix`.
+**NixOS split.** `modules/nixos` is the NixOS module (session, services, system packages). `modules/desktop` is its Home Manager half, imported by `profiles/nixos.nix`. Machine settings live only in `/etc/nixos/machine.nix`. Moving the checkout or `modules/nixos` needs `./bootstrap.sh nixos` again to rewrite the wrapper's path.
 
-**Theme.** `modules/theme/default.nix` is a plain function `{ lib }: { ... }`, not a module. Consumers `import ../theme { inherit lib; }` and read colors, opacity, blur, or helpers like `render` and `styleLua`. All colors, window opacity, and blur go there and nowhere else.
+**Theme.** `modules/theme/default.nix` is a plain function `{ lib }: { ... }`, not a module. Consumers `import ../theme { inherit lib; }` and read colors, opacity, blur, or helpers like `render` and `styleLua`.
 
 **Hyprland is not in the store.** Activation symlinks `~/.config/hypr/hyprland.lua` to the checkout's `modules/desktop/hyprland/hyprland.lua`, using the path that `scripts/switch.sh` writes to `~/.config/nix-home/root`. Lua edits need only `just reload`. `~/.config/hypr/style.lua` is generated from the theme, so theme changes need `just switch` then `just reload`.
 
-**Checks validate builds and behavior.** `tests/checks.nix` builds profile activation packages and runs script, shell, tmux rendering, note-editor, and Neovim smoke tests. Keep focused integration checks for toolchain precedence, duplicate language servers and keymaps, macOS app copying, and NixOS wiring. Do not duplicate package lists or literal configuration values in assertions. The `neovim` check runs `tests/neovim.lua` headless against the workstation editor; `server-neovim` runs `tests/neovim-server.lua` against the base editor. `lint` runs shellcheck on shell scripts and statix and deadnix on Nix files; statix reads `tests/statix.toml`. A Mac can only build its own system's checks, so `just check` first evaluates every system's checks without building, then builds local checks. The NixOS and Hyprland script tests run only on Linux.
+**Checks validate builds and behavior.** `tests/checks.nix` builds profile activation packages and runs one check per test area through its `pythonCheck` helper: `switch` (switch and bootstrap), `bin-scripts`, `desktop-scripts` (rebuild, monitors, Waybar and SwayNC menus, clipboard, wallpaper), `shell`, `tmux`, and `nb`. Keep focused integration checks for toolchain precedence, duplicate language servers and keymaps, macOS app copying, and NixOS wiring. The `neovim` check runs `tests/neovim.lua` headless against the workstation editor; `server-neovim` runs `tests/neovim-server.lua` against the base editor. `lint` runs shellcheck on shell scripts and statix and deadnix on Nix files; statix reads `tests/statix.toml`. A Mac can only build its own system's checks, so `just check` first evaluates every system's checks without building, then builds local checks. The NixOS and Hyprland script tests run only on Linux.
