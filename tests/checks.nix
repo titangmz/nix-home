@@ -38,6 +38,19 @@ let
       ${editor.build.package}/bin/nvim --headless -i NONE --cmd "set runtimepath^=${editor.build.extraFiles}" -u ${editor.build.initFile} -c "luafile ${script}"
       touch "$out"
     '';
+  # Runs Python tests from this directory; each check covers one area, so a
+  # failing check names what broke.
+  pythonCheck =
+    name:
+    {
+      inputs ? [ ],
+      env ? { },
+    }:
+    script:
+    pkgs.runCommand "${name}-check" ({ nativeBuildInputs = [ pkgs.python3 ] ++ inputs; } // env) ''
+      ${script}
+      touch "$out"
+    '';
   server = homeFor "server";
   workstationName = if pkgs.stdenv.isDarwin then "mac" else "pc";
 in
@@ -45,33 +58,25 @@ in
   server = server.activationPackage;
   server-neovim = neovimCheck "server-neovim-smoke-check" server ./neovim-server.lua [ ];
   tmux =
-    pkgs.runCommand "tmux-border-check"
+    let
+      tmux = server.config.programs.tmux.package;
+    in
+    pythonCheck "tmux"
       {
-        nativeBuildInputs = [
-          pkgs.python3
-          server.config.programs.tmux.package
-        ];
-        TEST_TMUX = lib.getExe server.config.programs.tmux.package;
-        TMUX_CONFIG = pkgs.writeText "tmux-test.conf" server.config.xdg.configFile."tmux/tmux.conf".text;
+        inputs = [ tmux ];
+        env = {
+          TEST_TMUX = lib.getExe tmux;
+          TMUX_CONFIG = pkgs.writeText "tmux-test.conf" server.config.xdg.configFile."tmux/tmux.conf".text;
+        };
       }
       ''
         export HOME="$TMPDIR/home"
         mkdir -p "$HOME"
         python ${./test_tmux.py}
-        touch "$out"
       '';
-  shell =
-    pkgs.runCommand "shell-check"
-      {
-        nativeBuildInputs = [
-          pkgs.python3
-          pkgs.zsh
-        ];
-      }
-      ''
-        SHELL_ZSHRC=${../modules/shell/zshrc} python ${./test_shell.py}
-        touch "$out"
-      '';
+  shell = pythonCheck "shell" { inputs = [ pkgs.zsh ]; } ''
+    SHELL_ZSHRC=${../modules/shell/zshrc} python ${./test_shell.py}
+  '';
   # Every shell script, including the template without a shebang, plus Nix lints.
   lint =
     pkgs.runCommand "lint-check"
@@ -94,33 +99,35 @@ in
         deadnix --fail .
         touch "$out"
       '';
-  switch =
-    let
-      # These scripts drive NixOS and Hyprland, which run only on Linux.
-      linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
-        REBUILD_SCRIPT=${../scripts/rebuild.sh} python ${./test_rebuild.py}
-        MONITOR_LAYOUT_RUNTIME=${../modules/desktop/hyprland}/monitor-layout.lua SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
-        MONITOR_LAYOUT_RUNTIME=${../modules/desktop/hyprland}/monitor-layout.lua lua ${./monitor-layout.lua}
-        WAYBAR_MODULE=${../modules/desktop/waybar} CONTROL_CENTER_SCRIPT=${../modules/desktop/swaync/control-center} python ${./test_network_menu.py}
-        CLIPBOARD_HISTORY_SCRIPT=${../modules/desktop/clipboard/clipboard-history} python ${./test_clipboard_history.py}
-      '';
-    in
-    pkgs.runCommand "switch-script-check"
+  # The scripts that install Nix and apply a profile.
+  switch = pythonCheck "switch" { inputs = [ pkgs.bash ]; } ''
+    SWITCH_SCRIPT=${../scripts/switch.sh} python ${./test_switch.py}
+    BOOTSTRAP_SCRIPT=${../bootstrap.sh} python ${./test_bootstrap.py}
+  '';
+  # Commands installed into ~/.local/bin on every profile.
+  bin-scripts = pythonCheck "bin-scripts" { inputs = [ pkgs.bash ]; } ''
+    SCRIPTS_BIN=${../modules/scripts/bin} python ${./test_bin_scripts.py}
+  '';
+}
+// lib.optionalAttrs pkgs.stdenv.isLinux {
+  # nixos-rebuild and the Hyprland desktop scripts run only on Linux.
+  desktop-scripts =
+    pythonCheck "desktop-scripts"
       {
-        nativeBuildInputs = [
-          pkgs.python3
+        inputs = [
           pkgs.bash
           pkgs.jq
           pkgs.lua
         ];
+        env.MONITOR_LAYOUT_RUNTIME = "${../modules/desktop/hyprland}/monitor-layout.lua";
       }
       ''
-        SWITCH_SCRIPT=${../scripts/switch.sh} python ${./test_switch.py}
-        BOOTSTRAP_SCRIPT=${../bootstrap.sh} python ${./test_bootstrap.py}
-        ${linuxScriptTests}
-        SCRIPTS_BIN=${../modules/scripts/bin} python ${./test_bin_scripts.py}
+        REBUILD_SCRIPT=${../scripts/rebuild.sh} python ${./test_rebuild.py}
+        SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
+        lua ${./monitor-layout.lua}
+        WAYBAR_MODULE=${../modules/desktop/waybar} CONTROL_CENTER_SCRIPT=${../modules/desktop/swaync/control-center} python ${./test_network_menu.py}
+        CLIPBOARD_HISTORY_SCRIPT=${../modules/desktop/clipboard/clipboard-history} python ${./test_clipboard_history.py}
         SET_WALLPAPER_SCRIPT=${../modules/desktop/wallpaper/set-wallpaper} python ${./test_set_wallpaper.py}
-        touch "$out"
       '';
 }
 // lib.optionalAttrs (supports workstationName) (
@@ -150,17 +157,9 @@ in
           builtins.filter (p: (p.pname or "") == "nb") workstation.config.home.packages
         );
       in
-      pkgs.runCommand "nb-editor-check"
-        {
-          nativeBuildInputs = [
-            pkgs.python3
-            pkgs.git
-          ];
-        }
-        ''
-          NB_BIN=${lib.getExe package} NB_TEMPLATES=${../modules/nb/templates} python ${./test_nb.py}
-          touch "$out"
-        '';
+      pythonCheck "nb-editor" { inputs = [ pkgs.git ]; } ''
+        NB_BIN=${lib.getExe package} NB_TEMPLATES=${../modules/nb/templates} python ${./test_nb.py}
+      '';
   }
 )
 // lib.optionalAttrs (supports "nixos") {
