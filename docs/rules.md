@@ -12,10 +12,10 @@ The server being a subset of every workstation is the default, not an absolute r
 
 - `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds the user from `profiles/user.nix` to the `docker` group. The account itself stays in `machine.nix`.
 - Identity is read only through `profiles/user.nix`. The tracked values live in `profiles/user.default.nix`. Another person's values go in the gitignored `profiles/user.local.nix`, never in the default file.
-- `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, Waybar, Rofi, Mako, and wallpaper.
+- `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, the hyprlock style, Waybar, Rofi, Mako, and wallpaper.
 - Users, hardware, hostname, networking, and `system.stateVersion` stay in `/etc/nixos/machine.nix`. This repo does not register machines.
 
-`modules/theme` is the only place for colors, window opacity, and blur. Shell, Waybar, Rofi, Mako, Kitty, GTK, Lazygit, and Hyprland read it.
+`modules/theme` is the only place for colors, window opacity, and blur. Shell, Waybar, Rofi, Mako, Kitty, GTK, Lazygit, Hyprland, and hyprlock read it.
 
 Hyprland behavior lives in `modules/nixos/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch`, then `just reload`.
 

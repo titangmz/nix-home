@@ -13,6 +13,7 @@ in
     ./rofi
     ./mako
     ./hyprland
+    ./hyprlock
     ./kitty
     ./wallpaper
   ];

@@ -32,6 +32,13 @@ let
     size = 5;
     passes = 3;
   };
+  # Lock screen: the desktop screenshot behind hyprlock is blurred harder
+  # than windows and dimmed so the clock and password field stand out.
+  lock = {
+    blurSize = 9;
+    blurPasses = 4;
+    brightness = "0.55";
+  };
   ghostty = {
     linuxBlur = true;
     # macOS keeps its own opacity and blur radius; Linux uses the shared
@@ -46,6 +53,9 @@ let
     inherit opacity opacityHex;
     blurSize = toString blur.size;
     blurPasses = toString blur.passes;
+    lockBlurSize = toString lock.blurSize;
+    lockBlurPasses = toString lock.blurPasses;
+    lockBrightness = lock.brightness;
   };
 in
 {
@@ -54,6 +64,7 @@ in
     opacity
     opacityHex
     blur
+    lock
     ghostty
     neovim
     ;
