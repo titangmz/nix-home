@@ -69,7 +69,9 @@ window#waybar {
 #custom-launcher {
     background-image: linear-gradient(135deg, @accent, @blue);
     color: @crust;
-    font-family: "JetBrainsMono Nerd Font Mono";
+    /* Propo gives the icon an advance width that matches its ink, so it centers;
+       the regular and Mono variants leave it a few pixels off. */
+    font-family: "JetBrainsMono Nerd Font Propo";
     font-size: 20px;
     min-width: 34px;
     padding: 0;
@@ -87,8 +89,9 @@ window#waybar {
 }
 
 #workspaces button {
-    min-width: 28px;
-    padding: 0 9px;
+    min-width: 30px;
+    padding: 0 6px;
+    font-weight: 700;
     margin: 0 2px;
     border-radius: 9px;
     color: @muted;
@@ -107,7 +110,7 @@ window#waybar {
 }
 
 #workspaces button.active {
-    padding: 0 16px;
+    padding: 0 11px;
     color: @crust;
     background-image: linear-gradient(135deg, @accent, @blue);
 }
