@@ -6,7 +6,7 @@ setup_monitor_wizard() {
     return 1
   fi
   local runtime_file
-  runtime_file="${MONITOR_LAYOUT_RUNTIME:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../modules/nixos/desktop/hyprland" && pwd -P)/monitor-layout.lua}"
+  runtime_file="${MONITOR_LAYOUT_RUNTIME:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../modules/desktop/hyprland" && pwd -P)/monitor-layout.lua}"
   [[ -r "$runtime_file" ]] || { printf 'Missing monitor runtime: %s\n' "$runtime_file" >&2; return 1; }
 
   local active saved='{"version":1,"monitors":[]}' metadata

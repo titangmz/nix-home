@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 let
-  palette = import ../../../theme { inherit lib; };
+  palette = import ../../theme { inherit lib; };
   swaync = pkgs.swaynotificationcenter;
   controlCenter = pkgs.writeShellScript "control-center" (builtins.readFile ./control-center);
 in

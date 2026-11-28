@@ -37,7 +37,7 @@
         };
     in
     {
-      nixosModules.desktop = import ./modules/nixos/system;
+      nixosModules.desktop = import ./modules/nixos;
 
       # One configuration per profile and supported system, named `<profile>-<system>`.
       homeConfigurations = lib.listToAttrs (

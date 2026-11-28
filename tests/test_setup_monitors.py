@@ -40,7 +40,7 @@ class SetupMonitorsTests(unittest.TestCase):
             os.environ,
             NIX_HOME_MONITORS_FILE=str(self.destination),
             PATH=f"{self.bin}:{os.environ['PATH']}",
-            MONITOR_LAYOUT_RUNTIME=os.environ.get("MONITOR_LAYOUT_RUNTIME", str(Path(__file__).resolve().parents[1] / "modules/nixos/desktop/hyprland/monitor-layout.lua")),
+            MONITOR_LAYOUT_RUNTIME=os.environ.get("MONITOR_LAYOUT_RUNTIME", str(Path(__file__).resolve().parents[1] / "modules/desktop/hyprland/monitor-layout.lua")),
         )
 
     def wizard(self, responses):

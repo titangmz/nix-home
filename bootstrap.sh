@@ -134,7 +134,7 @@ wire_nixos() {
   local config_dir=${NIX_HOME_BOOTSTRAP_CONFIG_DIR:-/etc/nixos}
   local system_config="$config_dir/configuration.nix"
   local machine_config="$config_dir/machine.nix"
-  local module="$REPO_DIR/modules/nixos/system"
+  local module="$REPO_DIR/modules/nixos"
   local marker="# Managed by nix-home bootstrap."
 
   [[ -f "$system_config" ]] || fail "Missing $system_config; generate the machine configuration first."

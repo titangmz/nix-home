@@ -1,6 +1,6 @@
 -- Exercise per-screen workspaces against a small stateful compositor model:
 -- startup, keys, hotplug, undock, reconnect, and window preservation.
-local runtime = os.getenv("MONITOR_LAYOUT_RUNTIME") or "modules/nixos/desktop/hyprland/monitor-layout.lua"
+local runtime = os.getenv("MONITOR_LAYOUT_RUNTIME") or "modules/desktop/hyprland/monitor-layout.lua"
 package.path = runtime:gsub("[^/]*$", "") .. "?.lua;" .. package.path
 local monitors, workspaces, rules, handlers, timers = {}, {}, {}, {}, {}
 local focused = nil

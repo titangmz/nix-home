@@ -15,7 +15,7 @@ Preserve the server subset by default, but allow intentional differences when th
 
 For an exception, document why the profiles differ in the module's README. Keep shared functionality in shared layers; split common configuration from specialized additions when that makes ownership clearer.
 
-Distinguish Home Manager configuration from NixOS system configuration before choosing a location. Follow the existing `modules/nixos/desktop` and `modules/nixos/system` boundary, and keep machine identity and hardware outside reusable modules.
+Distinguish Home Manager configuration from NixOS system configuration before choosing a location. Follow the existing `modules/desktop` and `modules/nixos` boundary, and keep machine identity and hardware outside reusable modules.
 
 ## Integrate the module
 

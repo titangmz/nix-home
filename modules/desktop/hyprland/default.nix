@@ -5,7 +5,7 @@
   ...
 }:
 let
-  theme = import ../../../theme { inherit lib; };
+  theme = import ../../theme { inherit lib; };
   styleFile = pkgs.writeText "hypr-style.lua" theme.styleLua;
   linkHyprland = pkgs.writeShellScript "link-hyprland" (
     lib.replaceStrings

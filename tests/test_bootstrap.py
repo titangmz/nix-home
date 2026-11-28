@@ -227,8 +227,8 @@ class BootstrapHomeTests(BootstrapTestCase):
 class BootstrapNixosTests(BootstrapTestCase):
     def setUp(self):
         super().setUp()
-        (self.repo / "modules/nixos/system").mkdir(parents=True)
-        (self.repo / "modules/nixos/system/default.nix").write_text("{}\n")
+        (self.repo / "modules/nixos").mkdir(parents=True)
+        (self.repo / "modules/nixos/default.nix").write_text("{}\n")
         self.config_dir = self.root / "etc/nixos"
         self.config_dir.mkdir(parents=True)
         self.original = "{ ... }: { imports = [ ./hardware-configuration.nix ]; system.stateVersion = \"26.05\"; }\n"
@@ -246,7 +246,7 @@ class BootstrapNixosTests(BootstrapTestCase):
         wrapper = (self.config_dir / "configuration.nix").read_text()
         self.assertIn("# Managed by nix-home bootstrap.", wrapper)
         self.assertIn("./machine.nix", wrapper)
-        self.assertIn(str(self.repo / "modules/nixos/system"), wrapper)
+        self.assertIn(str(self.repo / "modules/nixos"), wrapper)
         self.assertEqual(self.calls(), ["switch.sh nixos"])
 
     def test_second_run_is_idempotent(self):

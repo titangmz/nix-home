@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 let
-  palette = import ../../../theme { inherit lib; };
+  palette = import ../../theme { inherit lib; };
   # Also installed as the `network-menu` command for the control center.
   networkMenu = pkgs.writeShellScript "network-menu" (
     palette.render (builtins.readFile ./network-menu)

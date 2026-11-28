@@ -4,22 +4,22 @@ Home Manager configurations are built from profiles in `profiles/`. `profiles/de
 
 - `base.nix` holds identity and the terminal core: the shell and prompt, zoxide, CLI tools, Git, tmux, Neovim, and scripts. Every profile includes it.
 - `workstation.nix` is base plus Ghostty configuration (without installing it), the CLI extras, Neovim's development tooling, development tools, chat, nb notes, v2rayN, and proxychains. Every profile except `server` includes it.
-- `server` is base alone; switch.sh picks its x86_64 or aarch64 build from the machine, so a Raspberry Pi uses it too. `pc` and `mac` are workstations. `nixos` adds `modules/nixos/desktop`.
+- `server` is base alone; switch.sh picks its x86_64 or aarch64 build from the machine, so a Raspberry Pi uses it too. `pc` and `mac` are workstations. `nixos` adds `modules/desktop`.
 
 Exactly one layer or profile imports each module. Put a module in the lowest layer that every profile including it should have. A new profile is one file in `profiles/` and one line in `profiles/default.nix`. Include it in flake evaluation and build checks.
 
 The server being a subset of every workstation is the default, not an absolute requirement. A server-only module or other intentional profile-specific difference is allowed when the requested behavior calls for it. Put it in the appropriate profile and document the reason in the module's README. Shared functionality still belongs in the common layers.
 
-- `modules/nixos/system` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, the NetworkManager OpenVPN plugin with nm-applet, GNOME Keyring, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds the user from `profiles/user.nix` to the `docker` group. The account itself stays in `machine.nix`.
+- `modules/nixos` owns the session: Hyprland, portals, greetd, nix-ld, flakes, PipeWire, DConf, Tumbler, Flatpak, Firefox, the Kitty package, Thunar, imv, hyprlock, hypridle, the NetworkManager OpenVPN plugin with nm-applet, GNOME Keyring, Bazaar, Warehouse, hyprbars at `/etc/hyprland-plugins/libhyprbars.so`, and Docker with its Compose plugin. The module adds the user from `profiles/user.nix` to the `docker` group. The account itself stays in `machine.nix`.
 - Identity is read only through `profiles/user.nix`. The tracked values live in `profiles/user.default.nix`. Another person's values go in the gitignored `profiles/user.local.nix`, never in the default file.
-- `modules/nixos/desktop` owns GTK, Kitty config, Hyprland behavior, the hyprlock style, Waybar, the SwayNC control center and notifications, clipboard history, Rofi, and wallpaper.
+- `modules/desktop` owns GTK, Kitty config, Hyprland behavior, the hyprlock style, Waybar, the SwayNC control center and notifications, clipboard history, Rofi, and wallpaper.
 - Users, hardware, hostname, networking, and `system.stateVersion` stay in `/etc/nixos/machine.nix`. This repo does not register machines.
 
 `modules/theme` is the only place for colors, window opacity, and blur. Shell, Waybar, SwayNC, Rofi, Kitty, GTK, Lazygit, Hyprland, and hyprlock read it.
 
-Hyprland behavior lives in `modules/nixos/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch`, then `just reload`.
+Hyprland behavior lives in `modules/desktop/hyprland/hyprland.lua`. Activation symlinks `~/.config/hypr/hyprland.lua` to that checkout file using `~/.config/nix-home/root`, and writes `~/.config/hypr/style.lua` from the theme. Edit the Lua file, then run `just reload`. A theme change needs `just switch`, then `just reload`.
 
-Software cursors are the shared default. Monitor names stay out of git. In a terminal, `just setup-monitors` opens the Gum wizard for screen order and main screen. Every screen has its own workspaces 1–10 (`modules/nixos/desktop/hyprland/workspaces.lua`). `--list` prints output names and positions. Explicit names (left to right) and `--force` retain the noninteractive layout writer. The wizard's settings and hotplug behavior are documented in `modules/nixos/desktop/hyprland/README.md`.
+Software cursors are the shared default. Monitor names stay out of git. In a terminal, `just setup-monitors` opens the Gum wizard for screen order and main screen. Every screen has its own workspaces 1–10 (`modules/desktop/hyprland/workspaces.lua`). `--list` prints output names and positions. Explicit names (left to right) and `--force` retain the noninteractive layout writer. The wizard's settings and hotplug behavior are documented in `modules/desktop/hyprland/README.md`.
 
 Optional local files are loaded when they exist and are not managed:
 

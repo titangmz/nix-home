@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 let
-  user = import ../../../profiles/user.nix;
+  user = import ../../profiles/user.nix;
 in
 {
   # The bootstrap starts with nixos-rebuild, then uses the flake-based Home

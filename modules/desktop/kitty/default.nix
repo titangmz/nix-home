@@ -1,6 +1,6 @@
 { lib, pkgs, ... }:
 let
-  theme = import ../../../theme { inherit lib; };
+  theme = import ../../theme { inherit lib; };
 in
 {
   config = lib.mkIf pkgs.stdenv.isLinux {

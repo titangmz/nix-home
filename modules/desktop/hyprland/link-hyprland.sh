@@ -8,7 +8,7 @@ if [[ ! -r "$root_file" ]]; then
   exit 1
 fi
 root=$(tr -d '\n' < "$root_file")
-source="$root/modules/nixos/desktop/hyprland/hyprland.lua"
+source="$root/modules/desktop/hyprland/hyprland.lua"
 if [[ ! -f "$source" ]]; then
   printf 'Hyprland config not found at %s\n' "$source" >&2
   exit 1

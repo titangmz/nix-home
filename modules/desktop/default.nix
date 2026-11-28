@@ -5,7 +5,7 @@
   ...
 }:
 let
-  palette = import ../../theme { inherit lib; };
+  palette = import ../theme { inherit lib; };
 in
 {
   imports = [

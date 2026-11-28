@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 
-DESKTOP = Path(__file__).resolve().parents[1] / "modules/nixos/desktop"
+DESKTOP = Path(__file__).resolve().parents[1] / "modules/desktop"
 WAYBAR = Path(os.environ.get("WAYBAR_MODULE", DESKTOP / "waybar"))
 CONTROL_CENTER = Path(os.environ.get("CONTROL_CENTER_SCRIPT", DESKTOP / "swaync/control-center"))
 BASH = shutil.which("bash")

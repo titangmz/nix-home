@@ -8,7 +8,7 @@ package.path = config_home .. "/hypr/?.lua;" .. package.path
 local root_file = assert(io.open(config_home .. "/nix-home/root"), "Missing nix-home root; run just switch")
 local root = root_file:read("l")
 root_file:close()
-package.path = package.path .. ";" .. root .. "/modules/nixos/desktop/hyprland/?.lua"
+package.path = package.path .. ";" .. root .. "/modules/desktop/hyprland/?.lua"
 
 local function load_optional(name)
     package.loaded[name] = nil

@@ -99,10 +99,10 @@ in
       # These scripts drive NixOS and Hyprland, which run only on Linux.
       linuxScriptTests = lib.optionalString pkgs.stdenv.isLinux ''
         REBUILD_SCRIPT=${../scripts/rebuild.sh} python ${./test_rebuild.py}
-        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland}/monitor-layout.lua SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
-        MONITOR_LAYOUT_RUNTIME=${../modules/nixos/desktop/hyprland}/monitor-layout.lua lua ${./monitor-layout.lua}
-        WAYBAR_MODULE=${../modules/nixos/desktop/waybar} CONTROL_CENTER_SCRIPT=${../modules/nixos/desktop/swaync/control-center} python ${./test_network_menu.py}
-        CLIPBOARD_HISTORY_SCRIPT=${../modules/nixos/desktop/clipboard/clipboard-history} python ${./test_clipboard_history.py}
+        MONITOR_LAYOUT_RUNTIME=${../modules/desktop/hyprland}/monitor-layout.lua SETUP_MONITORS_SCRIPT=${../scripts}/setup-monitors.sh python ${./test_setup_monitors.py}
+        MONITOR_LAYOUT_RUNTIME=${../modules/desktop/hyprland}/monitor-layout.lua lua ${./monitor-layout.lua}
+        WAYBAR_MODULE=${../modules/desktop/waybar} CONTROL_CENTER_SCRIPT=${../modules/desktop/swaync/control-center} python ${./test_network_menu.py}
+        CLIPBOARD_HISTORY_SCRIPT=${../modules/desktop/clipboard/clipboard-history} python ${./test_clipboard_history.py}
       '';
     in
     pkgs.runCommand "switch-script-check"
@@ -119,7 +119,7 @@ in
         BOOTSTRAP_SCRIPT=${../bootstrap.sh} python ${./test_bootstrap.py}
         ${linuxScriptTests}
         SCRIPTS_BIN=${../modules/scripts/bin} python ${./test_bin_scripts.py}
-        SET_WALLPAPER_SCRIPT=${../modules/nixos/desktop/wallpaper/set-wallpaper} python ${./test_set_wallpaper.py}
+        SET_WALLPAPER_SCRIPT=${../modules/desktop/wallpaper/set-wallpaper} python ${./test_set_wallpaper.py}
         touch "$out"
       '';
 }

@@ -10,7 +10,7 @@ import unittest
 
 SCRIPT = Path(os.environ.get(
     "CLIPBOARD_HISTORY_SCRIPT",
-    Path(__file__).resolve().parents[1] / "modules/nixos/desktop/clipboard/clipboard-history",
+    Path(__file__).resolve().parents[1] / "modules/desktop/clipboard/clipboard-history",
 ))
 BASH = shutil.which("bash")
 

@@ -2,6 +2,6 @@
 {
   imports = [
     ./workstation.nix
-    ../modules/nixos/desktop
+    ../modules/desktop
   ];
 }
