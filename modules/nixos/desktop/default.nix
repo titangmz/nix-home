@@ -55,6 +55,24 @@ in
       };
     };
 
+    # The standard folders apps use for downloads and saves. Flatpak apps
+    # granted xdg-download (such as Chrome) can only reach ~/Downloads when it
+    # is named here. Only folders in use are named, so no empty Desktop,
+    # Public, or Templates folders appear.
+    xdg.userDirs = {
+      enable = true;
+      createDirectories = true;
+      download = "$HOME/Downloads";
+      pictures = "$HOME/Pictures";
+      desktop = null;
+      documents = null;
+      music = null;
+      projects = null;
+      publicShare = null;
+      templates = null;
+      videos = null;
+    };
+
     xdg.mimeApps = {
       enable = true;
       defaultApplications = {

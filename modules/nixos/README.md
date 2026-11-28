@@ -8,6 +8,8 @@ nix-ld also exposes glib, alsa-lib, Wayland, libdrm, libgbm, libglvnd, libX11, a
 
 `modules/nixos/desktop` is the Home Manager half, imported only by `profiles/nixos.nix`. It adds GTK, Kitty config, Hyprland, the hyprlock style, Waybar, the SwayNC control center, clipboard history, Rofi, and wallpaper.
 
+The desktop module writes `~/.config/user-dirs.dirs` naming only the folders in use, Downloads and Pictures. Apps read it to choose where downloads and saves go. Flatpak apps depend on it: Chrome's Flatpak is granted `xdg-download`, and without this file that permission resolves to nothing, so the sandbox cannot see `~/Downloads` and saves fall back to document-portal paths under `/run/user/1000/doc/`.
+
 `./bootstrap.sh nixos` preserves the generated configuration as `/etc/nixos/machine.nix`, installs a wrapper that imports this module, and applies the system and desktop. Later updates use `just switch`, which switches the system before the desktop. Both can be run again.
 
 ## OpenVPN
